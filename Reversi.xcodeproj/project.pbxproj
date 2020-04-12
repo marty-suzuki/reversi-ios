@@ -23,6 +23,7 @@
 		ED6EAC8124436B2C00BAF620 /* ReversiLogic.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		ED6EAC9524436C3300BAF620 /* Disk.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EAC9424436C3300BAF620 /* Disk.swift */; };
 		ED6EAC9B24436D9400BAF620 /* GameDataIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EAC9A24436D9400BAF620 /* GameDataIO.swift */; };
+		ED6EAC9F24436EE800BAF620 /* GameDataIOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EAC9E24436EE800BAF620 /* GameDataIOTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -92,6 +93,7 @@
 		ED6EAC7C24436B2C00BAF620 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		ED6EAC9424436C3300BAF620 /* Disk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Disk.swift; sourceTree = "<group>"; };
 		ED6EAC9A24436D9400BAF620 /* GameDataIO.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameDataIO.swift; sourceTree = "<group>"; };
+		ED6EAC9E24436EE800BAF620 /* GameDataIOTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDataIOTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -199,6 +201,7 @@
 			isa = PBXGroup;
 			children = (
 				ED6EAC7C24436B2C00BAF620 /* Info.plist */,
+				ED6EAC9E24436EE800BAF620 /* GameDataIOTests.swift */,
 			);
 			path = ReversiLogicTests;
 			sourceTree = "<group>";
@@ -329,6 +332,7 @@
 					};
 					ED6EAC7224436B2C00BAF620 = {
 						CreatedOnToolsVersion = 11.3.1;
+						LastSwiftMigration = 1130;
 					};
 				};
 			};
@@ -422,6 +426,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED6EAC9F24436EE800BAF620 /* GameDataIOTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -716,6 +721,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = ReversiLogicTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
@@ -726,6 +732,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.marty-suzuki.ReversiLogicTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -735,6 +742,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = ReversiLogicTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
