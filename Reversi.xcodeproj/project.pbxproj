@@ -18,7 +18,6 @@
 		D642BDD623AA0B3900396732 /* CellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDD523AA0B3900396732 /* CellView.swift */; };
 		D642BDDC23AA137C00396732 /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDDB23AA137C00396732 /* BoardView.swift */; };
 		ED6EAC7424436B2C00BAF620 /* ReversiLogic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; };
-		ED6EAC7B24436B2C00BAF620 /* ReversiLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EAC7A24436B2C00BAF620 /* ReversiLogicTests.swift */; };
 		ED6EAC7D24436B2C00BAF620 /* ReversiLogic.h in Headers */ = {isa = PBXBuildFile; fileRef = ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ED6EAC8024436B2C00BAF620 /* ReversiLogic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; };
 		ED6EAC8124436B2C00BAF620 /* ReversiLogic.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -90,7 +89,6 @@
 		ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReversiLogic.h; sourceTree = "<group>"; };
 		ED6EAC6E24436B2B00BAF620 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		ED6EAC7324436B2C00BAF620 /* ReversiLogicTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReversiLogicTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		ED6EAC7A24436B2C00BAF620 /* ReversiLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiLogicTests.swift; sourceTree = "<group>"; };
 		ED6EAC7C24436B2C00BAF620 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		ED6EAC9424436C3300BAF620 /* Disk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Disk.swift; sourceTree = "<group>"; };
 		ED6EAC9A24436D9400BAF620 /* GameDataIO.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameDataIO.swift; sourceTree = "<group>"; };
@@ -200,7 +198,6 @@
 		ED6EAC7924436B2C00BAF620 /* ReversiLogicTests */ = {
 			isa = PBXGroup;
 			children = (
-				ED6EAC7A24436B2C00BAF620 /* ReversiLogicTests.swift */,
 				ED6EAC7C24436B2C00BAF620 /* Info.plist */,
 			);
 			path = ReversiLogicTests;
@@ -425,7 +422,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ED6EAC7B24436B2C00BAF620 /* ReversiLogicTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
