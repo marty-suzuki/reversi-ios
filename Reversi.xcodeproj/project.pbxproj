@@ -17,13 +17,13 @@
 		D642BDCB23A9FE4700396732 /* ReversiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDCA23A9FE4700396732 /* ReversiTests.swift */; };
 		D642BDD623AA0B3900396732 /* CellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDD523AA0B3900396732 /* CellView.swift */; };
 		D642BDDC23AA137C00396732 /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDDB23AA137C00396732 /* BoardView.swift */; };
-		ED6EAC402443513100BAF620 /* GameDataIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EAC3F2443513100BAF620 /* GameDataIO.swift */; };
 		ED6EAC7424436B2C00BAF620 /* ReversiLogic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; };
 		ED6EAC7B24436B2C00BAF620 /* ReversiLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EAC7A24436B2C00BAF620 /* ReversiLogicTests.swift */; };
 		ED6EAC7D24436B2C00BAF620 /* ReversiLogic.h in Headers */ = {isa = PBXBuildFile; fileRef = ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ED6EAC8024436B2C00BAF620 /* ReversiLogic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; };
 		ED6EAC8124436B2C00BAF620 /* ReversiLogic.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		ED6EAC9524436C3300BAF620 /* Disk.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EAC9424436C3300BAF620 /* Disk.swift */; };
+		ED6EAC9B24436D9400BAF620 /* GameDataIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EAC9A24436D9400BAF620 /* GameDataIO.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -86,7 +86,6 @@
 		D642BDCC23A9FE4700396732 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D642BDD523AA0B3900396732 /* CellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellView.swift; sourceTree = "<group>"; };
 		D642BDDB23AA137C00396732 /* BoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
-		ED6EAC3F2443513100BAF620 /* GameDataIO.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameDataIO.swift; sourceTree = "<group>"; };
 		ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ReversiLogic.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReversiLogic.h; sourceTree = "<group>"; };
 		ED6EAC6E24436B2B00BAF620 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -94,6 +93,7 @@
 		ED6EAC7A24436B2C00BAF620 /* ReversiLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiLogicTests.swift; sourceTree = "<group>"; };
 		ED6EAC7C24436B2C00BAF620 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		ED6EAC9424436C3300BAF620 /* Disk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Disk.swift; sourceTree = "<group>"; };
+		ED6EAC9A24436D9400BAF620 /* GameDataIO.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameDataIO.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -172,7 +172,6 @@
 				D642BDBC23A9FE4700396732 /* Assets.xcassets */,
 				D642BDBE23A9FE4700396732 /* LaunchScreen.storyboard */,
 				D642BDC123A9FE4700396732 /* Info.plist */,
-				ED6EAC3E2443510F00BAF620 /* Models */,
 				D636B3A123D43203007F370F /* Views */,
 			);
 			path = Reversi;
@@ -187,17 +186,10 @@
 			path = ReversiTests;
 			sourceTree = "<group>";
 		};
-		ED6EAC3E2443510F00BAF620 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				ED6EAC3F2443513100BAF620 /* GameDataIO.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
 		ED6EAC6C24436B2B00BAF620 /* ReversiLogic */ = {
 			isa = PBXGroup;
 			children = (
+				ED6EAC9924436D9400BAF620 /* Models */,
 				ED6EAC9324436C3300BAF620 /* DataTypes */,
 				ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */,
 				ED6EAC6E24436B2B00BAF620 /* Info.plist */,
@@ -220,6 +212,14 @@
 				ED6EAC9424436C3300BAF620 /* Disk.swift */,
 			);
 			path = DataTypes;
+			sourceTree = "<group>";
+		};
+		ED6EAC9924436D9400BAF620 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				ED6EAC9A24436D9400BAF620 /* GameDataIO.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -401,7 +401,6 @@
 				D642BDDC23AA137C00396732 /* BoardView.swift in Sources */,
 				D642BDB423A9FE4500396732 /* AppDelegate.swift in Sources */,
 				D642BDB623A9FE4500396732 /* SceneDelegate.swift in Sources */,
-				ED6EAC402443513100BAF620 /* GameDataIO.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -418,6 +417,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ED6EAC9524436C3300BAF620 /* Disk.swift in Sources */,
+				ED6EAC9B24436D9400BAF620 /* GameDataIO.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

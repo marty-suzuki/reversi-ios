@@ -1,5 +1,4 @@
 import Foundation
-import ReversiLogic
 
 public enum GameDataIO {
     public static func save(
