@@ -23,4 +23,11 @@ extension Disk {
     public mutating func flip() {
         self = flipped
     }
+
+    public var index: Int {
+        switch self {
+        case .dark: return 0
+        case .light: return 1
+        }
+    }
 }
