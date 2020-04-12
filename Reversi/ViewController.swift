@@ -360,93 +360,31 @@ extension ViewController: BoardViewDelegate {
 
 // MARK: Save and Load
 
-extension ViewController {
-    private var path: String {
-        (NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).first! as NSString).appendingPathComponent("Game")
-    }
-    
+extension ViewController {    
     func saveGame() throws {
-        var output: String = ""
-        output += turn.symbol
-        for side in Disk.sides {
-            output += playerControls[side.index].selectedSegmentIndex.description
-        }
-        output += "\n"
-        
-        for y in boardView.yRange {
-            for x in boardView.xRange {
-                output += boardView.diskAt(x: x, y: y).symbol
-            }
-            output += "\n"
-        }
-        
-        do {
-            try output.write(toFile: path, atomically: true, encoding: .utf8)
-        } catch let error {
-            throw FileIOError.read(path: path, cause: error)
-        }
+        try GameDataIO.save(
+            turn: turn,
+            selectedSegumentIndexFor: { playerControls[$0].selectedSegmentIndex },
+            yRange: boardView.yRange,
+            xRange: boardView.xRange,
+            diskAt: boardView.diskAt(x:y:),
+            writeToFile: { try $0.write(toFile: $1, atomically: true, encoding: .utf8) }
+        )
     }
     
     func loadGame() throws {
-        let input = try String(contentsOfFile: path, encoding: .utf8)
-        var lines: ArraySlice<Substring> = input.split(separator: "\n")[...]
-        
-        guard var line = lines.popFirst() else {
-            throw FileIOError.read(path: path, cause: nil)
+        try GameDataIO.loadGame(
+            rawRepresentable: Player.self,
+            width: boardView.width,
+            height: boardView.height,
+            contentsOfFile: { try String(contentsOfFile: $0, encoding: .utf8) },
+            setTurn: { turn = $0 },
+            setSelectedSegmentIndexFor: { playerControls[$0].selectedSegmentIndex = $1 },
+            setDisk: { boardView.setDisk($0, atX: $1, y: $2, animated: $3) }
+        ) {
+            updateMessageViews()
+            updateCountLabels()
         }
-        
-        do { // turn
-            guard
-                let diskSymbol = line.popFirst(),
-                let disk = Optional<Disk>(symbol: diskSymbol.description)
-            else {
-                throw FileIOError.read(path: path, cause: nil)
-            }
-            turn = disk
-        }
-
-        // players
-        for side in Disk.sides {
-            guard
-                let playerSymbol = line.popFirst(),
-                let playerNumber = Int(playerSymbol.description),
-                let player = Player(rawValue: playerNumber)
-            else {
-                throw FileIOError.read(path: path, cause: nil)
-            }
-            playerControls[side.index].selectedSegmentIndex = player.rawValue
-        }
-
-        do { // board
-            guard lines.count == boardView.height else {
-                throw FileIOError.read(path: path, cause: nil)
-            }
-            
-            var y = 0
-            while let line = lines.popFirst() {
-                var x = 0
-                for character in line {
-                    let disk = Disk?(symbol: "\(character)").flatMap { $0 }
-                    boardView.setDisk(disk, atX: x, y: y, animated: false)
-                    x += 1
-                }
-                guard x == boardView.width else {
-                    throw FileIOError.read(path: path, cause: nil)
-                }
-                y += 1
-            }
-            guard y == boardView.height else {
-                throw FileIOError.read(path: path, cause: nil)
-            }
-        }
-
-        updateMessageViews()
-        updateCountLabels()
-    }
-    
-    enum FileIOError: Error {
-        case write(path: String, cause: Error?)
-        case read(path: String, cause: Error?)
     }
 }
 
@@ -497,32 +435,6 @@ extension Disk {
         switch self {
         case .dark: return 0
         case .light: return 1
-        }
-    }
-}
-
-extension Optional where Wrapped == Disk {
-    fileprivate init?<S: StringProtocol>(symbol: S) {
-        switch symbol {
-        case "x":
-            self = .some(.dark)
-        case "o":
-            self = .some(.light)
-        case "-":
-            self = .none
-        default:
-            return nil
-        }
-    }
-    
-    fileprivate var symbol: String {
-        switch self {
-        case .some(.dark):
-            return "x"
-        case .some(.light):
-            return "o"
-        case .none:
-            return "-"
         }
     }
 }
