@@ -363,26 +363,43 @@ extension ViewController: BoardViewDelegate {
 
 extension ViewController {    
     func saveGame() throws {
+        let cells = boardView.yRange.map { y -> [GameData.Board.Cell] in
+            boardView.xRange.map { x -> GameData.Board.Cell in
+                GameData.Board.Cell(x: x, y: y, disk: boardView.diskAt(x: x, y: y))
+            }
+        }
+
+        let data = GameData(
+            status: turn.map(GameData.Status.turn) ?? .gameOver,
+            playerDark: GameData.Player(rawValue: playerControls[0].selectedSegmentIndex) ?? .manual,
+            playerLight: GameData.Player(rawValue: playerControls[1].selectedSegmentIndex) ?? .manual,
+            board: GameData.Board(cells: cells)
+        )
+
         try GameDataIO.save(
-            turn: turn,
-            selectedSegumentIndexFor: { playerControls[$0].selectedSegmentIndex },
-            yRange: boardView.yRange,
-            xRange: boardView.xRange,
-            diskAt: boardView.diskAt(x:y:),
+            data: data,
             writeToFile: { try $0.write(toFile: $1, atomically: true, encoding: .utf8) }
         )
     }
     
     func loadGame() throws {
-        try GameDataIO.loadGame(
-            rawRepresentable: Player.self,
-            width: boardView.width,
-            height: boardView.height,
-            contentsOfFile: { try String(contentsOfFile: $0, encoding: .utf8) },
-            setTurn: { turn = $0 },
-            setSelectedSegmentIndexFor: { playerControls[$0].selectedSegmentIndex = $1 },
-            setDisk: { boardView.setDisk($0, atX: $1, y: $2, animated: $3) }
-        ) {
+        try GameDataIO.loadGame(contentsOfFile: { try String(contentsOfFile: $0, encoding: .utf8) }) { data in
+            switch data.status {
+            case .gameOver:
+                turn = nil
+            case let .turn(disk):
+                turn = disk
+            }
+
+            playerControls[0].selectedSegmentIndex = data.playerDark.rawValue
+            playerControls[1].selectedSegmentIndex = data.playerLight.rawValue
+
+            data.board.cells.forEach { rows in
+                rows.forEach { cell in
+                    boardView.setDisk(cell.disk, atX: cell.x, y: cell.y, animated: false)
+                }
+            }
+
             updateMessageViews()
             updateCountLabels()
         }
