@@ -202,7 +202,7 @@ extension ViewController {
         turn = .dark
         
         for playerControl in playerControls {
-            playerControl.selectedSegmentIndex = Player.manual.rawValue
+            playerControl.selectedSegmentIndex = GameData.Player.manual.rawValue
         }
 
         updateMessageViews()
@@ -213,7 +213,7 @@ extension ViewController {
     
     func waitForPlayer() {
         guard let turn = self.turn else { return }
-        switch Player(rawValue: playerControls[turn.index].selectedSegmentIndex)! {
+        switch GameData.Player(rawValue: playerControls[turn.index].selectedSegmentIndex)! {
         case .manual:
             break
         case .computer:
@@ -341,7 +341,7 @@ extension ViewController {
             canceller.cancel()
         }
         
-        if !isAnimating, side == turn, case .computer = Player(rawValue: sender.selectedSegmentIndex)! {
+        if !isAnimating, side == turn, case .computer = GameData.Player(rawValue: sender.selectedSegmentIndex)! {
             playTurnOfComputer()
         }
     }
@@ -351,7 +351,7 @@ extension ViewController: BoardViewDelegate {
     func boardView(_ boardView: BoardView, didSelectCellAtX x: Int, y: Int) {
         guard let turn = turn else { return }
         if isAnimating { return }
-        guard case .manual = Player(rawValue: playerControls[turn.index].selectedSegmentIndex)! else { return }
+        guard case .manual = GameData.Player(rawValue: playerControls[turn.index].selectedSegmentIndex)! else { return }
         // try? because doing nothing when an error occurs
         try? placeDisk(turn, atX: x, y: y, animated: true) { [weak self] _ in
             self?.nextTurn()
@@ -407,13 +407,6 @@ extension ViewController {
 }
 
 // MARK: Additional types
-
-extension ViewController {
-    enum Player: Int {
-        case manual = 0
-        case computer = 1
-    }
-}
 
 final class Canceller {
     private(set) var isCancelled: Bool = false
