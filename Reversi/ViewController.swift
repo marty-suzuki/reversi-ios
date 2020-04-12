@@ -1,3 +1,4 @@
+import ReversiLogic
 import UIKit
 
 class ViewController: UIViewController {

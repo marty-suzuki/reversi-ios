@@ -1,3 +1,4 @@
+import ReversiLogic
 import UIKit
 
 private let lineWidth: CGFloat = 2

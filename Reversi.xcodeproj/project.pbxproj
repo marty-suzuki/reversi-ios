@@ -16,7 +16,6 @@
 		D642BDC023A9FE4700396732 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D642BDBE23A9FE4700396732 /* LaunchScreen.storyboard */; };
 		D642BDCB23A9FE4700396732 /* ReversiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDCA23A9FE4700396732 /* ReversiTests.swift */; };
 		D642BDD623AA0B3900396732 /* CellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDD523AA0B3900396732 /* CellView.swift */; };
-		D642BDD823AA0B5700396732 /* Disk.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDD723AA0B5700396732 /* Disk.swift */; };
 		D642BDDC23AA137C00396732 /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDDB23AA137C00396732 /* BoardView.swift */; };
 		ED6EAC402443513100BAF620 /* GameDataIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EAC3F2443513100BAF620 /* GameDataIO.swift */; };
 		ED6EAC7424436B2C00BAF620 /* ReversiLogic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; };
@@ -24,6 +23,7 @@
 		ED6EAC7D24436B2C00BAF620 /* ReversiLogic.h in Headers */ = {isa = PBXBuildFile; fileRef = ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ED6EAC8024436B2C00BAF620 /* ReversiLogic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; };
 		ED6EAC8124436B2C00BAF620 /* ReversiLogic.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		ED6EAC9524436C3300BAF620 /* Disk.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EAC9424436C3300BAF620 /* Disk.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,7 +85,6 @@
 		D642BDCA23A9FE4700396732 /* ReversiTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiTests.swift; sourceTree = "<group>"; };
 		D642BDCC23A9FE4700396732 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D642BDD523AA0B3900396732 /* CellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellView.swift; sourceTree = "<group>"; };
-		D642BDD723AA0B5700396732 /* Disk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Disk.swift; sourceTree = "<group>"; };
 		D642BDDB23AA137C00396732 /* BoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
 		ED6EAC3F2443513100BAF620 /* GameDataIO.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameDataIO.swift; sourceTree = "<group>"; };
 		ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ReversiLogic.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -94,6 +93,7 @@
 		ED6EAC7324436B2C00BAF620 /* ReversiLogicTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReversiLogicTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED6EAC7A24436B2C00BAF620 /* ReversiLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiLogicTests.swift; sourceTree = "<group>"; };
 		ED6EAC7C24436B2C00BAF620 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		ED6EAC9424436C3300BAF620 /* Disk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Disk.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,14 +140,6 @@
 			name = Views;
 			sourceTree = "<group>";
 		};
-		D636B3A423D432D3007F370F /* DataTypes */ = {
-			isa = PBXGroup;
-			children = (
-				D642BDD723AA0B5700396732 /* Disk.swift */,
-			);
-			name = DataTypes;
-			sourceTree = "<group>";
-		};
 		D642BDA723A9FE4500396732 = {
 			isa = PBXGroup;
 			children = (
@@ -182,7 +174,6 @@
 				D642BDC123A9FE4700396732 /* Info.plist */,
 				ED6EAC3E2443510F00BAF620 /* Models */,
 				D636B3A123D43203007F370F /* Views */,
-				D636B3A423D432D3007F370F /* DataTypes */,
 			);
 			path = Reversi;
 			sourceTree = "<group>";
@@ -207,6 +198,7 @@
 		ED6EAC6C24436B2B00BAF620 /* ReversiLogic */ = {
 			isa = PBXGroup;
 			children = (
+				ED6EAC9324436C3300BAF620 /* DataTypes */,
 				ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */,
 				ED6EAC6E24436B2B00BAF620 /* Info.plist */,
 			);
@@ -220,6 +212,14 @@
 				ED6EAC7C24436B2C00BAF620 /* Info.plist */,
 			);
 			path = ReversiLogicTests;
+			sourceTree = "<group>";
+		};
+		ED6EAC9324436C3300BAF620 /* DataTypes */ = {
+			isa = PBXGroup;
+			children = (
+				ED6EAC9424436C3300BAF620 /* Disk.swift */,
+			);
+			path = DataTypes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -397,7 +397,6 @@
 			files = (
 				D636B39F23D35043007F370F /* DiskView.swift in Sources */,
 				D642BDD623AA0B3900396732 /* CellView.swift in Sources */,
-				D642BDD823AA0B5700396732 /* Disk.swift in Sources */,
 				D642BDB823A9FE4500396732 /* ViewController.swift in Sources */,
 				D642BDDC23AA137C00396732 /* BoardView.swift in Sources */,
 				D642BDB423A9FE4500396732 /* AppDelegate.swift in Sources */,
@@ -418,6 +417,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED6EAC9524436C3300BAF620 /* Disk.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -589,6 +589,7 @@
 		D642BDD023A9FE4800396732 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = Reversi/Info.plist;
@@ -606,6 +607,7 @@
 		D642BDD123A9FE4800396732 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				INFOPLIST_FILE = Reversi/Info.plist;

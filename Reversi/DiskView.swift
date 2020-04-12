@@ -1,3 +1,4 @@
+import ReversiLogic
 import UIKit
 
 public class DiskView: UIView {

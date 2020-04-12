@@ -1,3 +1,4 @@
+import ReversiLogic
 import UIKit
 
 private let animationDuration: TimeInterval = 0.25
