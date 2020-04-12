@@ -2,23 +2,25 @@ import Foundation
 
 public enum GameDataIO {
     public static func save(
-        turn: Disk?,
-        selectedSegumentIndexFor: (Int) -> Int,
-        yRange: Range<Int>,
-        xRange: Range<Int>,
-        diskAt: (Int, Int) -> Disk?,
+        data: GameData,
         writeToFile: (String, String) throws -> Void
     ) throws {
         var output: String = ""
-        output += turn.symbol
-        for side in Disk.sides {
-            output += selectedSegumentIndexFor(side.index).description
+        let turn: Disk?
+        switch data.status {
+        case .gameOver:
+            turn = nil
+        case let .turn(disk):
+            turn = disk
         }
+        output += turn.symbol
+        output += data.playerDark.rawValue.description
+        output += data.playerLight.rawValue.description
         output += "\n"
 
-        for y in yRange {
-            for x in xRange {
-                output += diskAt(x, y).symbol
+        data.board.cells.forEach { rows in
+            rows.forEach { cell in
+                output += cell.disk.symbol
             }
             output += "\n"
         }
@@ -30,16 +32,10 @@ public enum GameDataIO {
         }
     }
 
-    public static func loadGame<T: RawRepresentable>(
-        rawRepresentable _: T.Type,
-        width: Int,
-        height: Int,
+    public static func loadGame(
         contentsOfFile: (String) throws -> String,
-        setTurn: (Disk?) -> Void,
-        setSelectedSegmentIndexFor: (Int, Int) -> Void,
-        setDisk: (Disk?, Int, Int, Bool) -> Void,
-        completion: () -> Void
-    ) throws where T.RawValue == Int {
+        completion: (GameData) -> Void
+    ) throws {
         let input = try contentsOfFile(path)
         var lines: ArraySlice<Substring> = input.split(separator: "\n")[...]
 
@@ -47,6 +43,7 @@ public enum GameDataIO {
             throw FileIOError.read(path: path, cause: nil)
         }
 
+        let turn: Disk?
         do { // turn
             guard
                 let diskSymbol = line.popFirst(),
@@ -54,23 +51,27 @@ public enum GameDataIO {
             else {
                 throw FileIOError.read(path: path, cause: nil)
             }
-            setTurn(disk)
+            turn = disk
         }
 
         // players
-        for side in Disk.sides {
+        let getPlayer: () throws -> GameData.Player = {
             guard
                 let playerSymbol = line.popFirst(),
                 let playerNumber = Int(playerSymbol.description),
-                let player = T(rawValue: playerNumber)
+                let player = GameData.Player(rawValue: playerNumber)
             else {
                 throw FileIOError.read(path: path, cause: nil)
             }
-            setSelectedSegmentIndexFor(side.index, player.rawValue)
+            return player
         }
+        let playerDark = try getPlayer()
+        let playerLight = try getPlayer()
 
+
+        var cells = GameData.Board.initial().cells
         do { // board
-            guard lines.count == height else {
+            guard lines.count == cells.count else {
                 throw FileIOError.read(path: path, cause: nil)
             }
 
@@ -79,20 +80,26 @@ public enum GameDataIO {
                 var x = 0
                 for character in line {
                     let disk = Disk?(symbol: "\(character)").flatMap { $0 }
-                    setDisk(disk, x, y, false)
+                    cells[y][x].disk = disk
                     x += 1
                 }
-                guard x == width else {
+                guard x == cells[y].count else {
                     throw FileIOError.read(path: path, cause: nil)
                 }
                 y += 1
             }
-            guard y == height else {
+            guard y == cells.count else {
                 throw FileIOError.read(path: path, cause: nil)
             }
         }
 
-        completion()
+        let data = GameData(
+            status: turn.map(GameData.Status.turn) ?? .gameOver,
+            playerDark: playerDark,
+            playerLight: playerLight,
+            board: .init(cells: cells)
+        )
+        completion(data)
     }
 }
 
