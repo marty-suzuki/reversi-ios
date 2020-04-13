@@ -1,4 +1,5 @@
 public final class ReversiViewModel {
+    public typealias SetDisk = (Disk?, Int, Int, Bool, ((Bool) -> Void)?) -> Void
 
     public var turn: Disk? = .dark // `nil` if the current game is over
 
@@ -11,13 +12,16 @@ public final class ReversiViewModel {
 
     private var viewHasAppeared: Bool = false
 
+    private let _setDisk: SetDisk
     private let playTurnOfComputer: () -> Void
     private let selectedSegmentIndexFor: (Int) -> Int?
 
     public init(playTurnOfComputer: @escaping () -> Void,
-                selectedSegmentIndexFor: @escaping (Int) -> Int?) {
+                selectedSegmentIndexFor: @escaping (Int) -> Int?,
+                setDisk: @escaping SetDisk) {
         self.playTurnOfComputer = playTurnOfComputer
         self.selectedSegmentIndexFor = selectedSegmentIndexFor
+        self._setDisk = setDisk
     }
 
     public func viewDidAppear() {
@@ -43,5 +47,9 @@ public final class ReversiViewModel {
         case .computer:
             playTurnOfComputer()
         }
+    }
+
+    public func setDisk(_ disk: Disk?, atX x: Int, y: Int, animated: Bool, completion: ((Bool) -> Void)? = nil) {
+        _setDisk(disk, x, y, animated, completion)
     }
 }

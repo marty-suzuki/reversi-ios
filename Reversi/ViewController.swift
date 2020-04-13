@@ -15,7 +15,8 @@ class ViewController: UIViewController {
 
     private lazy var viewModel = ReversiViewModel(
         playTurnOfComputer: { [weak self] in self?.playTurnOfComputer() },
-        selectedSegmentIndexFor: { [weak self] in self?.playerControls[$0].selectedSegmentIndex }
+        selectedSegmentIndexFor: { [weak self] in self?.playerControls[$0].selectedSegmentIndex },
+        setDisk: { [weak self] in self?.boardView.setDisk($0, atX: $1, y: $2, animated: $3, completion: $4) }
     )
 
     override func viewDidLoad() {
@@ -153,9 +154,9 @@ extension ViewController {
         } else {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                self.boardView.setDisk(disk, atX: x, y: y, animated: false)
+                self.viewModel.setDisk(disk, atX: x, y: y, animated: false)
                 for (x, y) in diskCoordinates {
-                    self.boardView.setDisk(disk, atX: x, y: y, animated: false)
+                    self.viewModel.setDisk(disk, atX: x, y: y, animated: false)
                 }
                 completion?(true)
                 try? self.saveGame()
@@ -171,16 +172,16 @@ extension ViewController {
             completion(true)
             return
         }
-        
+
         let animationCanceller = viewModel.animationCanceller!
-        boardView.setDisk(disk, atX: x, y: y, animated: true) { [weak self] finished in
+        viewModel.setDisk(disk, atX: x, y: y, animated: true) { [weak self] finished in
             guard let self = self else { return }
             if animationCanceller.isCancelled { return }
             if finished {
                 self.animateSettingDisks(at: coordinates.dropFirst(), to: disk, completion: completion)
             } else {
                 for (x, y) in coordinates {
-                    self.boardView.setDisk(disk, atX: x, y: y, animated: false)
+                    self.viewModel.setDisk(disk, atX: x, y: y, animated: false)
                 }
                 completion(false)
             }
@@ -380,7 +381,7 @@ extension ViewController {
 
             data.board.cells.forEach { rows in
                 rows.forEach { cell in
-                    boardView.setDisk(cell.disk, atX: cell.x, y: cell.y, animated: false)
+                    viewModel.setDisk(cell.disk, atX: cell.x, y: cell.y, animated: false)
                 }
             }
 
