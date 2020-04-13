@@ -13,8 +13,11 @@ class ViewController: UIViewController {
     @IBOutlet private var countLabels: [UILabel]!
     @IBOutlet private var playerActivityIndicators: [UIActivityIndicatorView]!
 
-    private lazy var viewModel = ReversiViewModel()
-    
+    private lazy var viewModel = ReversiViewModel(
+        playTurnOfComputer: { [weak self] in self?.playTurnOfComputer() },
+        selectedSegmentIndexFor: { [weak self] in self?.playerControls[$0].selectedSegmentIndex }
+    )
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -33,7 +36,7 @@ class ViewController: UIViewController {
         
         if viewModel.viewHasAppeared { return }
         viewModel.viewDidAppear()
-        waitForPlayer()
+        viewModel.waitForPlayer()
     }
 }
 
@@ -205,16 +208,6 @@ extension ViewController {
         try? saveGame()
     }
     
-    func waitForPlayer() {
-        guard let turn = viewModel.turn else { return }
-        switch GameData.Player(rawValue: playerControls[turn.index].selectedSegmentIndex)! {
-        case .manual:
-            break
-        case .computer:
-            playTurnOfComputer()
-        }
-    }
-    
     func nextTurn() {
         guard var turn = viewModel.turn else { return }
 
@@ -241,7 +234,7 @@ extension ViewController {
         } else {
             viewModel.turn = turn
             updateMessageViews()
-            waitForPlayer()
+            viewModel.waitForPlayer()
         }
     }
     
@@ -321,7 +314,7 @@ extension ViewController {
             }
             
             self.newGame()
-            self.waitForPlayer()
+            self.viewModel.waitForPlayer()
         })
         present(alertController, animated: true)
     }

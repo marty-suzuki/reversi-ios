@@ -11,9 +11,33 @@ public final class ReversiViewModel {
 
     public private(set) var viewHasAppeared: Bool = false
 
-    public init() {}
+    private let playTurnOfComputer: () -> Void
+    private let selectedSegmentIndexFor: (Int) -> Int?
+
+    public init(playTurnOfComputer: @escaping () -> Void,
+                selectedSegmentIndexFor: @escaping (Int) -> Int?) {
+        self.playTurnOfComputer = playTurnOfComputer
+        self.selectedSegmentIndexFor = selectedSegmentIndexFor
+    }
 
     public func viewDidAppear() {
         viewHasAppeared = true
+    }
+
+    public func waitForPlayer() {
+        guard
+            let player = turn
+                .flatMap({ selectedSegmentIndexFor($0.index) })
+                .flatMap(GameData.Player.init)
+        else {
+            return
+        }
+
+        switch player {
+        case .manual:
+            break
+        case .computer:
+            playTurnOfComputer()
+        }
     }
 }
