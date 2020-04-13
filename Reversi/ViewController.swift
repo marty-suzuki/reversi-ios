@@ -12,9 +12,6 @@ class ViewController: UIViewController {
     @IBOutlet private var playerControls: [UISegmentedControl]!
     @IBOutlet private var countLabels: [UILabel]!
     @IBOutlet private var playerActivityIndicators: [UIActivityIndicatorView]!
-
-    private var animationCanceller: Canceller?
-    private var isAnimating: Bool { animationCanceller != nil }
     
     private var playerCancellers: [Disk: Canceller] = [:]
 
@@ -143,12 +140,12 @@ extension ViewController {
         
         if isAnimated {
             let cleanUp: () -> Void = { [weak self] in
-                self?.animationCanceller = nil
+                self?.viewModel.animationCanceller = nil
             }
-            animationCanceller = Canceller(cleanUp)
+            viewModel.animationCanceller = Canceller(cleanUp)
             animateSettingDisks(at: [(x, y)] + diskCoordinates, to: disk) { [weak self] finished in
                 guard let self = self else { return }
-                guard let canceller = self.animationCanceller else { return }
+                guard let canceller = self.viewModel.animationCanceller else { return }
                 if canceller.isCancelled { return }
                 cleanUp()
 
@@ -178,7 +175,7 @@ extension ViewController {
             return
         }
         
-        let animationCanceller = self.animationCanceller!
+        let animationCanceller = viewModel.animationCanceller!
         boardView.setDisk(disk, atX: x, y: y, animated: true) { [weak self] finished in
             guard let self = self else { return }
             if animationCanceller.isCancelled { return }
@@ -318,8 +315,8 @@ extension ViewController {
         alertController.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
             guard let self = self else { return }
             
-            self.animationCanceller?.cancel()
-            self.animationCanceller = nil
+            self.viewModel.animationCanceller?.cancel()
+            self.viewModel.animationCanceller = nil
             
             for side in Disk.sides {
                 self.playerCancellers[side]?.cancel()
@@ -341,7 +338,7 @@ extension ViewController {
             canceller.cancel()
         }
         
-        if !isAnimating, side == viewModel.turn, case .computer = GameData.Player(rawValue: sender.selectedSegmentIndex)! {
+        if !viewModel.isAnimating, side == viewModel.turn, case .computer = GameData.Player(rawValue: sender.selectedSegmentIndex)! {
             playTurnOfComputer()
         }
     }
@@ -350,7 +347,7 @@ extension ViewController {
 extension ViewController: BoardViewDelegate {
     func boardView(_ boardView: BoardView, didSelectCellAtX x: Int, y: Int) {
         guard let turn = viewModel.turn else { return }
-        if isAnimating { return }
+        if viewModel.isAnimating { return }
         guard case .manual = GameData.Player(rawValue: playerControls[turn.index].selectedSegmentIndex)! else { return }
         // try? because doing nothing when an error occurs
         try? placeDisk(turn, atX: x, y: y, animated: true) { [weak self] _ in
