@@ -9,5 +9,11 @@ public final class ReversiViewModel {
 
     public var playerCancellers: [Disk: Canceller] = [:]
 
+    public private(set) var viewHasAppeared: Bool = false
+
     public init() {}
+
+    public func viewDidAppear() {
+        viewHasAppeared = true
+    }
 }

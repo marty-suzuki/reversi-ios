@@ -27,13 +27,12 @@ class ViewController: UIViewController {
             newGame()
         }
     }
-    
-    private var viewHasAppeared: Bool = false
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if viewHasAppeared { return }
-        viewHasAppeared = true
+        if viewModel.viewHasAppeared { return }
+        viewModel.viewDidAppear()
         waitForPlayer()
     }
 }
