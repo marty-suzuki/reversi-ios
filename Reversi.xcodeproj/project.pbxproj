@@ -28,6 +28,7 @@
 		ED6EACA42444B1E900BAF620 /* ReversiViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EACA32444B1E900BAF620 /* ReversiViewModel.swift */; };
 		ED6EACA62444BDE100BAF620 /* Canceller.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EACA52444BDE100BAF620 /* Canceller.swift */; };
 		ED6EACA82444CD7E00BAF620 /* ReversiViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EACA72444CD7E00BAF620 /* ReversiViewModelTests.swift */; };
+		ED6EACAB2444D3C200BAF620 /* MockResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EACAA2444D3C200BAF620 /* MockResponse.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -102,6 +103,7 @@
 		ED6EACA32444B1E900BAF620 /* ReversiViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiViewModel.swift; sourceTree = "<group>"; };
 		ED6EACA52444BDE100BAF620 /* Canceller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Canceller.swift; sourceTree = "<group>"; };
 		ED6EACA72444CD7E00BAF620 /* ReversiViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiViewModelTests.swift; sourceTree = "<group>"; };
+		ED6EACAA2444D3C200BAF620 /* MockResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockResponse.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -209,6 +211,7 @@
 		ED6EAC7924436B2C00BAF620 /* ReversiLogicTests */ = {
 			isa = PBXGroup;
 			children = (
+				ED6EACA92444D36400BAF620 /* Util */,
 				ED6EAC7C24436B2C00BAF620 /* Info.plist */,
 				ED6EAC9E24436EE800BAF620 /* GameDataIOTests.swift */,
 				ED6EACA72444CD7E00BAF620 /* ReversiViewModelTests.swift */,
@@ -240,6 +243,14 @@
 				ED6EACA32444B1E900BAF620 /* ReversiViewModel.swift */,
 			);
 			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		ED6EACA92444D36400BAF620 /* Util */ = {
+			isa = PBXGroup;
+			children = (
+				ED6EACAA2444D3C200BAF620 /* MockResponse.swift */,
+			);
+			path = Util;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -449,6 +460,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED6EACAB2444D3C200BAF620 /* MockResponse.swift in Sources */,
 				ED6EAC9F24436EE800BAF620 /* GameDataIOTests.swift in Sources */,
 				ED6EACA82444CD7E00BAF620 /* ReversiViewModelTests.swift in Sources */,
 			);
