@@ -53,6 +53,22 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(selectedSegmentIndexFor.parameters, [])
         XCTAssertEqual(playTurnOfComputer.calledCount, 0)
     }
+
+    func test_viewDidAppear_selectedSegmentIndexForが2回呼ばれることはない() {
+        let viewModel = dependency.testTarget
+        let turn = Disk.dark
+
+        viewModel.turn = turn
+        viewModel.viewDidAppear()
+
+        let selectedSegmentIndexFor = dependency.$_selectedSegmentIndexFor
+        XCTAssertEqual(selectedSegmentIndexFor.calledCount, 1)
+        XCTAssertEqual(selectedSegmentIndexFor.parameters, [turn.index])
+
+        viewModel.viewDidAppear()
+        XCTAssertEqual(selectedSegmentIndexFor.calledCount, 1)
+        XCTAssertEqual(selectedSegmentIndexFor.parameters, [turn.index])
+    }
 }
 
 extension ReversiViewModelTests {
