@@ -12,13 +12,13 @@ class ViewController: UIViewController {
     @IBOutlet private var playerControls: [UISegmentedControl]!
     @IBOutlet private var countLabels: [UILabel]!
     @IBOutlet private var playerActivityIndicators: [UIActivityIndicatorView]!
-    
-    private var turn: Disk? = .dark // `nil` if the current game is over
-    
+
     private var animationCanceller: Canceller?
     private var isAnimating: Bool { animationCanceller != nil }
     
     private var playerCancellers: [Disk: Canceller] = [:]
+
+    private lazy var viewModel = ReversiViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -199,7 +199,7 @@ extension ViewController {
 extension ViewController {
     func newGame() {
         boardView.reset()
-        turn = .dark
+        viewModel.turn = .dark
         
         for playerControl in playerControls {
             playerControl.selectedSegmentIndex = GameData.Player.manual.rawValue
@@ -212,7 +212,7 @@ extension ViewController {
     }
     
     func waitForPlayer() {
-        guard let turn = self.turn else { return }
+        guard let turn = viewModel.turn else { return }
         switch GameData.Player(rawValue: playerControls[turn.index].selectedSegmentIndex)! {
         case .manual:
             break
@@ -222,16 +222,16 @@ extension ViewController {
     }
     
     func nextTurn() {
-        guard var turn = self.turn else { return }
+        guard var turn = viewModel.turn else { return }
 
         turn.flip()
         
         if validMoves(for: turn).isEmpty {
             if validMoves(for: turn.flipped).isEmpty {
-                self.turn = nil
+                viewModel.turn = nil
                 updateMessageViews()
             } else {
-                self.turn = turn
+                viewModel.turn = turn
                 updateMessageViews()
                 
                 let alertController = UIAlertController(
@@ -245,14 +245,14 @@ extension ViewController {
                 present(alertController, animated: true)
             }
         } else {
-            self.turn = turn
+            viewModel.turn = turn
             updateMessageViews()
             waitForPlayer()
         }
     }
     
     func playTurnOfComputer() {
-        guard let turn = self.turn else { preconditionFailure() }
+        guard let turn = viewModel.turn else { preconditionFailure() }
         let (x, y) = validMoves(for: turn).randomElement()!
 
         playerActivityIndicators[turn.index].startAnimating()
@@ -287,7 +287,7 @@ extension ViewController {
     }
     
     func updateMessageViews() {
-        switch turn {
+        switch viewModel.turn {
         case .some(let side):
             messageDiskSizeConstraint.constant = messageDiskSize
             messageDiskView.disk = side
@@ -341,7 +341,7 @@ extension ViewController {
             canceller.cancel()
         }
         
-        if !isAnimating, side == turn, case .computer = GameData.Player(rawValue: sender.selectedSegmentIndex)! {
+        if !isAnimating, side == viewModel.turn, case .computer = GameData.Player(rawValue: sender.selectedSegmentIndex)! {
             playTurnOfComputer()
         }
     }
@@ -349,7 +349,7 @@ extension ViewController {
 
 extension ViewController: BoardViewDelegate {
     func boardView(_ boardView: BoardView, didSelectCellAtX x: Int, y: Int) {
-        guard let turn = turn else { return }
+        guard let turn = viewModel.turn else { return }
         if isAnimating { return }
         guard case .manual = GameData.Player(rawValue: playerControls[turn.index].selectedSegmentIndex)! else { return }
         // try? because doing nothing when an error occurs
@@ -370,7 +370,7 @@ extension ViewController {
         }
 
         let data = GameData(
-            status: turn.map(GameData.Status.turn) ?? .gameOver,
+            status: viewModel.turn.map(GameData.Status.turn) ?? .gameOver,
             playerDark: GameData.Player(rawValue: playerControls[0].selectedSegmentIndex) ?? .manual,
             playerLight: GameData.Player(rawValue: playerControls[1].selectedSegmentIndex) ?? .manual,
             board: GameData.Board(cells: cells)
@@ -386,9 +386,9 @@ extension ViewController {
         try GameDataIO.loadGame(contentsOfFile: { try String(contentsOfFile: $0, encoding: .utf8) }) { data in
             switch data.status {
             case .gameOver:
-                turn = nil
+                viewModel.turn = nil
             case let .turn(disk):
-                turn = disk
+                viewModel.turn = disk
             }
 
             playerControls[0].selectedSegmentIndex = data.playerDark.rawValue
