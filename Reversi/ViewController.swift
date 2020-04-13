@@ -33,10 +33,7 @@ class ViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        if viewModel.viewHasAppeared { return }
         viewModel.viewDidAppear()
-        viewModel.waitForPlayer()
     }
 }
 

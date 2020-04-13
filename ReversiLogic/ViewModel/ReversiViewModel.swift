@@ -9,7 +9,7 @@ public final class ReversiViewModel {
 
     public var playerCancellers: [Disk: Canceller] = [:]
 
-    public private(set) var viewHasAppeared: Bool = false
+    private var viewHasAppeared: Bool = false
 
     private let playTurnOfComputer: () -> Void
     private let selectedSegmentIndexFor: (Int) -> Int?
@@ -21,7 +21,11 @@ public final class ReversiViewModel {
     }
 
     public func viewDidAppear() {
+        if viewHasAppeared {
+            return
+        }
         viewHasAppeared = true
+        waitForPlayer()
     }
 
     public func waitForPlayer() {
