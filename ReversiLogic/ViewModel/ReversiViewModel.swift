@@ -7,5 +7,7 @@ public final class ReversiViewModel {
         animationCanceller != nil
     }
 
+    public var playerCancellers: [Disk: Canceller] = [:]
+
     public init() {}
 }

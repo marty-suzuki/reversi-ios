@@ -12,8 +12,6 @@ class ViewController: UIViewController {
     @IBOutlet private var playerControls: [UISegmentedControl]!
     @IBOutlet private var countLabels: [UILabel]!
     @IBOutlet private var playerActivityIndicators: [UIActivityIndicatorView]!
-    
-    private var playerCancellers: [Disk: Canceller] = [:]
 
     private lazy var viewModel = ReversiViewModel()
     
@@ -257,7 +255,7 @@ extension ViewController {
         let cleanUp: () -> Void = { [weak self] in
             guard let self = self else { return }
             self.playerActivityIndicators[turn.index].stopAnimating()
-            self.playerCancellers[turn] = nil
+            self.viewModel.playerCancellers[turn] = nil
         }
         let canceller = Canceller(cleanUp)
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
@@ -270,7 +268,7 @@ extension ViewController {
             }
         }
         
-        playerCancellers[turn] = canceller
+        viewModel.playerCancellers[turn] = canceller
     }
 }
 
@@ -319,8 +317,8 @@ extension ViewController {
             self.viewModel.animationCanceller = nil
             
             for side in Disk.sides {
-                self.playerCancellers[side]?.cancel()
-                self.playerCancellers.removeValue(forKey: side)
+                self.viewModel.playerCancellers[side]?.cancel()
+                self.viewModel.playerCancellers.removeValue(forKey: side)
             }
             
             self.newGame()
@@ -334,7 +332,7 @@ extension ViewController {
         
         try? saveGame()
         
-        if let canceller = playerCancellers[side] {
+        if let canceller = viewModel.playerCancellers[side] {
             canceller.cancel()
         }
         
