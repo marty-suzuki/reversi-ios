@@ -23,6 +23,7 @@ public final class ReversiViewModel {
     private let updateMessageViews: () -> Void
     private let getRanges: () -> (Range<Int>, Range<Int>)?
     private let diskAt: (Int, Int) -> Disk?
+    private let reset: () -> Void
     private let _loadGame: GameDataIO.LoadGame
     private let _saveGame: GameDataIO.SaveGame
 
@@ -37,6 +38,7 @@ public final class ReversiViewModel {
                 updateMessageViews: @escaping () -> Void,
                 getRanges: @escaping () -> (Range<Int>, Range<Int>)?,
                 diskAt: @escaping (Int, Int) -> Disk?,
+                reset: @escaping () -> Void,
                 loadGame: @escaping GameDataIO.LoadGame,
                 saveGame: @escaping GameDataIO.SaveGame) {
         self.playTurnOfComputer = playTurnOfComputer
@@ -50,6 +52,7 @@ public final class ReversiViewModel {
         self.updateMessageViews = updateMessageViews
         self.getRanges = getRanges
         self.diskAt = diskAt
+        self.reset = reset
         self._loadGame = loadGame
         self._saveGame = saveGame
     }
@@ -81,6 +84,19 @@ public final class ReversiViewModel {
 
     public func setDisk(_ disk: Disk?, atX x: Int, y: Int, animated: Bool, completion: ((Bool) -> Void)? = nil) {
         _setDisk(disk, x, y, animated, completion)
+    }
+
+    public func newGame() {
+        reset()
+        turn = .dark
+
+        setPlayerDarkSelectedIndex(GameData.Player.manual.rawValue)
+        setPlayerLightSelectedIndex(GameData.Player.manual.rawValue)
+
+        updateMessageViews()
+        updateCountLabels()
+
+        try? saveGame()
     }
 
     public func loadGame() throws {

@@ -25,6 +25,7 @@ class ViewController: UIViewController {
         updateMessageViews: { [weak self] in self?.updateMessageViews() },
         getRanges: { [weak self] in self.map { ($0.boardView.xRange, $0.boardView.yRange) } },
         diskAt: { [weak self] in self?.boardView.diskAt(x: $0, y: $1) },
+        reset: { [weak self] in self?.boardView.reset() },
         loadGame: GameDataIO.loadGame,
         saveGame: GameDataIO.save
     )
@@ -38,7 +39,7 @@ class ViewController: UIViewController {
         do {
             try viewModel.loadGame()
         } catch _ {
-            newGame()
+            viewModel.newGame()
         }
     }
 
@@ -189,20 +190,7 @@ extension ViewController {
 // MARK: Game management
 
 extension ViewController {
-    func newGame() {
-        boardView.reset()
-        viewModel.turn = .dark
-        
-        for playerControl in playerControls {
-            playerControl.selectedSegmentIndex = GameData.Player.manual.rawValue
-        }
 
-        updateMessageViews()
-        updateCountLabels()
-        
-        try? viewModel.saveGame()
-    }
-    
     func nextTurn() {
         guard var turn = viewModel.turn else { return }
 
@@ -308,7 +296,7 @@ extension ViewController {
                 self.viewModel.playerCancellers.removeValue(forKey: side)
             }
             
-            self.newGame()
+            self.viewModel.newGame()
             self.viewModel.waitForPlayer()
         })
         present(alertController, animated: true)
