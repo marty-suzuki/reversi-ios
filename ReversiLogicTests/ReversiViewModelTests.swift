@@ -189,6 +189,41 @@ final class ReversiViewModelTests: XCTestCase {
         let count = viewModel.count(of: .dark)
         XCTAssertEqual(count, x * y)
     }
+
+    func test_sideWithMoreDisks_darkの方が多い() {
+        let cells = [
+            GameData.Board.Cell(x: 0, y: 0, disk: .dark),
+            GameData.Board.Cell(x: 1, y: 0, disk: .dark),
+            GameData.Board.Cell(x: 2, y: 0, disk: .light)
+        ]
+        self.dependency = Dependency(board: .init(cells: [cells]))
+
+        let result = dependency.testTarget.sideWithMoreDisks()
+        XCTAssertEqual(result, .dark)
+    }
+
+    func test_sideWithMoreDisks_lightの方が多い() {
+        let cells = [
+            GameData.Board.Cell(x: 0, y: 0, disk: .dark),
+            GameData.Board.Cell(x: 1, y: 0, disk: .light),
+            GameData.Board.Cell(x: 2, y: 0, disk: .light)
+        ]
+        self.dependency = Dependency(board: .init(cells: [cells]))
+
+        let result = dependency.testTarget.sideWithMoreDisks()
+        XCTAssertEqual(result, .light)
+    }
+
+    func test_sideWithMoreDisks_darkとlightが同じ数() {
+        let cells = [
+            GameData.Board.Cell(x: 0, y: 0, disk: .dark),
+            GameData.Board.Cell(x: 1, y: 0, disk: .light)
+        ]
+        self.dependency = Dependency(board: .init(cells: [cells]))
+
+        let result = dependency.testTarget.sideWithMoreDisks()
+        XCTAssertNil(result)
+    }
 }
 
 extension ReversiViewModelTests {
