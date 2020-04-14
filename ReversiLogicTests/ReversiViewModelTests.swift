@@ -6,7 +6,7 @@ final class ReversiViewModelTests: XCTestCase {
     private var dependency: Dependency!
 
     override func setUp() {
-        self.dependency = Dependency()
+        self.dependency = Dependency(board: .initial())
     }
 
     func test_waitForPlayer_turnがdarkで_selectedSegmentIndexが0の場合() {
@@ -141,12 +141,14 @@ final class ReversiViewModelTests: XCTestCase {
     }
 
     func test_saveGame() throws {
-        let viewModel = dependency.testTarget
+        let expectedCell = GameData.Board.Cell(
+            x: 1,
+            y: 2,
+            disk: .dark
+        )
 
-        let expectedX = 1
-        let expectedY = 2
-        dependency.xRange = (expectedX..<(expectedX + 1))
-        dependency.yRange = (expectedY..<(expectedY + 1))
+        self.dependency = Dependency(board: .init(cells: [[expectedCell]]))
+        let viewModel = dependency.testTarget
 
         let expectedPayerDark: GameData.Player = .manual
         dependency.getPlayerDarkSelectedIndex = expectedPayerDark.rawValue
@@ -157,19 +159,11 @@ final class ReversiViewModelTests: XCTestCase {
         let expectedTurn: Disk = .light
         viewModel.turn = expectedTurn
 
-        let expectedDisk: Disk = .dark
-        dependency.diskAt = expectedDisk
-
         try viewModel.saveGame()
 
         let saveGame = dependency.$saveGame
         XCTAssertEqual(saveGame.calledCount, 1)
 
-        let expectedCell = GameData.Board.Cell(
-            x: expectedX,
-            y: expectedY,
-            disk: expectedDisk
-        )
         let expectedGameData = GameData(
             status: .turn(expectedTurn),
             playerDark: expectedPayerDark,
@@ -180,18 +174,20 @@ final class ReversiViewModelTests: XCTestCase {
     }
 
     func test_count() {
+        let disk = Disk.dark
+        let y = 2
+        let x = 3
+        let cells: [[GameData.Board.Cell]] = (0..<y).map { y in
+            (0..<x).map { x in
+                GameData.Board.Cell(x: x, y: y, disk: disk)
+            }
+        }
+
+        self.dependency = Dependency(board: .init(cells: cells))
         let viewModel = dependency.testTarget
 
-        let expectedX = 2
-        let expectedY = 3
-        dependency.xRange = (0..<expectedX)
-        dependency.yRange = (0..<expectedY)
-
-        let disk: Disk = .dark
-        dependency.diskAt = disk
-
-        let count = viewModel.count(of: disk)
-        XCTAssertEqual(count, expectedX * expectedY)
+        let count = viewModel.count(of: .dark)
+        XCTAssertEqual(count, x * y)
     }
 }
 
@@ -226,9 +222,6 @@ extension ReversiViewModelTests {
         @MockResponse<Void, Void>()
         var updateMessageViews: Void
 
-        @MockResponse<(Int, Int), Disk?>
-        var diskAt = nil
-
         @MockResponse<GameData, Void>()
         var saveGame: Void
 
@@ -236,8 +229,8 @@ extension ReversiViewModelTests {
         var reset: Void
 
         var gameData = Const.initialData
-        var xRange = (0..<1)
-        var yRange = (0..<1)
+
+        private let board: GameData.Board
 
         private(set) lazy var testTarget = ReversiViewModel(
             playTurnOfComputer: { [weak self] in self?.playTurnOfComputer() },
@@ -249,12 +242,15 @@ extension ReversiViewModelTests {
             getPlayerLightSelectedIndex: { [weak self] in self?._getPlayerLightSelectedIndex.respond() },
             updateCountLabels: { [weak self] in self?._updateCountLabels.respond() },
             updateMessageViews: { [weak self] in self?._updateMessageViews.respond() },
-            getRanges: { [weak self] in self.map { ($0.xRange, $0.yRange) } },
-            diskAt: { [weak self] in self?._diskAt.respond(($0, $1)) },
             reset: { [weak self] in self?._reset.respond() },
             loadGame: { [weak self] _, completion in completion(self?.gameData ?? Const.initialData) },
-            saveGame: { [weak self] data, _ in self?._saveGame.respond(data) }
+            saveGame: { [weak self] data, _ in self?._saveGame.respond(data) },
+            board: board
         )
+
+        init(board: GameData.Board) {
+            self.board = board
+        }
 
         func playTurnOfComputer() {
             __playTurnOfComputer.respond()
