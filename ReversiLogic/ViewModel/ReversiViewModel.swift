@@ -23,8 +23,6 @@ public final class ReversiViewModel {
     private let getPlayerLightSelectedIndex: () -> Int?
     private let updateCountLabels: () -> Void
     private let updateMessageViews: () -> Void
-    private let getRanges: () -> (Range<Int>, Range<Int>)?
-    private let diskAt: (Int, Int) -> Disk?
     private let reset: () -> Void
     private let _loadGame: GameDataIO.LoadGame
     private let _saveGame: GameDataIO.SaveGame
@@ -38,8 +36,6 @@ public final class ReversiViewModel {
                 getPlayerLightSelectedIndex: @escaping () -> Int?,
                 updateCountLabels: @escaping () -> Void,
                 updateMessageViews: @escaping () -> Void,
-                getRanges: @escaping () -> (Range<Int>, Range<Int>)?,
-                diskAt: @escaping (Int, Int) -> Disk?,
                 reset: @escaping () -> Void,
                 loadGame: @escaping GameDataIO.LoadGame,
                 saveGame: @escaping GameDataIO.SaveGame,
@@ -53,8 +49,6 @@ public final class ReversiViewModel {
         self.getPlayerLightSelectedIndex = getPlayerLightSelectedIndex
         self.updateCountLabels = updateCountLabels
         self.updateMessageViews = updateMessageViews
-        self.getRanges = getRanges
-        self.diskAt = diskAt
         self.reset = reset
         self._loadGame = loadGame
         self._saveGame = saveGame
@@ -96,6 +90,7 @@ public final class ReversiViewModel {
 
     public func newGame() {
         reset()
+        cells = GameData.Board.initial().cells
         turn = .dark
 
         setPlayerDarkSelectedIndex(GameData.Player.manual.rawValue)
@@ -132,16 +127,6 @@ public final class ReversiViewModel {
     }
 
     public func saveGame() throws {
-        guard let (xRange, yRange) = getRanges() else {
-            return
-        }
-
-        let cells = yRange.map { y -> [GameData.Board.Cell] in
-            xRange.map { x -> GameData.Board.Cell in
-                GameData.Board.Cell(x: x, y: y, disk: diskAt(x, y))
-            }
-        }
-
         let playerDark = getPlayerDarkSelectedIndex()
             .flatMap(GameData.Player.init) ?? .manual
         let playerLight = getPlayerLightSelectedIndex()
@@ -161,13 +146,9 @@ public final class ReversiViewModel {
     }
 
     public func count(of disk: Disk) -> Int {
-        guard let (xRange, yRange) = getRanges() else {
-            return 0
-        }
-
-        return yRange.reduce(0) { result, y in
-            xRange.reduce(result) { result, x in
-                if diskAt(x, y) == disk {
+        return cells.reduce(0) { result, rows in
+            rows.reduce(result) { result, cell in
+                if cell.disk == disk {
                     return result + 1
                 } else {
                     return result

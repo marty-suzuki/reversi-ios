@@ -23,8 +23,6 @@ class ViewController: UIViewController {
         getPlayerLightSelectedIndex: { [weak self] in self?.playerControls[1].selectedSegmentIndex },
         updateCountLabels: { [weak self] in self?.updateCountLabels() },
         updateMessageViews: { [weak self] in self?.updateMessageViews() },
-        getRanges: { [weak self] in self.map { ($0.boardView.xRange, $0.boardView.yRange) } },
-        diskAt: { [weak self] in self?.boardView.diskAt(x: $0, y: $1) },
         reset: { [weak self] in self?.boardView.reset() },
         loadGame: GameDataIO.loadGame,
         saveGame: GameDataIO.save
