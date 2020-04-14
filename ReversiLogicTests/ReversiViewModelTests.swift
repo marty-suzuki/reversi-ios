@@ -111,6 +111,45 @@ final class ReversiViewModelTests: XCTestCase {
         let updateCountLabels = dependency.$updateCountLabels
         XCTAssertEqual(updateCountLabels.calledCount, 1)
     }
+
+    func test_saveGame() throws {
+        let viewModel = dependency.testTarget
+
+        let expectedX = 1
+        let expectedY = 2
+        dependency.xRange = (expectedX..<(expectedX + 1))
+        dependency.yRange = (expectedY..<(expectedY + 1))
+
+        let expectedPayerDark: GameData.Player = .manual
+        dependency.getPlayerDarkSelectedIndex = expectedPayerDark.rawValue
+
+        let expectedPlayerLight: GameData.Player = .computer
+        dependency.getPlayerLightSelectedIndex = expectedPlayerLight.rawValue
+
+        let expectedTurn: Disk = .light
+        viewModel.turn = expectedTurn
+
+        let expectedDisk: Disk = .dark
+        dependency.diskAt = expectedDisk
+
+        try viewModel.saveGame()
+
+        let saveGame = dependency.$saveGame
+        XCTAssertEqual(saveGame.calledCount, 1)
+
+        let expectedCell = GameData.Board.Cell(
+            x: expectedX,
+            y: expectedY,
+            disk: expectedDisk
+        )
+        let expectedGameData = GameData(
+            status: .turn(expectedTurn),
+            playerDark: expectedPayerDark,
+            playerLight: expectedPlayerLight,
+            board: GameData.Board(cells: [[expectedCell]])
+        )
+        XCTAssertEqual(saveGame.parameters, [expectedGameData])
+    }
 }
 
 extension ReversiViewModelTests {
@@ -129,8 +168,14 @@ extension ReversiViewModelTests {
         @MockResponse<Int, Void>()
         var setPlayerDarkSelectedIndex: Void
 
+        @MockResponse<Void, Int>
+        var getPlayerDarkSelectedIndex = 0
+
         @MockResponse<Int, Void>()
         var setPlayerLightSelectedIndex: Void
+
+        @MockResponse<Void, Int>()
+        var getPlayerLightSelectedIndex = 0
 
         @MockResponse<Void, Void>()
         var updateCountLabels: Void
@@ -138,17 +183,30 @@ extension ReversiViewModelTests {
         @MockResponse<Void, Void>()
         var updateMessageViews: Void
 
+        @MockResponse<(Int, Int), Disk?>
+        var diskAt = nil
+
+        @MockResponse<GameData, Void>()
+        var saveGame: Void
+
         var gameData = Const.initialData
+        var xRange = (0..<1)
+        var yRange = (0..<1)
 
         private(set) lazy var testTarget = ReversiViewModel(
             playTurnOfComputer: { [weak self] in self?.playTurnOfComputer() },
             selectedSegmentIndexFor: { [weak self] in self?.selectedSegmentIndexFor($0) },
             setDisk: { [weak self] disk, x, y, animated, _ in self?._setDisk.respond((disk, x, y, animated)) },
             setPlayerDarkSelectedIndex: { [weak self] in self?._setPlayerDarkSelectedIndex.respond($0) },
+            getPlayerDarkSelectedIndex: { [weak self] in self?._getPlayerDarkSelectedIndex.respond() },
             setPlayerLightSelectedIndex: { [weak self] in self?._setPlayerLightSelectedIndex.respond($0) },
+            getPlayerLightSelectedIndex: { [weak self] in self?._getPlayerLightSelectedIndex.respond() },
             updateCountLabels: { [weak self] in self?._updateCountLabels.respond() },
             updateMessageViews: { [weak self] in self?._updateMessageViews.respond() },
-            loadGame: { [weak self] _, completion in completion(self?.gameData ?? Const.initialData) }
+            getRanges: { [weak self] in self.map { ($0.xRange, $0.yRange) } },
+            diskAt: { [weak self] in self?._diskAt.respond(($0, $1)) },
+            loadGame: { [weak self] _, completion in completion(self?.gameData ?? Const.initialData) },
+            saveGame: { [weak self] data, _ in self?._saveGame.respond(data) }
         )
 
         func playTurnOfComputer() {
