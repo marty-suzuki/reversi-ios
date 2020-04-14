@@ -7,13 +7,16 @@ class ViewController: UIViewController {
     @IBOutlet private var messageDiskView: DiskView!
     @IBOutlet private var messageLabel: UILabel!
     @IBOutlet private var messageDiskSizeConstraint: NSLayoutConstraint!
-    private var messageDiskSize: CGFloat! // to store the size designated in the storyboard
     
     @IBOutlet private var playerControls: [UISegmentedControl]!
     @IBOutlet private var countLabels: [UILabel]!
     @IBOutlet private var playerActivityIndicators: [UIActivityIndicatorView]!
 
     private lazy var viewModel = ReversiViewModel(
+        messageDiskSize: messageDiskSizeConstraint.constant,
+        setMessageDiskSizeConstant: { [weak self] in self?.messageDiskSizeConstraint.constant = $0 },
+        setMessageDisk: { [weak self] in self?.messageDiskView.disk = $0 },
+        setMessageText: { [weak self] in self?.messageLabel.text = $0 },
         playTurnOfComputer: { [weak self] in self?.playTurnOfComputer() },
         selectedSegmentIndexFor: { [weak self] in self?.playerControls[$0].selectedSegmentIndex },
         setDisk: { [weak self] in self?.boardView.setDisk($0, atX: $1, y: $2, animated: $3, completion: $4) },
@@ -22,7 +25,6 @@ class ViewController: UIViewController {
         setPlayerLightSelectedIndex: { [weak self] in self?.playerControls[1].selectedSegmentIndex = $0 },
         getPlayerLightSelectedIndex: { [weak self] in self?.playerControls[1].selectedSegmentIndex },
         updateCountLabels: { [weak self] in self?.updateCountLabels() },
-        updateMessageViews: { [weak self] in self?.updateMessageViews() },
         reset: { [weak self] in self?.boardView.reset() },
         loadGame: GameDataIO.loadGame,
         saveGame: GameDataIO.save
@@ -32,7 +34,6 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         boardView.delegate = self
-        messageDiskSize = messageDiskSizeConstraint.constant
         
         do {
             try viewModel.loadGame()
@@ -187,10 +188,10 @@ extension ViewController {
         if validMoves(for: turn).isEmpty {
             if validMoves(for: turn.flipped).isEmpty {
                 viewModel.turn = nil
-                updateMessageViews()
+                viewModel.updateMessage()
             } else {
                 viewModel.turn = turn
-                updateMessageViews()
+                viewModel.updateMessage()
                 
                 let alertController = UIAlertController(
                     title: "Pass",
@@ -204,7 +205,7 @@ extension ViewController {
             }
         } else {
             viewModel.turn = turn
-            updateMessageViews()
+            viewModel.updateMessage()
             viewModel.waitForPlayer()
         }
     }
@@ -241,24 +242,6 @@ extension ViewController {
     func updateCountLabels() {
         for side in Disk.sides {
             countLabels[side.index].text = "\(viewModel.count(of: side))"
-        }
-    }
-    
-    func updateMessageViews() {
-        switch viewModel.turn {
-        case .some(let side):
-            messageDiskSizeConstraint.constant = messageDiskSize
-            messageDiskView.disk = side
-            messageLabel.text = "'s turn"
-        case .none:
-            if let winner = viewModel.sideWithMoreDisks() {
-                messageDiskSizeConstraint.constant = messageDiskSize
-                messageDiskView.disk = winner
-                messageLabel.text = " won"
-            } else {
-                messageDiskSizeConstraint.constant = 0
-                messageLabel.text = "Tied"
-            }
         }
     }
 }

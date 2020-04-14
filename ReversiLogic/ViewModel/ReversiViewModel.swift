@@ -1,3 +1,5 @@
+import CoreGraphics
+
 public final class ReversiViewModel {
     public typealias SetDisk = (Disk?, Int, Int, Bool, ((Bool) -> Void)?) -> Void
 
@@ -13,7 +15,11 @@ public final class ReversiViewModel {
     public var playerCancellers: [Disk: Canceller] = [:]
 
     private var viewHasAppeared: Bool = false
+    private let messageDiskSize: CGFloat
 
+    private let setMessageDiskSizeConstant: (CGFloat) -> Void
+    private let setMessageDisk: (Disk) -> Void
+    private let setMessageText: (String) -> Void
     private let _setDisk: SetDisk
     private let playTurnOfComputer: () -> Void
     private let selectedSegmentIndexFor: (Int) -> Int?
@@ -22,12 +28,15 @@ public final class ReversiViewModel {
     private let setPlayerLightSelectedIndex: (Int) -> Void
     private let getPlayerLightSelectedIndex: () -> Int?
     private let updateCountLabels: () -> Void
-    private let updateMessageViews: () -> Void
     private let reset: () -> Void
     private let _loadGame: GameDataIO.LoadGame
     private let _saveGame: GameDataIO.SaveGame
 
-    public init(playTurnOfComputer: @escaping () -> Void,
+    public init(messageDiskSize: CGFloat,
+                setMessageDiskSizeConstant: @escaping (CGFloat) -> Void,
+                setMessageDisk: @escaping (Disk) -> Void,
+                setMessageText: @escaping (String) -> Void,
+                playTurnOfComputer: @escaping () -> Void,
                 selectedSegmentIndexFor: @escaping (Int) -> Int?,
                 setDisk: @escaping SetDisk,
                 setPlayerDarkSelectedIndex: @escaping (Int) -> Void,
@@ -35,11 +44,13 @@ public final class ReversiViewModel {
                 setPlayerLightSelectedIndex: @escaping (Int) -> Void,
                 getPlayerLightSelectedIndex: @escaping () -> Int?,
                 updateCountLabels: @escaping () -> Void,
-                updateMessageViews: @escaping () -> Void,
                 reset: @escaping () -> Void,
                 loadGame: @escaping GameDataIO.LoadGame,
                 saveGame: @escaping GameDataIO.SaveGame,
                 board: GameData.Board = .initial()) {
+        self.setMessageDiskSizeConstant = setMessageDiskSizeConstant
+        self.setMessageDisk = setMessageDisk
+        self.setMessageText = setMessageText
         self.playTurnOfComputer = playTurnOfComputer
         self.selectedSegmentIndexFor = selectedSegmentIndexFor
         self._setDisk = setDisk
@@ -48,11 +59,11 @@ public final class ReversiViewModel {
         self.setPlayerLightSelectedIndex = setPlayerLightSelectedIndex
         self.getPlayerLightSelectedIndex = getPlayerLightSelectedIndex
         self.updateCountLabels = updateCountLabels
-        self.updateMessageViews = updateMessageViews
         self.reset = reset
         self._loadGame = loadGame
         self._saveGame = saveGame
         self.cells = board.cells
+        self.messageDiskSize = messageDiskSize
     }
 
     public func viewDidAppear() {
@@ -96,7 +107,7 @@ public final class ReversiViewModel {
         setPlayerDarkSelectedIndex(GameData.Player.manual.rawValue)
         setPlayerLightSelectedIndex(GameData.Player.manual.rawValue)
 
-        updateMessageViews()
+        updateMessage()
         updateCountLabels()
 
         try? saveGame()
@@ -121,7 +132,7 @@ public final class ReversiViewModel {
                 }
             }
 
-            self?.updateMessageViews()
+            self?.updateMessage()
             self?.updateCountLabels()
         }
     }
@@ -157,13 +168,31 @@ public final class ReversiViewModel {
         }
     }
 
-    public func sideWithMoreDisks() -> Disk? {
+    func sideWithMoreDisks() -> Disk? {
         let darkCount = count(of: .dark)
         let lightCount = count(of: .light)
         if darkCount == lightCount {
             return nil
         } else {
             return darkCount > lightCount ? .dark : .light
+        }
+    }
+
+    public func updateMessage() {
+        switch turn {
+        case let .some(side):
+            setMessageDiskSizeConstant(messageDiskSize)
+            setMessageDisk(side)
+            setMessageText("'s turn")
+        case .none:
+            if let winner = sideWithMoreDisks() {
+                setMessageDiskSizeConstant(messageDiskSize)
+                setMessageDisk(winner)
+                setMessageText(" won")
+            } else {
+                setMessageDiskSizeConstant(0)
+                setMessageText("Tied")
+            }
         }
     }
 }
