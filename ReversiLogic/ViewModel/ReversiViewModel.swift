@@ -134,4 +134,20 @@ public final class ReversiViewModel {
             { try $0.write(toFile: $1, atomically: true, encoding: .utf8) }
         )
     }
+
+    public func count(of disk: Disk) -> Int {
+        guard let (xRange, yRange) = getRanges() else {
+            return 0
+        }
+
+        return yRange.reduce(0) { result, y in
+            xRange.reduce(result) { result, x in
+                if diskAt(x, y) == disk {
+                    return result + 1
+                } else {
+                    return result
+                }
+            }
+        }
+    }
 }

@@ -51,23 +51,10 @@ class ViewController: UIViewController {
 // MARK: Reversi logics
 
 extension ViewController {
-    func count(of disk: Disk) -> Int {
-        var count = 0
-        
-        for y in boardView.yRange {
-            for x in boardView.xRange {
-                if boardView.diskAt(x: x, y: y) == disk {
-                    count +=  1
-                }
-            }
-        }
-        
-        return count
-    }
-    
+
     func sideWithMoreDisks() -> Disk? {
-        let darkCount = count(of: .dark)
-        let lightCount = count(of: .light)
+        let darkCount = viewModel.count(of: .dark)
+        let lightCount = viewModel.count(of: .light)
         if darkCount == lightCount {
             return nil
         } else {
@@ -277,7 +264,7 @@ extension ViewController {
 extension ViewController {
     func updateCountLabels() {
         for side in Disk.sides {
-            countLabels[side.index].text = "\(count(of: side))"
+            countLabels[side.index].text = "\(viewModel.count(of: side))"
         }
     }
     
