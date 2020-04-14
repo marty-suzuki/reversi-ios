@@ -150,6 +150,21 @@ final class ReversiViewModelTests: XCTestCase {
         )
         XCTAssertEqual(saveGame.parameters, [expectedGameData])
     }
+
+    func test_count() {
+        let viewModel = dependency.testTarget
+
+        let expectedX = 2
+        let expectedY = 3
+        dependency.xRange = (0..<expectedX)
+        dependency.yRange = (0..<expectedY)
+
+        let disk: Disk = .dark
+        dependency.diskAt = disk
+
+        let count = viewModel.count(of: disk)
+        XCTAssertEqual(count, expectedX * expectedY)
+    }
 }
 
 extension ReversiViewModelTests {
