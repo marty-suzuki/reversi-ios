@@ -32,6 +32,8 @@ public enum GameDataIO {
         }
     }
 
+    public typealias LoadGame = ((String) throws -> String, (GameData) -> Void) throws -> Void
+
     public static func loadGame(
         contentsOfFile: (String) throws -> String,
         completion: (GameData) -> Void

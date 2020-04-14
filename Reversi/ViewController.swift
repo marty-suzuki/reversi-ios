@@ -16,7 +16,12 @@ class ViewController: UIViewController {
     private lazy var viewModel = ReversiViewModel(
         playTurnOfComputer: { [weak self] in self?.playTurnOfComputer() },
         selectedSegmentIndexFor: { [weak self] in self?.playerControls[$0].selectedSegmentIndex },
-        setDisk: { [weak self] in self?.boardView.setDisk($0, atX: $1, y: $2, animated: $3, completion: $4) }
+        setDisk: { [weak self] in self?.boardView.setDisk($0, atX: $1, y: $2, animated: $3, completion: $4) },
+        setPlayerDarkSelectedIndex: { [weak self] in self?.playerControls[0].selectedSegmentIndex = $0 },
+        setPlayerLightSelectedIndex: { [weak self] in self?.playerControls[1].selectedSegmentIndex = $0 },
+        updateCountLabels: { [weak self] in self?.updateCountLabels() },
+        updateMessageViews: { [weak self] in self?.updateMessageViews() },
+        loadGame: GameDataIO.loadGame
     )
 
     override func viewDidLoad() {
@@ -26,7 +31,7 @@ class ViewController: UIViewController {
         messageDiskSize = messageDiskSizeConstraint.constant
         
         do {
-            try loadGame()
+            try viewModel.loadGame()
         } catch _ {
             newGame()
         }
@@ -365,29 +370,6 @@ extension ViewController {
             data: data,
             writeToFile: { try $0.write(toFile: $1, atomically: true, encoding: .utf8) }
         )
-    }
-    
-    func loadGame() throws {
-        try GameDataIO.loadGame(contentsOfFile: { try String(contentsOfFile: $0, encoding: .utf8) }) { data in
-            switch data.status {
-            case .gameOver:
-                viewModel.turn = nil
-            case let .turn(disk):
-                viewModel.turn = disk
-            }
-
-            playerControls[0].selectedSegmentIndex = data.playerDark.rawValue
-            playerControls[1].selectedSegmentIndex = data.playerLight.rawValue
-
-            data.board.cells.forEach { rows in
-                rows.forEach { cell in
-                    viewModel.setDisk(cell.disk, atX: cell.x, y: cell.y, animated: false)
-                }
-            }
-
-            updateMessageViews()
-            updateCountLabels()
-        }
     }
 }
 
