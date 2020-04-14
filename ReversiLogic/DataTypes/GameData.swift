@@ -48,7 +48,7 @@ extension GameData.Board {
         }
     }
 
-    static func initial() -> GameData.Board {
+    public static func initial() -> GameData.Board {
         let range = (0..<8)
         let disk: [[Disk?]] = [
             range.map { _ in nil },

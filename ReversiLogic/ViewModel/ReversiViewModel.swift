@@ -3,6 +3,8 @@ public final class ReversiViewModel {
 
     public var turn: Disk? = .dark // `nil` if the current game is over
 
+    private(set) var cells: [[GameData.Board.Cell]]
+
     public var animationCanceller: Canceller?
     public var isAnimating: Bool {
         animationCanceller != nil
@@ -40,7 +42,8 @@ public final class ReversiViewModel {
                 diskAt: @escaping (Int, Int) -> Disk?,
                 reset: @escaping () -> Void,
                 loadGame: @escaping GameDataIO.LoadGame,
-                saveGame: @escaping GameDataIO.SaveGame) {
+                saveGame: @escaping GameDataIO.SaveGame,
+                board: GameData.Board = .initial()) {
         self.playTurnOfComputer = playTurnOfComputer
         self.selectedSegmentIndexFor = selectedSegmentIndexFor
         self._setDisk = setDisk
@@ -55,6 +58,7 @@ public final class ReversiViewModel {
         self.reset = reset
         self._loadGame = loadGame
         self._saveGame = saveGame
+        self.cells = board.cells
     }
 
     public func viewDidAppear() {
@@ -83,6 +87,10 @@ public final class ReversiViewModel {
     }
 
     public func setDisk(_ disk: Disk?, atX x: Int, y: Int, animated: Bool, completion: ((Bool) -> Void)? = nil) {
+        let cell = cells[y][x]
+        if cell.x == x && cell.y == y {
+            cells[y][x].disk = disk
+        }
         _setDisk(disk, x, y, animated, completion)
     }
 
@@ -111,6 +119,7 @@ public final class ReversiViewModel {
             self?.setPlayerDarkSelectedIndex(data.playerDark.rawValue)
             self?.setPlayerLightSelectedIndex(data.playerLight.rawValue)
 
+            self?.cells = data.board.cells
             data.board.cells.forEach { rows in
                 rows.forEach { cell in
                     self?._setDisk(cell.disk, cell.x, cell.y, false, nil)
