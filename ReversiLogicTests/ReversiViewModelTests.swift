@@ -70,6 +70,34 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(selectedSegmentIndexFor.parameters, [turn.index])
     }
 
+    func test_newGame() {
+        let viewModel = dependency.testTarget
+        viewModel.turn = nil
+
+        viewModel.newGame()
+
+        let reset = dependency.$reset
+        XCTAssertEqual(reset.calledCount, 1)
+        XCTAssertEqual(viewModel.turn, .dark)
+
+        let setPlayerDarkSelectedIndex = dependency.$setPlayerDarkSelectedIndex
+        XCTAssertEqual(setPlayerDarkSelectedIndex.calledCount, 1)
+        XCTAssertEqual(setPlayerDarkSelectedIndex.parameters, [GameData.Player.manual.rawValue])
+
+        let setPlayerLightSelectedIndex = dependency.$setPlayerLightSelectedIndex
+        XCTAssertEqual(setPlayerLightSelectedIndex.calledCount, 1)
+        XCTAssertEqual(setPlayerLightSelectedIndex.parameters, [GameData.Player.manual.rawValue])
+
+        let updateMessageViews = dependency.$updateMessageViews
+        XCTAssertEqual(updateMessageViews.calledCount, 1)
+
+        let updateCountLabels = dependency.$updateCountLabels
+        XCTAssertEqual(updateCountLabels.calledCount, 1)
+
+        let saveGame = dependency.$saveGame
+        XCTAssertEqual(saveGame.parameters.isEmpty, false)
+    }
+
     func test_loadGame() throws {
         let viewModel = dependency.testTarget
 
@@ -204,6 +232,9 @@ extension ReversiViewModelTests {
         @MockResponse<GameData, Void>()
         var saveGame: Void
 
+        @MockResponse<Void, Void>()
+        var reset: Void
+
         var gameData = Const.initialData
         var xRange = (0..<1)
         var yRange = (0..<1)
@@ -220,6 +251,7 @@ extension ReversiViewModelTests {
             updateMessageViews: { [weak self] in self?._updateMessageViews.respond() },
             getRanges: { [weak self] in self.map { ($0.xRange, $0.yRange) } },
             diskAt: { [weak self] in self?._diskAt.respond(($0, $1)) },
+            reset: { [weak self] in self?._reset.respond() },
             loadGame: { [weak self] _, completion in completion(self?.gameData ?? Const.initialData) },
             saveGame: { [weak self] data, _ in self?._saveGame.respond(data) }
         )
