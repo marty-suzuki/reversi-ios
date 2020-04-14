@@ -50,16 +50,6 @@ class ViewController: UIViewController {
 // MARK: Reversi logics
 
 extension ViewController {
-
-    func sideWithMoreDisks() -> Disk? {
-        let darkCount = viewModel.count(of: .dark)
-        let lightCount = viewModel.count(of: .light)
-        if darkCount == lightCount {
-            return nil
-        } else {
-            return darkCount > lightCount ? .dark : .light
-        }
-    }
     
     private func flippedDiskCoordinatesByPlacingDisk(_ disk: Disk, atX x: Int, y: Int) -> [(Int, Int)] {
         let directions = [
@@ -261,7 +251,7 @@ extension ViewController {
             messageDiskView.disk = side
             messageLabel.text = "'s turn"
         case .none:
-            if let winner = self.sideWithMoreDisks() {
+            if let winner = viewModel.sideWithMoreDisks() {
                 messageDiskSizeConstraint.constant = messageDiskSize
                 messageDiskView.disk = winner
                 messageLabel.text = " won"

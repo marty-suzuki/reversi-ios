@@ -156,4 +156,14 @@ public final class ReversiViewModel {
             }
         }
     }
+
+    public func sideWithMoreDisks() -> Disk? {
+        let darkCount = count(of: .dark)
+        let lightCount = count(of: .light)
+        if darkCount == lightCount {
+            return nil
+        } else {
+            return darkCount > lightCount ? .dark : .light
+        }
+    }
 }
