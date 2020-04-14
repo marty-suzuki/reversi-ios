@@ -1,6 +1,8 @@
 import Foundation
 
 public enum GameDataIO {
+    public typealias SaveGame = (GameData, (String, String) throws -> Void) throws -> Void
+
     public static func save(
         data: GameData,
         writeToFile: (String, String) throws -> Void

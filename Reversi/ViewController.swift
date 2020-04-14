@@ -18,10 +18,15 @@ class ViewController: UIViewController {
         selectedSegmentIndexFor: { [weak self] in self?.playerControls[$0].selectedSegmentIndex },
         setDisk: { [weak self] in self?.boardView.setDisk($0, atX: $1, y: $2, animated: $3, completion: $4) },
         setPlayerDarkSelectedIndex: { [weak self] in self?.playerControls[0].selectedSegmentIndex = $0 },
+        getPlayerDarkSelectedIndex: { [weak self] in self?.playerControls[0].selectedSegmentIndex },
         setPlayerLightSelectedIndex: { [weak self] in self?.playerControls[1].selectedSegmentIndex = $0 },
+        getPlayerLightSelectedIndex: { [weak self] in self?.playerControls[1].selectedSegmentIndex },
         updateCountLabels: { [weak self] in self?.updateCountLabels() },
         updateMessageViews: { [weak self] in self?.updateMessageViews() },
-        loadGame: GameDataIO.loadGame
+        getRanges: { [weak self] in self.map { ($0.boardView.xRange, $0.boardView.yRange) } },
+        diskAt: { [weak self] in self?.boardView.diskAt(x: $0, y: $1) },
+        loadGame: GameDataIO.loadGame,
+        saveGame: GameDataIO.save
     )
 
     override func viewDidLoad() {
@@ -153,7 +158,7 @@ extension ViewController {
                 cleanUp()
 
                 completion?(finished)
-                try? self.saveGame()
+                try? self.viewModel.saveGame()
                 self.updateCountLabels()
             }
         } else {
@@ -164,7 +169,7 @@ extension ViewController {
                     self.viewModel.setDisk(disk, atX: x, y: y, animated: false)
                 }
                 completion?(true)
-                try? self.saveGame()
+                try? self.viewModel.saveGame()
                 self.updateCountLabels()
             }
         }
@@ -208,7 +213,7 @@ extension ViewController {
         updateMessageViews()
         updateCountLabels()
         
-        try? saveGame()
+        try? viewModel.saveGame()
     }
     
     func nextTurn() {
@@ -325,7 +330,7 @@ extension ViewController {
     @IBAction func changePlayerControlSegment(_ sender: UISegmentedControl) {
         let side: Disk = Disk(index: playerControls.firstIndex(of: sender)!)
         
-        try? saveGame()
+        try? viewModel.saveGame()
         
         if let canceller = viewModel.playerCancellers[side] {
             canceller.cancel()
@@ -346,30 +351,6 @@ extension ViewController: BoardViewDelegate {
         try? placeDisk(turn, atX: x, y: y, animated: true) { [weak self] _ in
             self?.nextTurn()
         }
-    }
-}
-
-// MARK: Save and Load
-
-extension ViewController {    
-    func saveGame() throws {
-        let cells = boardView.yRange.map { y -> [GameData.Board.Cell] in
-            boardView.xRange.map { x -> GameData.Board.Cell in
-                GameData.Board.Cell(x: x, y: y, disk: boardView.diskAt(x: x, y: y))
-            }
-        }
-
-        let data = GameData(
-            status: viewModel.turn.map(GameData.Status.turn) ?? .gameOver,
-            playerDark: GameData.Player(rawValue: playerControls[0].selectedSegmentIndex) ?? .manual,
-            playerLight: GameData.Player(rawValue: playerControls[1].selectedSegmentIndex) ?? .manual,
-            board: GameData.Board(cells: cells)
-        )
-
-        try GameDataIO.save(
-            data: data,
-            writeToFile: { try $0.write(toFile: $1, atomically: true, encoding: .utf8) }
-        )
     }
 }
 
