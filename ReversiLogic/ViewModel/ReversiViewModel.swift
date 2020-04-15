@@ -31,8 +31,7 @@ public final class ReversiViewModel {
     private let setPlayerLightSelectedIndex: (Int) -> Void
     private let getPlayerLightSelectedIndex: () -> Int?
     private let reset: () -> Void
-    private let _loadGame: GameDataIO.LoadGame
-    private let _saveGame: GameDataIO.SaveGame
+    private let cache: GameDataCacheProtocol
 
     public init(messageDiskSize: CGFloat,
                 showCanNotPlaceAlert: @escaping () -> Void,
@@ -49,8 +48,7 @@ public final class ReversiViewModel {
                 setPlayerLightSelectedIndex: @escaping (Int) -> Void,
                 getPlayerLightSelectedIndex: @escaping () -> Int?,
                 reset: @escaping () -> Void,
-                loadGame: @escaping GameDataIO.LoadGame,
-                saveGame: @escaping GameDataIO.SaveGame,
+                cache: GameDataCacheProtocol,
                 board: GameData.Board = .initial()) {
         self.showCanNotPlaceAlert = showCanNotPlaceAlert
         self.setPlayerDarkCount = setPlayerDarkCount
@@ -66,8 +64,7 @@ public final class ReversiViewModel {
         self.setPlayerLightSelectedIndex = setPlayerLightSelectedIndex
         self.getPlayerLightSelectedIndex = getPlayerLightSelectedIndex
         self.reset = reset
-        self._loadGame = loadGame
-        self._saveGame = saveGame
+        self.cache = cache
         self.cells = board.cells
         self.messageDiskSize = messageDiskSize
     }
@@ -120,7 +117,7 @@ public final class ReversiViewModel {
     }
 
     public func loadGame() throws {
-        try _loadGame({ try String(contentsOfFile: $0, encoding: .utf8) }) { [weak self] data in
+        try cache.load { [weak self] data in
             switch data.status {
             case .gameOver:
                 self?.turn = nil
@@ -156,10 +153,7 @@ public final class ReversiViewModel {
             board: GameData.Board(cells: cells)
         )
 
-        try _saveGame(
-            data,
-            { try $0.write(toFile: $1, atomically: true, encoding: .utf8) }
-        )
+        try cache.save(data: data)
     }
 
     public func count(of disk: Disk) -> Int {

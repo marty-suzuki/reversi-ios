@@ -28,8 +28,7 @@ class ViewController: UIViewController {
         setPlayerLightSelectedIndex: { [weak self] in self?.playerControls[1].selectedSegmentIndex = $0 },
         getPlayerLightSelectedIndex: { [weak self] in self?.playerControls[1].selectedSegmentIndex },
         reset: { [weak self] in self?.boardView.reset() },
-        loadGame: GameDataIO.loadGame,
-        saveGame: GameDataIO.save
+        cache: GameDataCacheFactory.make()
     )
 
     override func viewDidLoad() {
