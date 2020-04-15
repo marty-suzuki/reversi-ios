@@ -14,6 +14,8 @@ class ViewController: UIViewController {
 
     private lazy var viewModel = ReversiViewModel(
         messageDiskSize: messageDiskSizeConstraint.constant,
+        setPlayerDarkCount: { [weak self] in self?.countLabels[0].text = $0 },
+        setPlayerLightCount: { [weak self] in self?.countLabels[1].text = $0 },
         setMessageDiskSizeConstant: { [weak self] in self?.messageDiskSizeConstraint.constant = $0 },
         setMessageDisk: { [weak self] in self?.messageDiskView.disk = $0 },
         setMessageText: { [weak self] in self?.messageLabel.text = $0 },
@@ -24,7 +26,6 @@ class ViewController: UIViewController {
         getPlayerDarkSelectedIndex: { [weak self] in self?.playerControls[0].selectedSegmentIndex },
         setPlayerLightSelectedIndex: { [weak self] in self?.playerControls[1].selectedSegmentIndex = $0 },
         getPlayerLightSelectedIndex: { [weak self] in self?.playerControls[1].selectedSegmentIndex },
-        updateCountLabels: { [weak self] in self?.updateCountLabels() },
         reset: { [weak self] in self?.boardView.reset() },
         loadGame: GameDataIO.loadGame,
         saveGame: GameDataIO.save
@@ -136,7 +137,7 @@ extension ViewController {
 
                 completion?(finished)
                 try? self.viewModel.saveGame()
-                self.updateCountLabels()
+                self.viewModel.updateCount()
             }
         } else {
             DispatchQueue.main.async { [weak self] in
@@ -147,7 +148,7 @@ extension ViewController {
                 }
                 completion?(true)
                 try? self.viewModel.saveGame()
-                self.updateCountLabels()
+                self.viewModel.updateCount()
             }
         }
     }
@@ -233,16 +234,6 @@ extension ViewController {
         }
         
         viewModel.playerCancellers[turn] = canceller
-    }
-}
-
-// MARK: Views
-
-extension ViewController {
-    func updateCountLabels() {
-        for side in Disk.sides {
-            countLabels[side.index].text = "\(viewModel.count(of: side))"
-        }
     }
 }
 

@@ -17,6 +17,8 @@ public final class ReversiViewModel {
     private var viewHasAppeared: Bool = false
     private let messageDiskSize: CGFloat
 
+    private let setPlayerDarkCount: (String) -> Void
+    private let setPlayerLightCount: (String) -> Void
     private let setMessageDiskSizeConstant: (CGFloat) -> Void
     private let setMessageDisk: (Disk) -> Void
     private let setMessageText: (String) -> Void
@@ -27,12 +29,13 @@ public final class ReversiViewModel {
     private let getPlayerDarkSelectedIndex: () -> Int?
     private let setPlayerLightSelectedIndex: (Int) -> Void
     private let getPlayerLightSelectedIndex: () -> Int?
-    private let updateCountLabels: () -> Void
     private let reset: () -> Void
     private let _loadGame: GameDataIO.LoadGame
     private let _saveGame: GameDataIO.SaveGame
 
     public init(messageDiskSize: CGFloat,
+                setPlayerDarkCount: @escaping (String) -> Void,
+                setPlayerLightCount: @escaping (String) -> Void,
                 setMessageDiskSizeConstant: @escaping (CGFloat) -> Void,
                 setMessageDisk: @escaping (Disk) -> Void,
                 setMessageText: @escaping (String) -> Void,
@@ -43,11 +46,12 @@ public final class ReversiViewModel {
                 getPlayerDarkSelectedIndex: @escaping () -> Int?,
                 setPlayerLightSelectedIndex: @escaping (Int) -> Void,
                 getPlayerLightSelectedIndex: @escaping () -> Int?,
-                updateCountLabels: @escaping () -> Void,
                 reset: @escaping () -> Void,
                 loadGame: @escaping GameDataIO.LoadGame,
                 saveGame: @escaping GameDataIO.SaveGame,
                 board: GameData.Board = .initial()) {
+        self.setPlayerDarkCount = setPlayerDarkCount
+        self.setPlayerLightCount = setPlayerLightCount
         self.setMessageDiskSizeConstant = setMessageDiskSizeConstant
         self.setMessageDisk = setMessageDisk
         self.setMessageText = setMessageText
@@ -58,7 +62,6 @@ public final class ReversiViewModel {
         self.getPlayerDarkSelectedIndex = getPlayerDarkSelectedIndex
         self.setPlayerLightSelectedIndex = setPlayerLightSelectedIndex
         self.getPlayerLightSelectedIndex = getPlayerLightSelectedIndex
-        self.updateCountLabels = updateCountLabels
         self.reset = reset
         self._loadGame = loadGame
         self._saveGame = saveGame
@@ -108,7 +111,7 @@ public final class ReversiViewModel {
         setPlayerLightSelectedIndex(GameData.Player.manual.rawValue)
 
         updateMessage()
-        updateCountLabels()
+        updateCount()
 
         try? saveGame()
     }
@@ -133,7 +136,7 @@ public final class ReversiViewModel {
             }
 
             self?.updateMessage()
-            self?.updateCountLabels()
+            self?.updateCount()
         }
     }
 
@@ -194,5 +197,10 @@ public final class ReversiViewModel {
                 setMessageText("Tied")
             }
         }
+    }
+
+    public func updateCount() {
+        setPlayerDarkCount("\(count(of: .dark))")
+        setPlayerLightCount("\(count(of: .light))")
     }
 }
