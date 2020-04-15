@@ -249,4 +249,18 @@ public final class ReversiViewModel {
     public func canPlaceDisk(_ disk: Disk, atX x: Int, y: Int) -> Bool {
         !flippedDiskCoordinatesByPlacingDisk(disk, atX: x, y: y).isEmpty
     }
+
+    public func validMoves(for side: Disk) -> [(x: Int, y: Int)] {
+        var coordinates: [(Int, Int)] = []
+
+        for rows in cells {
+            for cell in rows {
+                if canPlaceDisk(side, atX: cell.x, y: cell.y) {
+                    coordinates.append((cell.x, cell.y))
+                }
+            }
+        }
+
+        return coordinates
+    }
 }

@@ -52,22 +52,6 @@ class ViewController: UIViewController {
 // MARK: Reversi logics
 
 extension ViewController {
-    
-
-    
-    func validMoves(for side: Disk) -> [(x: Int, y: Int)] {
-        var coordinates: [(Int, Int)] = []
-        
-        for y in boardView.yRange {
-            for x in boardView.xRange {
-                if viewModel.canPlaceDisk(side, atX: x, y: y) {
-                    coordinates.append((x, y))
-                }
-            }
-        }
-        
-        return coordinates
-    }
 
     /// - Parameter completion: A closure to be executed when the animation sequence ends.
     ///     This closure has no return value and takes a single Boolean argument that indicates
@@ -142,8 +126,8 @@ extension ViewController {
 
         turn.flip()
         
-        if validMoves(for: turn).isEmpty {
-            if validMoves(for: turn.flipped).isEmpty {
+        if viewModel.validMoves(for: turn).isEmpty {
+            if viewModel.validMoves(for: turn.flipped).isEmpty {
                 viewModel.turn = nil
                 viewModel.updateMessage()
             } else {
@@ -169,7 +153,7 @@ extension ViewController {
     
     func playTurnOfComputer() {
         guard let turn = viewModel.turn else { preconditionFailure() }
-        let (x, y) = validMoves(for: turn).randomElement()!
+        let (x, y) = viewModel.validMoves(for: turn).randomElement()!
 
         playerActivityIndicators[turn.index].startAnimating()
         
