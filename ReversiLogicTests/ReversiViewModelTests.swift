@@ -88,9 +88,6 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(setPlayerLightSelectedIndex.calledCount, 1)
         XCTAssertEqual(setPlayerLightSelectedIndex.parameters, [GameData.Player.manual.rawValue])
 
-        let updateCountLabels = dependency.$updateCountLabels
-        XCTAssertEqual(updateCountLabels.calledCount, 1)
-
         let saveGame = dependency.$saveGame
         XCTAssertEqual(saveGame.parameters.isEmpty, false)
     }
@@ -129,9 +126,6 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(parameter.1, expectedCell.x)
         XCTAssertEqual(parameter.2, expectedCell.y)
         XCTAssertEqual(parameter.3, false)
-
-        let updateCountLabels = dependency.$updateCountLabels
-        XCTAssertEqual(updateCountLabels.calledCount, 1)
     }
 
     func test_saveGame() throws {
@@ -306,11 +300,41 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(setMessageText.calledCount, 1)
         XCTAssertEqual(setMessageText.parameters, ["Tied"])
     }
+
+    func test_updateCount() {
+        let darkCount = Int(arc4random() % 100)
+        let cells1 = (0..<darkCount)
+            .map { _ in GameData.Board.Cell(x: 0, y: 0, disk: .dark) }
+
+        let lightCount = Int(arc4random() % 100)
+        let cells2 = (0..<lightCount)
+            .map { _ in GameData.Board.Cell(x: 0, y: 0, disk: .light) }
+
+        self.dependency = Dependency(board: .init(cells: [cells1, cells2]),
+                                     messageDiskSize: 0)
+        let viewModel = dependency.testTarget
+
+        viewModel.updateCount()
+
+        let setPlayerDarkCount = dependency.$setPlayerDarkCount
+        XCTAssertEqual(setPlayerDarkCount.calledCount, 1)
+        XCTAssertEqual(setPlayerDarkCount.parameters, ["\(darkCount)"])
+
+        let setPlayerLightCount = dependency.$setPlayerLightCount
+        XCTAssertEqual(setPlayerLightCount.calledCount, 1)
+        XCTAssertEqual(setPlayerLightCount.parameters, ["\(lightCount)"])
+    }
 }
 
 extension ReversiViewModelTests {
 
     final class Dependency {
+
+        @MockResponse<String, Void>()
+        var setPlayerDarkCount: Void
+
+        @MockResponse<String, Void>()
+        var setPlayerLightCount: Void
 
         @MockResponse<CGFloat, Void>()
         var setMessageDiskSizeConstant: Void
@@ -342,9 +366,6 @@ extension ReversiViewModelTests {
         @MockResponse<Void, Int>()
         var getPlayerLightSelectedIndex = 0
 
-        @MockResponse<Void, Void>()
-        var updateCountLabels: Void
-
         @MockResponse<GameData, Void>()
         var saveGame: Void
 
@@ -358,6 +379,8 @@ extension ReversiViewModelTests {
 
         private(set) lazy var testTarget = ReversiViewModel(
             messageDiskSize: messageDiskSize,
+            setPlayerDarkCount: { [weak self] in self?._setPlayerDarkCount.respond($0) },
+            setPlayerLightCount: { [weak self] in self?._setPlayerLightCount.respond($0) },
             setMessageDiskSizeConstant: { [weak self] in self?._setMessageDiskSizeConstant.respond($0) },
             setMessageDisk: { [weak self] in self?._setMessageDisk.respond($0) },
             setMessageText: { [weak self] in self?._setMessageText.respond($0) },
@@ -368,7 +391,6 @@ extension ReversiViewModelTests {
             getPlayerDarkSelectedIndex: { [weak self] in self?._getPlayerDarkSelectedIndex.respond() },
             setPlayerLightSelectedIndex: { [weak self] in self?._setPlayerLightSelectedIndex.respond($0) },
             getPlayerLightSelectedIndex: { [weak self] in self?._getPlayerLightSelectedIndex.respond() },
-            updateCountLabels: { [weak self] in self?._updateCountLabels.respond() },
             reset: { [weak self] in self?._reset.respond() },
             loadGame: { [weak self] _, completion in completion(self?.gameData ?? Const.initialData) },
             saveGame: { [weak self] data, _ in self?._saveGame.respond(data) },
