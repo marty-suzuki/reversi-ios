@@ -245,4 +245,8 @@ public final class ReversiViewModel {
 
         return diskCoordinates
     }
+
+    public func canPlaceDisk(_ disk: Disk, atX x: Int, y: Int) -> Bool {
+        !flippedDiskCoordinatesByPlacingDisk(disk, atX: x, y: y).isEmpty
+    }
 }

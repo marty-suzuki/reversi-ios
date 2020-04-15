@@ -53,16 +53,14 @@ class ViewController: UIViewController {
 
 extension ViewController {
     
-    func canPlaceDisk(_ disk: Disk, atX x: Int, y: Int) -> Bool {
-        !viewModel.flippedDiskCoordinatesByPlacingDisk(disk, atX: x, y: y).isEmpty
-    }
+
     
     func validMoves(for side: Disk) -> [(x: Int, y: Int)] {
         var coordinates: [(Int, Int)] = []
         
         for y in boardView.yRange {
             for x in boardView.xRange {
-                if canPlaceDisk(side, atX: x, y: y) {
+                if viewModel.canPlaceDisk(side, atX: x, y: y) {
                     coordinates.append((x, y))
                 }
             }
