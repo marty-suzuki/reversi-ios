@@ -14,6 +14,7 @@ class ViewController: UIViewController {
 
     private lazy var viewModel = ReversiViewModel(
         messageDiskSize: messageDiskSizeConstraint.constant,
+        showCanNotPlaceAlert: { [weak self] in self?.showCanNotPlaceAlert() },
         setPlayerDarkCount: { [weak self] in self?.countLabels[0].text = $0 },
         setPlayerLightCount: { [weak self] in self?.countLabels[1].text = $0 },
         setMessageDiskSizeConstant: { [weak self] in self?.messageDiskSizeConstraint.constant = $0 },
@@ -46,6 +47,18 @@ class ViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         viewModel.viewDidAppear()
+    }
+
+    func showCanNotPlaceAlert() {
+        let alertController = UIAlertController(
+            title: "Pass",
+            message: "Cannot place a disk.",
+            preferredStyle: .alert
+        )
+        alertController.addAction(UIAlertAction(title: "Dismiss", style: .default) { [weak self] _ in
+            self?.viewModel.nextTurn()
+        })
+        present(alertController, animated: true)
     }
 }
 
@@ -120,36 +133,6 @@ extension ViewController {
 // MARK: Game management
 
 extension ViewController {
-
-    func nextTurn() {
-        guard var turn = viewModel.turn else { return }
-
-        turn.flip()
-        
-        if viewModel.validMoves(for: turn).isEmpty {
-            if viewModel.validMoves(for: turn.flipped).isEmpty {
-                viewModel.turn = nil
-                viewModel.updateMessage()
-            } else {
-                viewModel.turn = turn
-                viewModel.updateMessage()
-                
-                let alertController = UIAlertController(
-                    title: "Pass",
-                    message: "Cannot place a disk.",
-                    preferredStyle: .alert
-                )
-                alertController.addAction(UIAlertAction(title: "Dismiss", style: .default) { [weak self] _ in
-                    self?.nextTurn()
-                })
-                present(alertController, animated: true)
-            }
-        } else {
-            viewModel.turn = turn
-            viewModel.updateMessage()
-            viewModel.waitForPlayer()
-        }
-    }
     
     func playTurnOfComputer() {
         guard let turn = viewModel.turn else { preconditionFailure() }
@@ -169,7 +152,7 @@ extension ViewController {
             cleanUp()
             
             try! self.placeDisk(turn, atX: x, y: y, animated: true) { [weak self] _ in
-                self?.nextTurn()
+                self?.viewModel.nextTurn()
             }
         }
         
@@ -226,7 +209,7 @@ extension ViewController: BoardViewDelegate {
         guard case .manual = GameData.Player(rawValue: playerControls[turn.index].selectedSegmentIndex)! else { return }
         // try? because doing nothing when an error occurs
         try? placeDisk(turn, atX: x, y: y, animated: true) { [weak self] _ in
-            self?.nextTurn()
+            self?.viewModel.nextTurn()
         }
     }
 }

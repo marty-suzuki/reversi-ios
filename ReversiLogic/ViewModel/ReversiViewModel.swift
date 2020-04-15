@@ -17,6 +17,7 @@ public final class ReversiViewModel {
     private var viewHasAppeared: Bool = false
     private let messageDiskSize: CGFloat
 
+    private let showCanNotPlaceAlert: () -> Void
     private let setPlayerDarkCount: (String) -> Void
     private let setPlayerLightCount: (String) -> Void
     private let setMessageDiskSizeConstant: (CGFloat) -> Void
@@ -34,6 +35,7 @@ public final class ReversiViewModel {
     private let _saveGame: GameDataIO.SaveGame
 
     public init(messageDiskSize: CGFloat,
+                showCanNotPlaceAlert: @escaping () -> Void,
                 setPlayerDarkCount: @escaping (String) -> Void,
                 setPlayerLightCount: @escaping (String) -> Void,
                 setMessageDiskSizeConstant: @escaping (CGFloat) -> Void,
@@ -50,6 +52,7 @@ public final class ReversiViewModel {
                 loadGame: @escaping GameDataIO.LoadGame,
                 saveGame: @escaping GameDataIO.SaveGame,
                 board: GameData.Board = .initial()) {
+        self.showCanNotPlaceAlert = showCanNotPlaceAlert
         self.setPlayerDarkCount = setPlayerDarkCount
         self.setPlayerLightCount = setPlayerLightCount
         self.setMessageDiskSizeConstant = setMessageDiskSizeConstant
@@ -262,5 +265,26 @@ public final class ReversiViewModel {
         }
 
         return coordinates
+    }
+
+    public func nextTurn() {
+        guard var turn = turn else { return }
+
+        turn.flip()
+
+        if validMoves(for: turn).isEmpty {
+            if validMoves(for: turn.flipped).isEmpty {
+                self.turn = nil
+                updateMessage()
+            } else {
+                self.turn = turn
+                updateMessage()
+                showCanNotPlaceAlert()
+            }
+        } else {
+            self.turn = turn
+            updateMessage()
+            waitForPlayer()
+        }
     }
 }
