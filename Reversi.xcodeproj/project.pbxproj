@@ -30,6 +30,7 @@
 		ED6EACA82444CD7E00BAF620 /* ReversiViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EACA72444CD7E00BAF620 /* ReversiViewModelTests.swift */; };
 		ED6EACAB2444D3C200BAF620 /* MockResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EACAA2444D3C200BAF620 /* MockResponse.swift */; };
 		ED8CC36224475F0100CD2CAB /* CollectionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED8CC36124475F0100CD2CAB /* CollectionExtension.swift */; };
+		ED8CC36424478D5B00CD2CAB /* GameDataCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED8CC36324478D5B00CD2CAB /* GameDataCache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -106,6 +107,7 @@
 		ED6EACA72444CD7E00BAF620 /* ReversiViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiViewModelTests.swift; sourceTree = "<group>"; };
 		ED6EACAA2444D3C200BAF620 /* MockResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockResponse.swift; sourceTree = "<group>"; };
 		ED8CC36124475F0100CD2CAB /* CollectionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionExtension.swift; sourceTree = "<group>"; };
+		ED8CC36324478D5B00CD2CAB /* GameDataCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDataCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -236,6 +238,7 @@
 			children = (
 				ED6EAC9A24436D9400BAF620 /* GameDataIO.swift */,
 				ED6EACA52444BDE100BAF620 /* Canceller.swift */,
+				ED8CC36324478D5B00CD2CAB /* GameDataCache.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -460,6 +463,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ED6EACA12443838900BAF620 /* GameData.swift in Sources */,
+				ED8CC36424478D5B00CD2CAB /* GameDataCache.swift in Sources */,
 				ED6EACA42444B1E900BAF620 /* ReversiViewModel.swift in Sources */,
 				ED6EACA62444BDE100BAF620 /* Canceller.swift in Sources */,
 				ED6EAC9524436C3300BAF620 /* Disk.swift in Sources */,
