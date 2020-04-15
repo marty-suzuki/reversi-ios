@@ -88,7 +88,7 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(setPlayerLightSelectedIndex.calledCount, 1)
         XCTAssertEqual(setPlayerLightSelectedIndex.parameters, [GameData.Player.manual.rawValue])
 
-        let saveGame = dependency.$saveGame
+        let saveGame = dependency.gameDataCache.$saveGame
         XCTAssertEqual(saveGame.parameters.isEmpty, false)
     }
 
@@ -99,7 +99,7 @@ final class ReversiViewModelTests: XCTestCase {
         let expectedPlayerDark = GameData.Player.computer
         let expectedPlayerLight = GameData.Player.computer
 
-        dependency.gameData = GameData(
+        dependency.gameDataCache.gameData = GameData(
             status: .turn(.dark),
             playerDark: expectedPlayerDark,
             playerLight: expectedPlayerLight,
@@ -150,7 +150,7 @@ final class ReversiViewModelTests: XCTestCase {
 
         try viewModel.saveGame()
 
-        let saveGame = dependency.$saveGame
+        let saveGame = dependency.gameDataCache.$saveGame
         XCTAssertEqual(saveGame.calledCount, 1)
 
         let expectedGameData = GameData(
@@ -513,7 +513,7 @@ final class ReversiViewModelTests: XCTestCase {
 
 extension ReversiViewModelTests {
 
-    final class Dependency {
+    fileprivate final class Dependency {
 
         @MockResponse<Void, Void>()
         var showCanNotPlaceAlert: Void
@@ -554,13 +554,10 @@ extension ReversiViewModelTests {
         @MockResponse<Void, Int>()
         var getPlayerLightSelectedIndex = 0
 
-        @MockResponse<GameData, Void>()
-        var saveGame: Void
-
         @MockResponse<Void, Void>()
         var reset: Void
 
-        var gameData = Const.initialData
+        let gameDataCache = MockGameDataCache(gameData: Const.initialData)
 
         private let board: GameData.Board
         private let messageDiskSize: CGFloat
@@ -581,8 +578,7 @@ extension ReversiViewModelTests {
             setPlayerLightSelectedIndex: { [weak self] in self?._setPlayerLightSelectedIndex.respond($0) },
             getPlayerLightSelectedIndex: { [weak self] in self?._getPlayerLightSelectedIndex.respond() },
             reset: { [weak self] in self?._reset.respond() },
-            loadGame: { [weak self] _, completion in completion(self?.gameData ?? Const.initialData) },
-            saveGame: { [weak self] data, _ in self?._saveGame.respond(data) },
+            cache: gameDataCache,
             board: board
         )
 
@@ -597,6 +593,26 @@ extension ReversiViewModelTests {
 
         func selectedSegmentIndexFor(_ index: Int) -> Int {
             return __selectedSegmentIndexFor.respond(index)
+        }
+    }
+
+    fileprivate final class MockGameDataCache: GameDataCacheProtocol {
+
+        @MockResponse<GameData, Void>()
+        var saveGame: Void
+
+        var gameData: GameData
+
+        init(gameData: GameData) {
+            self.gameData = gameData
+        }
+
+        func load(completion: @escaping (GameData) -> Void) throws {
+            completion(gameData)
+        }
+
+        func save(data: GameData) throws {
+            _saveGame.respond(data)
         }
     }
 }
