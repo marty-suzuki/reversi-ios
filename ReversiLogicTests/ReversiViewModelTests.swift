@@ -403,6 +403,43 @@ final class ReversiViewModelTests: XCTestCase {
             XCTAssertTrue(coordinates.isEmpty)
         }
     }
+
+    func test_validMoves() throws {
+        let board: [[Disk?]] = [
+            [nil, nil,    nil,   nil,   nil],
+            [nil, .light, .dark, nil,   nil],
+            [nil, .light, .dark, .dark, nil],
+            [nil, .light, nil,   nil,   nil]
+        ]
+        let cells = board.enumerated().map { y, rows in
+            rows.enumerated().map { x, disk in
+                GameData.Board.Cell(x: x, y: y, disk: disk)
+            }
+        }
+        self.dependency = Dependency(board: .init(cells: cells),
+                                     messageDiskSize: 0)
+
+        let coordinates = dependency.testTarget
+            .validMoves(for: .dark)
+
+        XCTAssertEqual(coordinates.count, 4)
+
+        let coordinate1 = try XCTUnwrap(coordinates[safe: 0])
+        XCTAssertEqual(coordinate1.x, 0)
+        XCTAssertEqual(coordinate1.y, 0)
+
+        let coordinate2 = try XCTUnwrap(coordinates[safe: 1])
+        XCTAssertEqual(coordinate2.x, 0)
+        XCTAssertEqual(coordinate2.y, 1)
+
+        let coordinate3 = try XCTUnwrap(coordinates[safe: 2])
+        XCTAssertEqual(coordinate3.x, 0)
+        XCTAssertEqual(coordinate3.y, 2)
+
+        let coordinate4 = try XCTUnwrap(coordinates[safe: 3])
+        XCTAssertEqual(coordinate4.x, 0)
+        XCTAssertEqual(coordinate4.y, 3)
+    }
 }
 
 extension ReversiViewModelTests {
