@@ -29,6 +29,7 @@
 		ED6EACA62444BDE100BAF620 /* Canceller.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EACA52444BDE100BAF620 /* Canceller.swift */; };
 		ED6EACA82444CD7E00BAF620 /* ReversiViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EACA72444CD7E00BAF620 /* ReversiViewModelTests.swift */; };
 		ED6EACAB2444D3C200BAF620 /* MockResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EACAA2444D3C200BAF620 /* MockResponse.swift */; };
+		ED8CC36224475F0100CD2CAB /* CollectionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED8CC36124475F0100CD2CAB /* CollectionExtension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,6 +105,7 @@
 		ED6EACA52444BDE100BAF620 /* Canceller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Canceller.swift; sourceTree = "<group>"; };
 		ED6EACA72444CD7E00BAF620 /* ReversiViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiViewModelTests.swift; sourceTree = "<group>"; };
 		ED6EACAA2444D3C200BAF620 /* MockResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockResponse.swift; sourceTree = "<group>"; };
+		ED8CC36124475F0100CD2CAB /* CollectionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -199,6 +201,7 @@
 		ED6EAC6C24436B2B00BAF620 /* ReversiLogic */ = {
 			isa = PBXGroup;
 			children = (
+				ED8CC36024475EF000CD2CAB /* Extension */,
 				ED6EACA22444B1D100BAF620 /* ViewModel */,
 				ED6EAC9924436D9400BAF620 /* Models */,
 				ED6EAC9324436C3300BAF620 /* DataTypes */,
@@ -251,6 +254,14 @@
 				ED6EACAA2444D3C200BAF620 /* MockResponse.swift */,
 			);
 			path = Util;
+			sourceTree = "<group>";
+		};
+		ED8CC36024475EF000CD2CAB /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				ED8CC36124475F0100CD2CAB /* CollectionExtension.swift */,
+			);
+			path = Extension;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -453,6 +464,7 @@
 				ED6EACA62444BDE100BAF620 /* Canceller.swift in Sources */,
 				ED6EAC9524436C3300BAF620 /* Disk.swift in Sources */,
 				ED6EAC9B24436D9400BAF620 /* GameDataIO.swift in Sources */,
+				ED8CC36224475F0100CD2CAB /* CollectionExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
