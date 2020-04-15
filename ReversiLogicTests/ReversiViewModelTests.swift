@@ -440,11 +440,83 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(coordinate4.x, 0)
         XCTAssertEqual(coordinate4.y, 3)
     }
+
+    func test_nextTurn_turnがlightのときに_darkの有効な配置がある場合() {
+        let board: [[Disk?]] = [
+            [nil, nil,    nil,   nil,   nil],
+            [nil, .light, .dark, nil,   nil],
+            [nil, .light, .dark, .dark, nil],
+            [nil, .light, nil,   nil,   nil]
+        ]
+        let cells = board.enumerated().map { y, rows in
+            rows.enumerated().map { x, disk in
+                GameData.Board.Cell(x: x, y: y, disk: disk)
+            }
+        }
+        self.dependency = Dependency(board: .init(cells: cells),
+                                     messageDiskSize: 0)
+
+        let viewModel = dependency.testTarget
+        viewModel.turn = .light
+
+        viewModel.nextTurn()
+
+        XCTAssertEqual(viewModel.turn, .dark)
+    }
+
+    func test_nextTurn_turnがlightのときに_darkの有効な配置はないが_lightの有効な配置がある場合() {
+        let board: [[Disk?]] = [
+            [nil, nil,   nil],
+            [nil, .dark, .dark],
+            [nil, .light, nil]
+        ]
+        let cells = board.enumerated().map { y, rows in
+            rows.enumerated().map { x, disk in
+                GameData.Board.Cell(x: x, y: y, disk: disk)
+            }
+        }
+        self.dependency = Dependency(board: .init(cells: cells),
+                                     messageDiskSize: 0)
+
+        let viewModel = dependency.testTarget
+        viewModel.turn = .light
+
+        viewModel.nextTurn()
+
+        XCTAssertEqual(viewModel.turn, .dark)
+
+        let showCanNotPlaceAlert = dependency.$showCanNotPlaceAlert
+        XCTAssertEqual(showCanNotPlaceAlert.calledCount, 1)
+    }
+
+    func test_nextTurn_turnがlightのときに_darkもlightの有効な配置はない場合() {
+        let board: [[Disk?]] = [
+            [.light, .dark],
+            [.dark, .light]
+        ]
+        let cells = board.enumerated().map { y, rows in
+            rows.enumerated().map { x, disk in
+                GameData.Board.Cell(x: x, y: y, disk: disk)
+            }
+        }
+        self.dependency = Dependency(board: .init(cells: cells),
+                                     messageDiskSize: 0)
+
+        let viewModel = dependency.testTarget
+        viewModel.turn = .light
+
+        viewModel.nextTurn()
+
+        XCTAssertNil(viewModel.turn)
+    }
 }
 
 extension ReversiViewModelTests {
 
     final class Dependency {
+
+        @MockResponse<Void, Void>()
+        var showCanNotPlaceAlert: Void
 
         @MockResponse<String, Void>()
         var setPlayerDarkCount: Void
@@ -495,6 +567,7 @@ extension ReversiViewModelTests {
 
         private(set) lazy var testTarget = ReversiViewModel(
             messageDiskSize: messageDiskSize,
+            showCanNotPlaceAlert: { [weak self] in self?._showCanNotPlaceAlert.respond() },
             setPlayerDarkCount: { [weak self] in self?._setPlayerDarkCount.respond($0) },
             setPlayerLightCount: { [weak self] in self?._setPlayerLightCount.respond($0) },
             setMessageDiskSizeConstant: { [weak self] in self?._setMessageDiskSizeConstant.respond($0) },
