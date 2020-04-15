@@ -6,7 +6,7 @@ final class ReversiViewModelTests: XCTestCase {
     private var dependency: Dependency!
 
     override func setUp() {
-        self.dependency = Dependency(board: .initial())
+        self.dependency = Dependency(board: .initial(), messageDiskSize: 0)
     }
 
     func test_waitForPlayer_turnがdarkで_selectedSegmentIndexが0の場合() {
@@ -88,9 +88,6 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(setPlayerLightSelectedIndex.calledCount, 1)
         XCTAssertEqual(setPlayerLightSelectedIndex.parameters, [GameData.Player.manual.rawValue])
 
-        let updateMessageViews = dependency.$updateMessageViews
-        XCTAssertEqual(updateMessageViews.calledCount, 1)
-
         let updateCountLabels = dependency.$updateCountLabels
         XCTAssertEqual(updateCountLabels.calledCount, 1)
 
@@ -133,9 +130,6 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(parameter.2, expectedCell.y)
         XCTAssertEqual(parameter.3, false)
 
-        let updateMessageViews = dependency.$updateMessageViews
-        XCTAssertEqual(updateMessageViews.calledCount, 1)
-
         let updateCountLabels = dependency.$updateCountLabels
         XCTAssertEqual(updateCountLabels.calledCount, 1)
     }
@@ -147,7 +141,8 @@ final class ReversiViewModelTests: XCTestCase {
             disk: .dark
         )
 
-        self.dependency = Dependency(board: .init(cells: [[expectedCell]]))
+        self.dependency = Dependency(board: .init(cells: [[expectedCell]]),
+                                     messageDiskSize: 0)
         let viewModel = dependency.testTarget
 
         let expectedPayerDark: GameData.Player = .manual
@@ -183,7 +178,8 @@ final class ReversiViewModelTests: XCTestCase {
             }
         }
 
-        self.dependency = Dependency(board: .init(cells: cells))
+        self.dependency = Dependency(board: .init(cells: cells),
+                                     messageDiskSize: 0)
         let viewModel = dependency.testTarget
 
         let count = viewModel.count(of: .dark)
@@ -196,7 +192,8 @@ final class ReversiViewModelTests: XCTestCase {
             GameData.Board.Cell(x: 1, y: 0, disk: .dark),
             GameData.Board.Cell(x: 2, y: 0, disk: .light)
         ]
-        self.dependency = Dependency(board: .init(cells: [cells]))
+        self.dependency = Dependency(board: .init(cells: [cells]),
+                                     messageDiskSize: 0)
 
         let result = dependency.testTarget.sideWithMoreDisks()
         XCTAssertEqual(result, .dark)
@@ -208,7 +205,8 @@ final class ReversiViewModelTests: XCTestCase {
             GameData.Board.Cell(x: 1, y: 0, disk: .light),
             GameData.Board.Cell(x: 2, y: 0, disk: .light)
         ]
-        self.dependency = Dependency(board: .init(cells: [cells]))
+        self.dependency = Dependency(board: .init(cells: [cells]),
+                                     messageDiskSize: 0)
 
         let result = dependency.testTarget.sideWithMoreDisks()
         XCTAssertEqual(result, .light)
@@ -219,16 +217,109 @@ final class ReversiViewModelTests: XCTestCase {
             GameData.Board.Cell(x: 0, y: 0, disk: .dark),
             GameData.Board.Cell(x: 1, y: 0, disk: .light)
         ]
-        self.dependency = Dependency(board: .init(cells: [cells]))
+        self.dependency = Dependency(board: .init(cells: [cells]),
+                                     messageDiskSize: 0)
 
         let result = dependency.testTarget.sideWithMoreDisks()
         XCTAssertNil(result)
+    }
+
+    func test_updateMessage_trunがnilじゃない場合() {
+        let expectedSize = CGFloat(arc4random() % 100)
+        self.dependency = Dependency(board: .initial(), messageDiskSize: expectedSize)
+
+        let expectedTurn = Disk.light
+        let viewModel = dependency.testTarget
+        viewModel.turn = expectedTurn
+
+        viewModel.updateMessage()
+
+        let setMessageDiskSizeConstant = dependency.$setMessageDiskSizeConstant
+        XCTAssertEqual(setMessageDiskSizeConstant.calledCount, 1)
+        XCTAssertEqual(setMessageDiskSizeConstant.parameters, [expectedSize])
+
+        let setMessageDisk = dependency.$setMessageDisk
+        XCTAssertEqual(setMessageDisk.calledCount, 1)
+        XCTAssertEqual(setMessageDisk.parameters, [expectedTurn])
+
+        let setMessageText = dependency.$setMessageText
+        XCTAssertEqual(setMessageText.calledCount, 1)
+        XCTAssertEqual(setMessageText.parameters, ["'s turn"])
+    }
+
+    func test_updateMessage_trunがnilで勝者がいる場合() {
+        let expectedDisk = Disk.dark
+        let expectedSize = CGFloat(arc4random() % 100)
+        let cell = GameData.Board.Cell(
+            x: 1,
+            y: 2,
+            disk: expectedDisk
+        )
+        self.dependency = Dependency(board: .init(cells: [[cell]]),
+                                     messageDiskSize: expectedSize)
+
+        let viewModel = dependency.testTarget
+        viewModel.turn = nil
+
+        viewModel.updateMessage()
+
+        let setMessageDiskSizeConstant = dependency.$setMessageDiskSizeConstant
+        XCTAssertEqual(setMessageDiskSizeConstant.calledCount, 1)
+        XCTAssertEqual(setMessageDiskSizeConstant.parameters, [expectedSize])
+
+        let setMessageDisk = dependency.$setMessageDisk
+        XCTAssertEqual(setMessageDisk.calledCount, 1)
+        XCTAssertEqual(setMessageDisk.parameters, [expectedDisk])
+
+        let setMessageText = dependency.$setMessageText
+        XCTAssertEqual(setMessageText.calledCount, 1)
+        XCTAssertEqual(setMessageText.parameters, [" won"])
+    }
+
+    func test_updateMessage_trunがnilで勝者がいない場合() {
+        let cell1 = GameData.Board.Cell(
+            x: 1,
+            y: 2,
+            disk: .dark
+        )
+        let cell2 = GameData.Board.Cell(
+            x: 1,
+            y: 2,
+            disk: .light
+        )
+        self.dependency = Dependency(board: .init(cells: [[cell1, cell2]]),
+                                     messageDiskSize: 0)
+
+        let viewModel = dependency.testTarget
+        viewModel.turn = nil
+
+        viewModel.updateMessage()
+
+        let setMessageDiskSizeConstant = dependency.$setMessageDiskSizeConstant
+        XCTAssertEqual(setMessageDiskSizeConstant.calledCount, 1)
+        XCTAssertEqual(setMessageDiskSizeConstant.parameters, [0])
+
+        let setMessageDisk = dependency.$setMessageDisk
+        XCTAssertEqual(setMessageDisk.calledCount, 0)
+
+        let setMessageText = dependency.$setMessageText
+        XCTAssertEqual(setMessageText.calledCount, 1)
+        XCTAssertEqual(setMessageText.parameters, ["Tied"])
     }
 }
 
 extension ReversiViewModelTests {
 
     final class Dependency {
+
+        @MockResponse<CGFloat, Void>()
+        var setMessageDiskSizeConstant: Void
+
+        @MockResponse<Disk, Void>()
+        var setMessageDisk: Void
+
+        @MockResponse<String, Void>()
+        var setMessageText: Void
 
         @MockResponse<Void, Void>()
         var _playTurnOfComputer: Void
@@ -254,9 +345,6 @@ extension ReversiViewModelTests {
         @MockResponse<Void, Void>()
         var updateCountLabels: Void
 
-        @MockResponse<Void, Void>()
-        var updateMessageViews: Void
-
         @MockResponse<GameData, Void>()
         var saveGame: Void
 
@@ -266,8 +354,13 @@ extension ReversiViewModelTests {
         var gameData = Const.initialData
 
         private let board: GameData.Board
+        private let messageDiskSize: CGFloat
 
         private(set) lazy var testTarget = ReversiViewModel(
+            messageDiskSize: messageDiskSize,
+            setMessageDiskSizeConstant: { [weak self] in self?._setMessageDiskSizeConstant.respond($0) },
+            setMessageDisk: { [weak self] in self?._setMessageDisk.respond($0) },
+            setMessageText: { [weak self] in self?._setMessageText.respond($0) },
             playTurnOfComputer: { [weak self] in self?.playTurnOfComputer() },
             selectedSegmentIndexFor: { [weak self] in self?.selectedSegmentIndexFor($0) },
             setDisk: { [weak self] disk, x, y, animated, _ in self?._setDisk.respond((disk, x, y, animated)) },
@@ -276,15 +369,15 @@ extension ReversiViewModelTests {
             setPlayerLightSelectedIndex: { [weak self] in self?._setPlayerLightSelectedIndex.respond($0) },
             getPlayerLightSelectedIndex: { [weak self] in self?._getPlayerLightSelectedIndex.respond() },
             updateCountLabels: { [weak self] in self?._updateCountLabels.respond() },
-            updateMessageViews: { [weak self] in self?._updateMessageViews.respond() },
             reset: { [weak self] in self?._reset.respond() },
             loadGame: { [weak self] _, completion in completion(self?.gameData ?? Const.initialData) },
             saveGame: { [weak self] data, _ in self?._saveGame.respond(data) },
             board: board
         )
 
-        init(board: GameData.Board) {
+        init(board: GameData.Board, messageDiskSize: CGFloat) {
             self.board = board
+            self.messageDiskSize = messageDiskSize
         }
 
         func playTurnOfComputer() {
