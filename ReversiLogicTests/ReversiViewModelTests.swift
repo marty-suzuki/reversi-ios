@@ -162,44 +162,6 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(saveGame.parameters, [expectedGameData])
     }
 
-    func test_sideWithMoreDisks_darkの方が多い() {
-        let cells = [
-            GameData.Board.Cell(x: 0, y: 0, disk: .dark),
-            GameData.Board.Cell(x: 1, y: 0, disk: .dark),
-            GameData.Board.Cell(x: 2, y: 0, disk: .light)
-        ]
-        self.dependency = Dependency(board: .init(cells: [cells]),
-                                     messageDiskSize: 0)
-
-        let result = dependency.testTarget.sideWithMoreDisks()
-        XCTAssertEqual(result, .dark)
-    }
-
-    func test_sideWithMoreDisks_lightの方が多い() {
-        let cells = [
-            GameData.Board.Cell(x: 0, y: 0, disk: .dark),
-            GameData.Board.Cell(x: 1, y: 0, disk: .light),
-            GameData.Board.Cell(x: 2, y: 0, disk: .light)
-        ]
-        self.dependency = Dependency(board: .init(cells: [cells]),
-                                     messageDiskSize: 0)
-
-        let result = dependency.testTarget.sideWithMoreDisks()
-        XCTAssertEqual(result, .light)
-    }
-
-    func test_sideWithMoreDisks_darkとlightが同じ数() {
-        let cells = [
-            GameData.Board.Cell(x: 0, y: 0, disk: .dark),
-            GameData.Board.Cell(x: 1, y: 0, disk: .light)
-        ]
-        self.dependency = Dependency(board: .init(cells: [cells]),
-                                     messageDiskSize: 0)
-
-        let result = dependency.testTarget.sideWithMoreDisks()
-        XCTAssertNil(result)
-    }
-
     func test_updateMessage_trunがnilじゃない場合() {
         let expectedSize = CGFloat(arc4random() % 100)
         self.dependency = Dependency(board: .initial(), messageDiskSize: expectedSize)

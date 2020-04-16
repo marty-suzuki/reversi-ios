@@ -160,16 +160,6 @@ public final class ReversiViewModel {
         GameLogic.count(of: disk, from: cells)
     }
 
-    func sideWithMoreDisks() -> Disk? {
-        let darkCount = count(of: .dark)
-        let lightCount = count(of: .light)
-        if darkCount == lightCount {
-            return nil
-        } else {
-            return darkCount > lightCount ? .dark : .light
-        }
-    }
-
     public func updateMessage() {
         switch turn {
         case let .some(side):
@@ -177,7 +167,7 @@ public final class ReversiViewModel {
             setMessageDisk(side)
             setMessageText("'s turn")
         case .none:
-            if let winner = sideWithMoreDisks() {
+            if let winner = GameLogic.sideWithMoreDisks(from: cells) {
                 setMessageDiskSizeConstant(messageDiskSize)
                 setMessageDisk(winner)
                 setMessageText(" won")
