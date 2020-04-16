@@ -8,7 +8,9 @@ class ViewController: UIViewController {
     @IBOutlet private var messageLabel: UILabel!
     @IBOutlet private var messageDiskSizeConstraint: NSLayoutConstraint!
     
-    @IBOutlet private var playerControls: [UISegmentedControl]!
+    @IBOutlet private var playerDarkControl: UISegmentedControl!
+    @IBOutlet private var playerLightControl: UISegmentedControl!
+
     @IBOutlet private var countLabels: [UILabel]!
     @IBOutlet private var playerActivityIndicators: [UIActivityIndicatorView]!
 
@@ -21,12 +23,12 @@ class ViewController: UIViewController {
         setMessageDisk: { [weak self] in self?.messageDiskView.disk = $0 },
         setMessageText: { [weak self] in self?.messageLabel.text = $0 },
         playTurnOfComputer: { [weak self] in self?.playTurnOfComputer() },
-        selectedSegmentIndexFor: { [weak self] in self?.playerControls[$0].selectedSegmentIndex },
+        selectedSegmentIndexFor: { [weak self] in [self?.playerDarkControl, self?.playerLightControl][$0]?.selectedSegmentIndex },
         setDisk: { [weak self] in self?.boardView.setDisk($0, atX: $1, y: $2, animated: $3, completion: $4) },
-        setPlayerDarkSelectedIndex: { [weak self] in self?.playerControls[0].selectedSegmentIndex = $0 },
-        getPlayerDarkSelectedIndex: { [weak self] in self?.playerControls[0].selectedSegmentIndex },
-        setPlayerLightSelectedIndex: { [weak self] in self?.playerControls[1].selectedSegmentIndex = $0 },
-        getPlayerLightSelectedIndex: { [weak self] in self?.playerControls[1].selectedSegmentIndex },
+        setPlayerDarkSelectedIndex: { [weak self] in self?.playerDarkControl.selectedSegmentIndex = $0 },
+        getPlayerDarkSelectedIndex: { [weak self] in self?.playerDarkControl.selectedSegmentIndex },
+        setPlayerLightSelectedIndex: { [weak self] in self?.playerLightControl.selectedSegmentIndex = $0 },
+        getPlayerLightSelectedIndex: { [weak self] in self?.playerLightControl.selectedSegmentIndex },
         reset: { [weak self] in self?.boardView.reset() },
         cache: GameDataCacheFactory.make()
     )
@@ -193,8 +195,16 @@ extension ViewController {
     }
     
     @IBAction func changePlayerControlSegment(_ sender: UISegmentedControl) {
-        let side: Disk = Disk(index: playerControls.firstIndex(of: sender)!)
-        
+        let side: Disk
+        switch sender {
+        case playerDarkControl:
+            side = .dark
+        case playerLightControl:
+            side = .light
+        default:
+            return
+        }
+
         try? viewModel.saveGame()
         
         if let canceller = viewModel.playerCancellers[side] {
@@ -211,7 +221,14 @@ extension ViewController: BoardViewDelegate {
     func boardView(_ boardView: BoardView, didSelectCellAtX x: Int, y: Int) {
         guard let turn = viewModel.turn else { return }
         if viewModel.isAnimating { return }
-        guard case .manual = GameData.Player(rawValue: playerControls[turn.index].selectedSegmentIndex)! else { return }
+        let selectedSegmentIndex: Int
+        switch turn {
+        case .dark:
+            selectedSegmentIndex = playerDarkControl.selectedSegmentIndex
+        case .light:
+            selectedSegmentIndex = playerLightControl.selectedSegmentIndex
+        }
+        guard case .manual = GameData.Player(rawValue: selectedSegmentIndex)! else { return }
         // try? because doing nothing when an error occurs
         try? placeDisk(turn, atX: x, y: y, animated: true) { [weak self] _ in
             self?.viewModel.nextTurn()
