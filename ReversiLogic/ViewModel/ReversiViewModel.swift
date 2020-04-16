@@ -207,7 +207,7 @@ public final class ReversiViewModel {
     }
 
     public func canPlaceDisk(_ disk: Disk, atX x: Int, y: Int) -> Bool {
-        !flippedDiskCoordinatesByPlacingDisk(disk, atX: x, y: y).isEmpty
+        GameLogic.canPlace(disk: disk, from: cells, at: .init(x: x, y: y))
     }
 
     public func validMoves(for side: Disk) -> [(x: Int, y: Int)] {
