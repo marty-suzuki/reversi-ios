@@ -157,15 +157,7 @@ public final class ReversiViewModel {
     }
 
     public func count(of disk: Disk) -> Int {
-        return cells.reduce(0) { result, rows in
-            rows.reduce(result) { result, cell in
-                if cell.disk == disk {
-                    return result + 1
-                } else {
-                    return result
-                }
-            }
-        }
+        GameLogic.count(of: disk, from: cells)
     }
 
     func sideWithMoreDisks() -> Disk? {

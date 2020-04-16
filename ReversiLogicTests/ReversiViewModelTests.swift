@@ -162,24 +162,6 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(saveGame.parameters, [expectedGameData])
     }
 
-    func test_count() {
-        let disk = Disk.dark
-        let y = 2
-        let x = 3
-        let cells: [[GameData.Board.Cell]] = (0..<y).map { y in
-            (0..<x).map { x in
-                GameData.Board.Cell(x: x, y: y, disk: disk)
-            }
-        }
-
-        self.dependency = Dependency(board: .init(cells: cells),
-                                     messageDiskSize: 0)
-        let viewModel = dependency.testTarget
-
-        let count = viewModel.count(of: .dark)
-        XCTAssertEqual(count, x * y)
-    }
-
     func test_sideWithMoreDisks_darkの方が多い() {
         let cells = [
             GameData.Board.Cell(x: 0, y: 0, disk: .dark),
