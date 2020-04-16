@@ -70,37 +70,43 @@ extension ViewController {
     ///     whether or not the animations actually finished before the completion handler was called.
     ///     If `animated` is `false`,  this closure is performed at the beginning of the next run loop cycle. This parameter may be `nil`.
     /// - Throws: `DiskPlacementError` if the `disk` cannot be placed at (`x`, `y`).
-    func placeDisk(_ disk: Disk, atX x: Int, y: Int, animated isAnimated: Bool, completion: ((Bool) -> Void)? = nil) throws {
+    func placeDisk(_ disk: Disk,
+                   atX x: Int, y: Int,
+                   animated isAnimated: Bool,
+                   completion: @escaping (Bool) -> Void) throws {
         let diskCoordinates = viewModel.flippedDiskCoordinatesByPlacingDisk(disk, atX: x, y: y)
         if diskCoordinates.isEmpty {
             throw DiskPlacementError(disk: disk, x: x, y: y)
         }
-        
+
+        let finally: (ReversiViewModel, Bool) -> Void = { viewModel, finished in
+            completion(finished)
+            try? viewModel.saveGame()
+            viewModel.updateCount()
+        }
+
         if isAnimated {
             let cleanUp: () -> Void = { [weak self] in
                 self?.viewModel.animationCanceller = nil
             }
             viewModel.animationCanceller = Canceller(cleanUp)
             animateSettingDisks(at: [(x, y)] + diskCoordinates, to: disk) { [weak self] finished in
-                guard let self = self else { return }
-                guard let canceller = self.viewModel.animationCanceller else { return }
+                guard let viewModel = self?.viewModel else { return }
+                guard let canceller = viewModel.animationCanceller else { return }
                 if canceller.isCancelled { return }
                 cleanUp()
 
-                completion?(finished)
-                try? self.viewModel.saveGame()
-                self.viewModel.updateCount()
+                finally(viewModel, finished)
             }
         } else {
             DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                self.viewModel.setDisk(disk, atX: x, y: y, animated: false)
+                guard let viewModel = self?.viewModel else { return }
+                viewModel.setDisk(disk, atX: x, y: y, animated: false)
                 for (x, y) in diskCoordinates {
-                    self.viewModel.setDisk(disk, atX: x, y: y, animated: false)
+                    viewModel.setDisk(disk, atX: x, y: y, animated: false)
                 }
-                completion?(true)
-                try? self.viewModel.saveGame()
-                self.viewModel.updateCount()
+
+                finally(viewModel, true)
             }
         }
     }
