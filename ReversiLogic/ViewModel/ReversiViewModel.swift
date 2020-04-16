@@ -211,17 +211,7 @@ public final class ReversiViewModel {
     }
 
     public func validMoves(for side: Disk) -> [(x: Int, y: Int)] {
-        var coordinates: [(Int, Int)] = []
-
-        for rows in cells {
-            for cell in rows {
-                if canPlaceDisk(side, atX: cell.x, y: cell.y) {
-                    coordinates.append((cell.x, cell.y))
-                }
-            }
-        }
-
-        return coordinates
+        GameLogic.validMoves(for: side, from: cells).map { ($0.x, $0.y) }
     }
 
     public func nextTurn() {
