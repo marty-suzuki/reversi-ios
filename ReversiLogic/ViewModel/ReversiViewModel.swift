@@ -35,9 +35,7 @@ public final class ReversiViewModel {
     private let playTurnOfComputer: () -> Void
     private let selectedSegmentIndexFor: (Int) -> Int?
     private let setPlayerDarkSelectedIndex: (Int) -> Void
-    private let getPlayerDarkSelectedIndex: () -> Int?
     private let setPlayerLightSelectedIndex: (Int) -> Void
-    private let getPlayerLightSelectedIndex: () -> Int?
     private let reset: () -> Void
     private let cache: GameDataCacheProtocol
 
@@ -52,9 +50,7 @@ public final class ReversiViewModel {
                 selectedSegmentIndexFor: @escaping (Int) -> Int?,
                 setDisk: @escaping SetDisk,
                 setPlayerDarkSelectedIndex: @escaping (Int) -> Void,
-                getPlayerDarkSelectedIndex: @escaping () -> Int?,
                 setPlayerLightSelectedIndex: @escaping (Int) -> Void,
-                getPlayerLightSelectedIndex: @escaping () -> Int?,
                 reset: @escaping () -> Void,
                 cache: GameDataCacheProtocol) {
         self.showCanNotPlaceAlert = showCanNotPlaceAlert
@@ -67,9 +63,7 @@ public final class ReversiViewModel {
         self.selectedSegmentIndexFor = selectedSegmentIndexFor
         self._setDisk = setDisk
         self.setPlayerDarkSelectedIndex = setPlayerDarkSelectedIndex
-        self.getPlayerDarkSelectedIndex = getPlayerDarkSelectedIndex
         self.setPlayerLightSelectedIndex = setPlayerLightSelectedIndex
-        self.getPlayerLightSelectedIndex = getPlayerLightSelectedIndex
         self.reset = reset
         self.cache = cache
         self.messageDiskSize = messageDiskSize
@@ -139,12 +133,16 @@ public final class ReversiViewModel {
     }
 
     public func saveGame() throws {
-        cache.playerDark = getPlayerDarkSelectedIndex()
-            .flatMap(GameData.Player.init) ?? .manual
-        cache.playerLight = getPlayerLightSelectedIndex()
-            .flatMap(GameData.Player.init) ?? .manual
-
         try cache.save()
+    }
+
+    public func setSelectedIndex(_ index: Int, for disk: Disk) {
+        switch disk {
+        case .dark:
+            cache.playerDark = GameData.Player(rawValue: index) ?? .manual
+        case .light:
+            cache.playerLight = GameData.Player(rawValue: index) ?? .manual
+        }
     }
 
     public func count(of disk: Disk) -> Int {

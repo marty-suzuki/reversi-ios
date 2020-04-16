@@ -26,9 +26,7 @@ class ViewController: UIViewController {
         selectedSegmentIndexFor: { [weak self] in [self?.playerDarkControl, self?.playerLightControl][$0]?.selectedSegmentIndex },
         setDisk: { [weak self] in self?.boardView.setDisk($0, atX: $1, y: $2, animated: $3, completion: $4) },
         setPlayerDarkSelectedIndex: { [weak self] in self?.playerDarkControl.selectedSegmentIndex = $0 },
-        getPlayerDarkSelectedIndex: { [weak self] in self?.playerDarkControl.selectedSegmentIndex },
         setPlayerLightSelectedIndex: { [weak self] in self?.playerLightControl.selectedSegmentIndex = $0 },
-        getPlayerLightSelectedIndex: { [weak self] in self?.playerLightControl.selectedSegmentIndex },
         reset: { [weak self] in self?.boardView.reset() },
         cache: GameDataCacheFactory.make()
     )
@@ -204,6 +202,8 @@ extension ViewController {
         default:
             return
         }
+
+        viewModel.setSelectedIndex(sender.selectedSegmentIndex, for: side)
 
         try? viewModel.saveGame()
         

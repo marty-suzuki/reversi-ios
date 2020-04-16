@@ -145,30 +145,28 @@ final class ReversiViewModelTests: XCTestCase {
     }
 
     func test_saveGame() throws {
-        let expectedCell = GameData.Board.Cell(
-            x: 1,
-            y: 2,
-            disk: .dark
-        )
-
-        self.dependency = Dependency(board: .init(cells: [[expectedCell]]),
+        self.dependency = Dependency(board: .initial(),
                                      messageDiskSize: 0)
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
-
-        let expectedPayerDark: GameData.Player = .manual
-        dependency.getPlayerDarkSelectedIndex = expectedPayerDark.rawValue
-
-        let expectedPlayerLight: GameData.Player = .computer
-        dependency.getPlayerLightSelectedIndex = expectedPlayerLight.rawValue
-
-        let expectedTurn: Disk = .light
-        cache.status = .turn(expectedTurn)
 
         try viewModel.saveGame()
 
         let save = cache.$_save
         XCTAssertEqual(save.calledCount, 1)
+    }
+
+    func test_setSelectedIndex() {
+        let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
+        cache.playerDark = .manual
+        cache.playerLight = .manual
+
+        viewModel.setSelectedIndex(1, for: .dark)
+        viewModel.setSelectedIndex(1, for: .light)
+
+        XCTAssertEqual(cache.playerDark, .computer)
+        XCTAssertEqual(cache.playerLight, .computer)
     }
 
     func test_updateMessage_trunがnilじゃない場合() {
@@ -387,14 +385,8 @@ extension ReversiViewModelTests {
         @MockResponse<Int, Void>()
         var setPlayerDarkSelectedIndex: Void
 
-        @MockResponse<Void, Int>
-        var getPlayerDarkSelectedIndex = 0
-
         @MockResponse<Int, Void>()
         var setPlayerLightSelectedIndex: Void
-
-        @MockResponse<Void, Int>()
-        var getPlayerLightSelectedIndex = 0
 
         @MockResponse<Void, Void>()
         var reset: Void
@@ -415,9 +407,7 @@ extension ReversiViewModelTests {
             selectedSegmentIndexFor: { [weak self] in self?._selectedSegmentIndexFor.respond($0) },
             setDisk: { [weak self] disk, x, y, animated, _ in self?._setDisk.respond((disk, x, y, animated)) },
             setPlayerDarkSelectedIndex: { [weak self] in self?._setPlayerDarkSelectedIndex.respond($0) },
-            getPlayerDarkSelectedIndex: { [weak self] in self?._getPlayerDarkSelectedIndex.respond() },
             setPlayerLightSelectedIndex: { [weak self] in self?._setPlayerLightSelectedIndex.respond($0) },
-            getPlayerLightSelectedIndex: { [weak self] in self?._getPlayerLightSelectedIndex.respond() },
             reset: { [weak self] in self?._reset.respond() },
             cache: gameDataCache
         )
