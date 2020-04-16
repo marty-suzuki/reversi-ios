@@ -9,11 +9,23 @@ final class ReversiViewModelTests: XCTestCase {
         self.dependency = Dependency(board: .initial(), messageDiskSize: 0)
     }
 
+    func test_turn() {
+        let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
+
+        cache.status = .gameOver
+        XCTAssertNil(viewModel.turn)
+
+        cache.status = .turn(.light)
+        XCTAssertEqual(viewModel.turn, .light)
+    }
+
     func test_waitForPlayer_turnがdarkで_selectedSegmentIndexが0の場合() {
         let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
         let turn = Disk.dark
 
-        viewModel.turn = turn
+        cache.status = .turn(turn)
         dependency.selectedSegmentIndexFor = 0
 
         viewModel.waitForPlayer()
@@ -27,9 +39,10 @@ final class ReversiViewModelTests: XCTestCase {
 
     func test_waitForPlayer_turnがlightで_selectedSegmentIndexが1の場合() {
         let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
         let turn = Disk.light
 
-        viewModel.turn = turn
+        cache.status = .turn(turn)
         dependency.selectedSegmentIndexFor = 1
 
         viewModel.waitForPlayer()
@@ -43,8 +56,9 @@ final class ReversiViewModelTests: XCTestCase {
 
     func test_waitForPlayer_turnがnilの場合() {
         let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
 
-        viewModel.turn = nil
+        cache.status = .gameOver
         viewModel.waitForPlayer()
 
         let selectedSegmentIndexFor = dependency.$selectedSegmentIndexFor
@@ -56,9 +70,10 @@ final class ReversiViewModelTests: XCTestCase {
 
     func test_viewDidAppear_selectedSegmentIndexForが2回呼ばれることはない() {
         let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
         let turn = Disk.dark
 
-        viewModel.turn = turn
+        cache.status = .turn(turn)
         viewModel.viewDidAppear()
 
         let selectedSegmentIndexFor = dependency.$selectedSegmentIndexFor
@@ -72,13 +87,15 @@ final class ReversiViewModelTests: XCTestCase {
 
     func test_newGame() {
         let viewModel = dependency.testTarget
-        viewModel.turn = nil
+        let cache = dependency.gameDataCache
 
         viewModel.newGame()
 
         let reset = dependency.$reset
         XCTAssertEqual(reset.calledCount, 1)
-        XCTAssertEqual(viewModel.turn, .dark)
+
+        let cacheReset = cache.$_reset
+        XCTAssertEqual(cacheReset.calledCount, 1)
 
         let setPlayerDarkSelectedIndex = dependency.$setPlayerDarkSelectedIndex
         XCTAssertEqual(setPlayerDarkSelectedIndex.calledCount, 1)
@@ -88,23 +105,22 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(setPlayerLightSelectedIndex.calledCount, 1)
         XCTAssertEqual(setPlayerLightSelectedIndex.parameters, [GameData.Player.manual.rawValue])
 
-        let saveGame = dependency.gameDataCache.$saveGame
-        XCTAssertEqual(saveGame.parameters.isEmpty, false)
+        let save = cache.$_save
+        XCTAssertEqual(save.parameters.isEmpty, false)
     }
 
     func test_loadGame() throws {
         let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
 
         let expectedCell = GameData.Board.Cell(x: 0, y: 0, disk: nil)
         let expectedPlayerDark = GameData.Player.computer
         let expectedPlayerLight = GameData.Player.computer
 
-        dependency.gameDataCache.gameData = GameData(
-            status: .turn(.dark),
-            playerDark: expectedPlayerDark,
-            playerLight: expectedPlayerLight,
-            board: GameData.Board(cells: [[expectedCell]])
-        )
+        cache.status = .turn(.dark)
+        cache.playerDark = expectedPlayerDark
+        cache.playerLight = expectedPlayerLight
+        cache.cells = [[expectedCell]]
 
         try viewModel.loadGame()
 
@@ -138,6 +154,7 @@ final class ReversiViewModelTests: XCTestCase {
         self.dependency = Dependency(board: .init(cells: [[expectedCell]]),
                                      messageDiskSize: 0)
         let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
 
         let expectedPayerDark: GameData.Player = .manual
         dependency.getPlayerDarkSelectedIndex = expectedPayerDark.rawValue
@@ -146,20 +163,12 @@ final class ReversiViewModelTests: XCTestCase {
         dependency.getPlayerLightSelectedIndex = expectedPlayerLight.rawValue
 
         let expectedTurn: Disk = .light
-        viewModel.turn = expectedTurn
+        cache.status = .turn(expectedTurn)
 
         try viewModel.saveGame()
 
-        let saveGame = dependency.gameDataCache.$saveGame
-        XCTAssertEqual(saveGame.calledCount, 1)
-
-        let expectedGameData = GameData(
-            status: .turn(expectedTurn),
-            playerDark: expectedPayerDark,
-            playerLight: expectedPlayerLight,
-            board: GameData.Board(cells: [[expectedCell]])
-        )
-        XCTAssertEqual(saveGame.parameters, [expectedGameData])
+        let save = cache.$_save
+        XCTAssertEqual(save.calledCount, 1)
     }
 
     func test_updateMessage_trunがnilじゃない場合() {
@@ -168,7 +177,8 @@ final class ReversiViewModelTests: XCTestCase {
 
         let expectedTurn = Disk.light
         let viewModel = dependency.testTarget
-        viewModel.turn = expectedTurn
+        let cache = dependency.gameDataCache
+        cache.status = .turn(expectedTurn)
 
         viewModel.updateMessage()
 
@@ -197,7 +207,8 @@ final class ReversiViewModelTests: XCTestCase {
                                      messageDiskSize: expectedSize)
 
         let viewModel = dependency.testTarget
-        viewModel.turn = nil
+        let cache = dependency.gameDataCache
+        cache.status = .gameOver
 
         viewModel.updateMessage()
 
@@ -229,7 +240,8 @@ final class ReversiViewModelTests: XCTestCase {
                                      messageDiskSize: 0)
 
         let viewModel = dependency.testTarget
-        viewModel.turn = nil
+        let cache = dependency.gameDataCache
+        cache.status = .gameOver
 
         viewModel.updateMessage()
 
@@ -284,7 +296,8 @@ final class ReversiViewModelTests: XCTestCase {
                                      messageDiskSize: 0)
 
         let viewModel = dependency.testTarget
-        viewModel.turn = .light
+        let cache = dependency.gameDataCache
+        cache.status = .turn(.light)
 
         viewModel.nextTurn()
 
@@ -306,7 +319,8 @@ final class ReversiViewModelTests: XCTestCase {
                                      messageDiskSize: 0)
 
         let viewModel = dependency.testTarget
-        viewModel.turn = .light
+        let cache = dependency.gameDataCache
+        cache.status = .turn(.light)
 
         viewModel.nextTurn()
 
@@ -330,7 +344,8 @@ final class ReversiViewModelTests: XCTestCase {
                                      messageDiskSize: 0)
 
         let viewModel = dependency.testTarget
-        viewModel.turn = .light
+        let cache = dependency.gameDataCache
+        cache.status = .turn(.light)
 
         viewModel.nextTurn()
 
@@ -384,9 +399,8 @@ extension ReversiViewModelTests {
         @MockResponse<Void, Void>()
         var reset: Void
 
-        let gameDataCache = MockGameDataCache(gameData: Const.initialData)
+        let gameDataCache = MockGameDataCache()
 
-        private let board: GameData.Board
         private let messageDiskSize: CGFloat
 
         private(set) lazy var testTarget = ReversiViewModel(
@@ -405,33 +419,52 @@ extension ReversiViewModelTests {
             setPlayerLightSelectedIndex: { [weak self] in self?._setPlayerLightSelectedIndex.respond($0) },
             getPlayerLightSelectedIndex: { [weak self] in self?._getPlayerLightSelectedIndex.respond() },
             reset: { [weak self] in self?._reset.respond() },
-            cache: gameDataCache,
-            board: board
+            cache: gameDataCache
         )
 
         init(board: GameData.Board, messageDiskSize: CGFloat) {
-            self.board = board
+            self.gameDataCache.cells = board.cells
             self.messageDiskSize = messageDiskSize
         }
     }
 
     fileprivate final class MockGameDataCache: GameDataCacheProtocol {
+        var status: GameData.Status = .turn(.dark)
+        var playerDark: GameData.Player = .manual
+        var playerLight: GameData.Player = .manual
+        var cells: [[GameData.Board.Cell]] = []
 
-        @MockResponse<GameData, Void>()
-        var saveGame: Void
+        @MockResponse<Void, Void>()
+        var _load: Void
 
-        var gameData: GameData
+        @MockResponse<Void, Void>()
+        var _save: Void
 
-        init(gameData: GameData) {
-            self.gameData = gameData
+        @MockResponse<Void, Void>()
+        var _reset: Void
+
+        @MockResponse<Coordinate, Disk?>
+        var _getDisk = nil
+
+        @MockResponse<(Coordinate, Disk?), Void>()
+        var _setDisk: Void
+
+        subscript(coordinate: Coordinate) -> Disk? {
+            get { __getDisk.respond(coordinate) }
+            set { __setDisk.respond((coordinate, newValue)) }
         }
 
-        func load(completion: @escaping (GameData) -> Void) throws {
-            completion(gameData)
+        func load(completion: @escaping () -> Void) throws {
+            __load.respond()
+            completion()
         }
 
-        func save(data: GameData) throws {
-            _saveGame.respond(data)
+        func save() throws {
+            __save.respond()
+        }
+
+        func reset() {
+            __reset.respond()
         }
     }
 }

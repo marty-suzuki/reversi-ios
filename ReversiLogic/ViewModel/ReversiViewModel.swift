@@ -3,9 +3,17 @@ import CoreGraphics
 public final class ReversiViewModel {
     public typealias SetDisk = (Disk?, Int, Int, Bool, ((Bool) -> Void)?) -> Void
 
-    public var turn: Disk? = .dark // `nil` if the current game is over
+    // `nil` if the current game is over
+    public var turn: Disk? {
+        switch cache.status {
+        case .gameOver: return nil
+        case let .turn(disk): return disk
+        }
+    }
 
-    private(set) var cells: [[GameData.Board.Cell]]
+    var cells: [[GameData.Board.Cell]] {
+        cache.cells
+    }
 
     public var animationCanceller: Canceller?
     public var isAnimating: Bool {
@@ -48,8 +56,7 @@ public final class ReversiViewModel {
                 setPlayerLightSelectedIndex: @escaping (Int) -> Void,
                 getPlayerLightSelectedIndex: @escaping () -> Int?,
                 reset: @escaping () -> Void,
-                cache: GameDataCacheProtocol,
-                board: GameData.Board = .initial()) {
+                cache: GameDataCacheProtocol) {
         self.showCanNotPlaceAlert = showCanNotPlaceAlert
         self.setPlayerDarkCount = setPlayerDarkCount
         self.setPlayerLightCount = setPlayerLightCount
@@ -65,7 +72,6 @@ public final class ReversiViewModel {
         self.getPlayerLightSelectedIndex = getPlayerLightSelectedIndex
         self.reset = reset
         self.cache = cache
-        self.cells = board.cells
         self.messageDiskSize = messageDiskSize
     }
 
@@ -95,17 +101,13 @@ public final class ReversiViewModel {
     }
 
     public func setDisk(_ disk: Disk?, atX x: Int, y: Int, animated: Bool, completion: ((Bool) -> Void)? = nil) {
-        let cell = cells[y][x]
-        if cell.x == x && cell.y == y {
-            cells[y][x].disk = disk
-        }
+        cache[Coordinate(x: x, y: y)] = disk
         _setDisk(disk, x, y, animated, completion)
     }
 
     public func newGame() {
         reset()
-        cells = GameData.Board.initial().cells
-        turn = .dark
+        cache.reset()
 
         setPlayerDarkSelectedIndex(GameData.Player.manual.rawValue)
         setPlayerLightSelectedIndex(GameData.Player.manual.rawValue)
@@ -117,19 +119,15 @@ public final class ReversiViewModel {
     }
 
     public func loadGame() throws {
-        try cache.load { [weak self] data in
-            switch data.status {
-            case .gameOver:
-                self?.turn = nil
-            case let .turn(disk):
-                self?.turn = disk
+        try cache.load { [weak self] in
+            guard let me = self else {
+                return
             }
 
-            self?.setPlayerDarkSelectedIndex(data.playerDark.rawValue)
-            self?.setPlayerLightSelectedIndex(data.playerLight.rawValue)
+            self?.setPlayerDarkSelectedIndex(me.cache.playerDark.rawValue)
+            self?.setPlayerLightSelectedIndex(me.cache.playerLight.rawValue)
 
-            self?.cells = data.board.cells
-            data.board.cells.forEach { rows in
+            me.cells.forEach { rows in
                 rows.forEach { cell in
                     self?._setDisk(cell.disk, cell.x, cell.y, false, nil)
                 }
@@ -141,19 +139,12 @@ public final class ReversiViewModel {
     }
 
     public func saveGame() throws {
-        let playerDark = getPlayerDarkSelectedIndex()
+        cache.playerDark = getPlayerDarkSelectedIndex()
             .flatMap(GameData.Player.init) ?? .manual
-        let playerLight = getPlayerLightSelectedIndex()
+        cache.playerLight = getPlayerLightSelectedIndex()
             .flatMap(GameData.Player.init) ?? .manual
 
-        let data = GameData(
-            status: turn.map(GameData.Status.turn) ?? .gameOver,
-            playerDark: playerDark,
-            playerLight: playerLight,
-            board: GameData.Board(cells: cells)
-        )
-
-        try cache.save(data: data)
+        try cache.save()
     }
 
     public func count(of disk: Disk) -> Int {
@@ -203,15 +194,15 @@ public final class ReversiViewModel {
 
         if validMoves(for: turn).isEmpty {
             if validMoves(for: turn.flipped).isEmpty {
-                self.turn = nil
+                self.cache.status = .gameOver
                 updateMessage()
             } else {
-                self.turn = turn
+                self.cache.status = .turn(turn)
                 updateMessage()
                 showCanNotPlaceAlert()
             }
         } else {
-            self.turn = turn
+            self.cache.status = .turn(turn)
             updateMessage()
             waitForPlayer()
         }
