@@ -14,12 +14,12 @@ final class ReversiViewModelTests: XCTestCase {
         let turn = Disk.dark
 
         viewModel.turn = turn
-        dependency._selectedSegmentIndexFor = 0
+        dependency.selectedSegmentIndexFor = 0
 
         viewModel.waitForPlayer()
 
-        let selectedSegmentIndexFor = dependency.$_selectedSegmentIndexFor
-        let playTurnOfComputer = dependency.$_playTurnOfComputer
+        let selectedSegmentIndexFor = dependency.$selectedSegmentIndexFor
+        let playTurnOfComputer = dependency.$playTurnOfComputer
         XCTAssertEqual(selectedSegmentIndexFor.calledCount, 1)
         XCTAssertEqual(selectedSegmentIndexFor.parameters, [turn.index])
         XCTAssertEqual(playTurnOfComputer.calledCount, 0)
@@ -30,12 +30,12 @@ final class ReversiViewModelTests: XCTestCase {
         let turn = Disk.light
 
         viewModel.turn = turn
-        dependency._selectedSegmentIndexFor = 1
+        dependency.selectedSegmentIndexFor = 1
 
         viewModel.waitForPlayer()
 
-        let selectedSegmentIndexFor = dependency.$_selectedSegmentIndexFor
-        let playTurnOfComputer = dependency.$_playTurnOfComputer
+        let selectedSegmentIndexFor = dependency.$selectedSegmentIndexFor
+        let playTurnOfComputer = dependency.$playTurnOfComputer
         XCTAssertEqual(selectedSegmentIndexFor.calledCount, 1)
         XCTAssertEqual(selectedSegmentIndexFor.parameters, [turn.index])
         XCTAssertEqual(playTurnOfComputer.calledCount, 1)
@@ -47,8 +47,8 @@ final class ReversiViewModelTests: XCTestCase {
         viewModel.turn = nil
         viewModel.waitForPlayer()
 
-        let selectedSegmentIndexFor = dependency.$_selectedSegmentIndexFor
-        let playTurnOfComputer = dependency.$_playTurnOfComputer
+        let selectedSegmentIndexFor = dependency.$selectedSegmentIndexFor
+        let playTurnOfComputer = dependency.$playTurnOfComputer
         XCTAssertEqual(selectedSegmentIndexFor.calledCount, 0)
         XCTAssertEqual(selectedSegmentIndexFor.parameters, [])
         XCTAssertEqual(playTurnOfComputer.calledCount, 0)
@@ -61,7 +61,7 @@ final class ReversiViewModelTests: XCTestCase {
         viewModel.turn = turn
         viewModel.viewDidAppear()
 
-        let selectedSegmentIndexFor = dependency.$_selectedSegmentIndexFor
+        let selectedSegmentIndexFor = dependency.$selectedSegmentIndexFor
         XCTAssertEqual(selectedSegmentIndexFor.calledCount, 1)
         XCTAssertEqual(selectedSegmentIndexFor.parameters, [turn.index])
 
@@ -361,10 +361,10 @@ extension ReversiViewModelTests {
         var setMessageText: Void
 
         @MockResponse<Void, Void>()
-        var _playTurnOfComputer: Void
+        var playTurnOfComputer: Void
 
         @MockResponse<Int, Int>
-        var _selectedSegmentIndexFor = 0
+        var selectedSegmentIndexFor = 0
 
         @MockResponse<(Disk?, Int, Int, Bool), Void>()
         var setDisk: Void
@@ -397,8 +397,8 @@ extension ReversiViewModelTests {
             setMessageDiskSizeConstant: { [weak self] in self?._setMessageDiskSizeConstant.respond($0) },
             setMessageDisk: { [weak self] in self?._setMessageDisk.respond($0) },
             setMessageText: { [weak self] in self?._setMessageText.respond($0) },
-            playTurnOfComputer: { [weak self] in self?.playTurnOfComputer() },
-            selectedSegmentIndexFor: { [weak self] in self?.selectedSegmentIndexFor($0) },
+            playTurnOfComputer: { [weak self] in self?._playTurnOfComputer.respond() },
+            selectedSegmentIndexFor: { [weak self] in self?._selectedSegmentIndexFor.respond($0) },
             setDisk: { [weak self] disk, x, y, animated, _ in self?._setDisk.respond((disk, x, y, animated)) },
             setPlayerDarkSelectedIndex: { [weak self] in self?._setPlayerDarkSelectedIndex.respond($0) },
             getPlayerDarkSelectedIndex: { [weak self] in self?._getPlayerDarkSelectedIndex.respond() },
@@ -412,14 +412,6 @@ extension ReversiViewModelTests {
         init(board: GameData.Board, messageDiskSize: CGFloat) {
             self.board = board
             self.messageDiskSize = messageDiskSize
-        }
-
-        func playTurnOfComputer() {
-            __playTurnOfComputer.respond()
-        }
-
-        func selectedSegmentIndexFor(_ index: Int) -> Int {
-            return __selectedSegmentIndexFor.respond(index)
         }
     }
 
