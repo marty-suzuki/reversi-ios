@@ -31,7 +31,9 @@
 		ED6EACAB2444D3C200BAF620 /* MockResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6EACAA2444D3C200BAF620 /* MockResponse.swift */; };
 		ED8CC36224475F0100CD2CAB /* CollectionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED8CC36124475F0100CD2CAB /* CollectionExtension.swift */; };
 		ED8CC36424478D5B00CD2CAB /* GameDataCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED8CC36324478D5B00CD2CAB /* GameDataCache.swift */; };
+		EDCC2A542448B324009E69F7 /* GameLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A532448B324009E69F7 /* GameLogic.swift */; };
 		EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A552448B3E9009E69F7 /* Coordinate.swift */; };
+		EDCC2A582448B5D0009E69F7 /* GameLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -109,7 +111,9 @@
 		ED6EACAA2444D3C200BAF620 /* MockResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockResponse.swift; sourceTree = "<group>"; };
 		ED8CC36124475F0100CD2CAB /* CollectionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionExtension.swift; sourceTree = "<group>"; };
 		ED8CC36324478D5B00CD2CAB /* GameDataCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDataCache.swift; sourceTree = "<group>"; };
+		EDCC2A532448B324009E69F7 /* GameLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLogic.swift; sourceTree = "<group>"; };
 		EDCC2A552448B3E9009E69F7 /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
+		EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -222,6 +226,7 @@
 				ED6EAC7C24436B2C00BAF620 /* Info.plist */,
 				ED6EAC9E24436EE800BAF620 /* GameDataIOTests.swift */,
 				ED6EACA72444CD7E00BAF620 /* ReversiViewModelTests.swift */,
+				EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */,
 			);
 			path = ReversiLogicTests;
 			sourceTree = "<group>";
@@ -242,6 +247,7 @@
 				ED6EAC9A24436D9400BAF620 /* GameDataIO.swift */,
 				ED6EACA52444BDE100BAF620 /* Canceller.swift */,
 				ED8CC36324478D5B00CD2CAB /* GameDataCache.swift */,
+				EDCC2A532448B324009E69F7 /* GameLogic.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -467,6 +473,7 @@
 			files = (
 				ED6EACA12443838900BAF620 /* GameData.swift in Sources */,
 				ED8CC36424478D5B00CD2CAB /* GameDataCache.swift in Sources */,
+				EDCC2A542448B324009E69F7 /* GameLogic.swift in Sources */,
 				ED6EACA42444B1E900BAF620 /* ReversiViewModel.swift in Sources */,
 				EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */,
 				ED6EACA62444BDE100BAF620 /* Canceller.swift in Sources */,
@@ -482,6 +489,7 @@
 			files = (
 				ED6EACAB2444D3C200BAF620 /* MockResponse.swift in Sources */,
 				ED6EAC9F24436EE800BAF620 /* GameDataIOTests.swift in Sources */,
+				EDCC2A582448B5D0009E69F7 /* GameLogicTests.swift in Sources */,
 				ED6EACA82444CD7E00BAF620 /* ReversiViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
