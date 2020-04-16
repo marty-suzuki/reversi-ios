@@ -20,69 +20,59 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.turn, .light)
     }
 
-    func test_waitForPlayer_turnがdarkで_selectedSegmentIndexが0の場合() {
+    func test_waitForPlayer_turnがdarkで_playerDarkがmanualの場合() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         let turn = Disk.dark
-
         cache.status = .turn(turn)
-        dependency.selectedSegmentIndexFor = 0
+        cache.playerDark = .manual
 
         viewModel.waitForPlayer()
 
-        let selectedSegmentIndexFor = dependency.$selectedSegmentIndexFor
         let playTurnOfComputer = dependency.$playTurnOfComputer
-        XCTAssertEqual(selectedSegmentIndexFor.calledCount, 1)
-        XCTAssertEqual(selectedSegmentIndexFor.parameters, [turn.index])
         XCTAssertEqual(playTurnOfComputer.calledCount, 0)
     }
 
-    func test_waitForPlayer_turnがlightで_selectedSegmentIndexが1の場合() {
+    func test_waitForPlayer_turnがlightで_playerLightがcomputerの場合() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         let turn = Disk.light
-
         cache.status = .turn(turn)
-        dependency.selectedSegmentIndexFor = 1
+        cache.playerLight = .computer
 
         viewModel.waitForPlayer()
 
-        let selectedSegmentIndexFor = dependency.$selectedSegmentIndexFor
         let playTurnOfComputer = dependency.$playTurnOfComputer
-        XCTAssertEqual(selectedSegmentIndexFor.calledCount, 1)
-        XCTAssertEqual(selectedSegmentIndexFor.parameters, [turn.index])
         XCTAssertEqual(playTurnOfComputer.calledCount, 1)
     }
 
-    func test_waitForPlayer_turnがnilの場合() {
+    func test_waitForPlayer_statusがgameOverの場合() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
-
         cache.status = .gameOver
+        cache.playerDark = .computer
+        cache.playerLight = .computer
+
         viewModel.waitForPlayer()
 
-        let selectedSegmentIndexFor = dependency.$selectedSegmentIndexFor
         let playTurnOfComputer = dependency.$playTurnOfComputer
-        XCTAssertEqual(selectedSegmentIndexFor.calledCount, 0)
-        XCTAssertEqual(selectedSegmentIndexFor.parameters, [])
         XCTAssertEqual(playTurnOfComputer.calledCount, 0)
     }
 
     func test_viewDidAppear_selectedSegmentIndexForが2回呼ばれることはない() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
+        cache.playerDark = .computer
         let turn = Disk.dark
 
         cache.status = .turn(turn)
         viewModel.viewDidAppear()
 
-        let selectedSegmentIndexFor = dependency.$selectedSegmentIndexFor
-        XCTAssertEqual(selectedSegmentIndexFor.calledCount, 1)
-        XCTAssertEqual(selectedSegmentIndexFor.parameters, [turn.index])
+        let playTurnOfComputer = dependency.$playTurnOfComputer
+        XCTAssertEqual(playTurnOfComputer.calledCount, 1)
 
         viewModel.viewDidAppear()
-        XCTAssertEqual(selectedSegmentIndexFor.calledCount, 1)
-        XCTAssertEqual(selectedSegmentIndexFor.parameters, [turn.index])
+        XCTAssertEqual(playTurnOfComputer.calledCount, 1)
     }
 
     func test_newGame() {
@@ -376,9 +366,6 @@ extension ReversiViewModelTests {
         @MockResponse<Void, Void>()
         var playTurnOfComputer: Void
 
-        @MockResponse<Int, Int>
-        var selectedSegmentIndexFor = 0
-
         @MockResponse<(Disk?, Int, Int, Bool), Void>()
         var setDisk: Void
 
@@ -404,7 +391,6 @@ extension ReversiViewModelTests {
             setMessageDisk: { [weak self] in self?._setMessageDisk.respond($0) },
             setMessageText: { [weak self] in self?._setMessageText.respond($0) },
             playTurnOfComputer: { [weak self] in self?._playTurnOfComputer.respond() },
-            selectedSegmentIndexFor: { [weak self] in self?._selectedSegmentIndexFor.respond($0) },
             setDisk: { [weak self] disk, x, y, animated, _ in self?._setDisk.respond((disk, x, y, animated)) },
             setPlayerDarkSelectedIndex: { [weak self] in self?._setPlayerDarkSelectedIndex.respond($0) },
             setPlayerLightSelectedIndex: { [weak self] in self?._setPlayerLightSelectedIndex.respond($0) },

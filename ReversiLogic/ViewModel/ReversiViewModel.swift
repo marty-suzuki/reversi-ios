@@ -33,7 +33,6 @@ public final class ReversiViewModel {
     private let setMessageText: (String) -> Void
     private let _setDisk: SetDisk
     private let playTurnOfComputer: () -> Void
-    private let selectedSegmentIndexFor: (Int) -> Int?
     private let setPlayerDarkSelectedIndex: (Int) -> Void
     private let setPlayerLightSelectedIndex: (Int) -> Void
     private let reset: () -> Void
@@ -47,7 +46,6 @@ public final class ReversiViewModel {
                 setMessageDisk: @escaping (Disk) -> Void,
                 setMessageText: @escaping (String) -> Void,
                 playTurnOfComputer: @escaping () -> Void,
-                selectedSegmentIndexFor: @escaping (Int) -> Int?,
                 setDisk: @escaping SetDisk,
                 setPlayerDarkSelectedIndex: @escaping (Int) -> Void,
                 setPlayerLightSelectedIndex: @escaping (Int) -> Void,
@@ -60,7 +58,6 @@ public final class ReversiViewModel {
         self.setMessageDisk = setMessageDisk
         self.setMessageText = setMessageText
         self.playTurnOfComputer = playTurnOfComputer
-        self.selectedSegmentIndexFor = selectedSegmentIndexFor
         self._setDisk = setDisk
         self.setPlayerDarkSelectedIndex = setPlayerDarkSelectedIndex
         self.setPlayerLightSelectedIndex = setPlayerLightSelectedIndex
@@ -78,12 +75,16 @@ public final class ReversiViewModel {
     }
 
     public func waitForPlayer() {
-        guard
-            let player = turn
-                .flatMap({ selectedSegmentIndexFor($0.index) })
-                .flatMap(GameData.Player.init)
-        else {
+        let player: GameData.Player
+        switch cache.status {
+        case .gameOver:
             return
+
+        case .turn(.dark):
+            player = cache.playerDark
+
+        case .turn(.light):
+            player = cache.playerLight
         }
 
         switch player {
