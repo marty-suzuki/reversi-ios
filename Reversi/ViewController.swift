@@ -17,7 +17,6 @@ class ViewController: UIViewController {
     @IBOutlet private var playerDarkActivityIndicator: UIActivityIndicatorView!
     @IBOutlet private var playerLightActivityIndicator: UIActivityIndicatorView!
 
-
     private lazy var viewModel = ReversiViewModel(
         messageDiskSize: messageDiskSizeConstraint.constant,
         placeDisk: { [weak self] in try self?.placeDisk($0, atX: $1, y: $2, animated: $3, completion: $4) },
@@ -159,27 +158,7 @@ extension ViewController {
 
 extension ViewController {
     @IBAction func pressResetButton(_ sender: UIButton) {
-        let alertController = UIAlertController(
-            title: "Confirmation",
-            message: "Do you really want to reset the game?",
-            preferredStyle: .alert
-        )
-        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in })
-        alertController.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
-            guard let self = self else { return }
-            
-            self.viewModel.animationCanceller?.cancel()
-            self.viewModel.animationCanceller = nil
-            
-            for side in Disk.allCases {
-                self.viewModel.playerCancellers[side]?.cancel()
-                self.viewModel.playerCancellers.removeValue(forKey: side)
-            }
-            
-            self.viewModel.newGame()
-            self.viewModel.waitForPlayer()
-        })
-        present(alertController, animated: true)
+        viewModel.handleReset()
     }
 
     @IBAction func changePlayerDarkControl(_ sender: UISegmentedControl) {

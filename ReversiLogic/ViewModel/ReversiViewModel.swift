@@ -304,4 +304,28 @@ public final class ReversiViewModel {
             self?.nextTurn()
         }
     }
+
+    public func handleReset() {
+        let cancel = Alert.Action(title: "Cancel", style: .cancel, handler: {})
+        let ok = Alert.Action(title: "OK", style: .default) { [weak self] in
+            guard let me = self else { return }
+
+            me.animationCanceller?.cancel()
+            me.animationCanceller = nil
+
+            for side in Disk.allCases {
+                me.playerCancellers[side]?.cancel()
+                me.playerCancellers.removeValue(forKey: side)
+            }
+
+            me.newGame()
+            me.waitForPlayer()
+        }
+        let alert = Alert(
+            title: "Confirmation",
+            message: "Do you really want to reset the game?",
+            actions: [cancel, ok]
+        )
+        showAlert(alert)
+    }
 }
