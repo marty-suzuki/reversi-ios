@@ -37,7 +37,7 @@ public final class ReversiViewModel {
     private let messageDiskSize: CGFloat
 
     private let placeDisk: PlaceDisk
-    private let showCanNotPlaceAlert: () -> Void
+    private let showAlert: (Alert) -> Void
     private let setPlayerDarkCount: (String) -> Void
     private let setPlayerLightCount: (String) -> Void
     private let setMessageDiskSizeConstant: (CGFloat) -> Void
@@ -56,7 +56,7 @@ public final class ReversiViewModel {
 
     public init(messageDiskSize: CGFloat,
                 placeDisk: @escaping PlaceDisk,
-                showCanNotPlaceAlert: @escaping () -> Void,
+                showAlert: @escaping (Alert) -> Void,
                 setPlayerDarkCount: @escaping (String) -> Void,
                 setPlayerLightCount: @escaping (String) -> Void,
                 setMessageDiskSizeConstant: @escaping (CGFloat) -> Void,
@@ -73,7 +73,7 @@ public final class ReversiViewModel {
                 asyncAfter: @escaping AsyncAfter,
                 cache: GameDataCacheProtocol) {
         self.placeDisk = placeDisk
-        self.showCanNotPlaceAlert = showCanNotPlaceAlert
+        self.showAlert = showAlert
         self.setPlayerDarkCount = setPlayerDarkCount
         self.setPlayerLightCount = setPlayerLightCount
         self.setMessageDiskSizeConstant = setMessageDiskSizeConstant
@@ -225,7 +225,19 @@ public final class ReversiViewModel {
             } else {
                 self.cache.status = .turn(turn)
                 updateMessage()
-                showCanNotPlaceAlert()
+
+                let action = Alert.Action(
+                    title: "Dismiss",
+                    style: .default
+                ) { [weak self] in
+                    self?.nextTurn()
+                }
+                let alert = Alert(
+                    title: "Pass",
+                    message: "Cannot place a disk.",
+                    actions: [action]
+                )
+                showAlert(alert)
             }
         } else {
             self.cache.status = .turn(turn)

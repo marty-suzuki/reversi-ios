@@ -21,7 +21,7 @@ class ViewController: UIViewController {
     private lazy var viewModel = ReversiViewModel(
         messageDiskSize: messageDiskSizeConstraint.constant,
         placeDisk: { [weak self] in try self?.placeDisk($0, atX: $1, y: $2, animated: $3, completion: $4) },
-        showCanNotPlaceAlert: { [weak self] in self?.showCanNotPlaceAlert() },
+        showAlert: { [weak self] in self?.showAlert($0) },
         setPlayerDarkCount: { [weak self] in self?.playerDarkCountLabel.text = $0 },
         setPlayerLightCount: { [weak self] in self?.playerLightCountLabel.text = $0 },
         setMessageDiskSizeConstant: { [weak self] in self?.messageDiskSizeConstraint.constant = $0 },
@@ -56,15 +56,27 @@ class ViewController: UIViewController {
         viewModel.viewDidAppear()
     }
 
-    func showCanNotPlaceAlert() {
+    private func showAlert(_ alert: Alert) {
         let alertController = UIAlertController(
-            title: "Pass",
-            message: "Cannot place a disk.",
+            title: alert.title,
+            message: alert.message,
             preferredStyle: .alert
         )
-        alertController.addAction(UIAlertAction(title: "Dismiss", style: .default) { [weak self] _ in
-            self?.viewModel.nextTurn()
-        })
+
+        alert.actions.forEach { action in
+            let style: UIAlertAction.Style
+            switch action.style {
+            case .default:
+                style = .default
+            case .cancel:
+                style = .cancel
+            }
+            let alertAction = UIAlertAction(title: action.title, style: style) { _ in
+                action.handler()
+            }
+            alertController.addAction(alertAction)
+        }
+
         present(alertController, animated: true)
     }
 }
