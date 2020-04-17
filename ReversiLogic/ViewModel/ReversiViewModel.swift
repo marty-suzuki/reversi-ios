@@ -271,4 +271,25 @@ public final class ReversiViewModel {
 
         playerCancellers[turn] = canceller
     }
+
+    public func handle(selectedCoordinate: Coordinate) {
+        guard case let .turn(turn) = cache.status else {
+            return
+        }
+
+        if isAnimating {
+            return
+        }
+
+        guard case .manual = playerOfCurrentTurn else {
+            return
+        }
+
+        let x = selectedCoordinate.x
+        let y = selectedCoordinate.y
+        // try? because doing nothing when an error occurs
+        try? placeDisk(turn, x, y, true) { [weak self] _ in
+            self?.nextTurn()
+        }
+    }
 }

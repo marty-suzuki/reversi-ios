@@ -183,13 +183,7 @@ extension ViewController {
 
 extension ViewController: BoardViewDelegate {
     func boardView(_ boardView: BoardView, didSelectCellAtX x: Int, y: Int) {
-        guard let turn = viewModel.turn else { return }
-        if viewModel.isAnimating { return }
-        guard case .manual = viewModel.playerOfCurrentTurn else { return }
-        // try? because doing nothing when an error occurs
-        try? placeDisk(turn, atX: x, y: y, animated: true) { [weak self] _ in
-            self?.viewModel.nextTurn()
-        }
+        viewModel.handle(selectedCoordinate: .init(x: x, y: y))
     }
 }
 
