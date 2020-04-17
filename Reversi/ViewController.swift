@@ -20,17 +20,22 @@ class ViewController: UIViewController {
 
     private lazy var viewModel = ReversiViewModel(
         messageDiskSize: messageDiskSizeConstraint.constant,
+        placeDisk: { [weak self] in try self?.placeDisk($0, atX: $1, y: $2, animated: $3, completion: $4) },
         showCanNotPlaceAlert: { [weak self] in self?.showCanNotPlaceAlert() },
         setPlayerDarkCount: { [weak self] in self?.playerDarkCountLabel.text = $0 },
         setPlayerLightCount: { [weak self] in self?.playerLightCountLabel.text = $0 },
         setMessageDiskSizeConstant: { [weak self] in self?.messageDiskSizeConstraint.constant = $0 },
         setMessageDisk: { [weak self] in self?.messageDiskView.disk = $0 },
         setMessageText: { [weak self] in self?.messageLabel.text = $0 },
-        playTurnOfComputer: { [weak self] in self?.playTurnOfComputer() },
         setDisk: { [weak self] in self?.boardView.setDisk($0, atX: $1, y: $2, animated: $3, completion: $4) },
         setPlayerDarkSelectedIndex: { [weak self] in self?.playerDarkControl.selectedSegmentIndex = $0 },
         setPlayerLightSelectedIndex: { [weak self] in self?.playerLightControl.selectedSegmentIndex = $0 },
+        startPlayerDarkAnimation: { [weak self] in self?.playerDarkActivityIndicator.startAnimating() },
+        stopPlayerDarkAnimation: { [weak self] in self?.playerDarkActivityIndicator.stopAnimating() },
+        startPlayerLightAnimation: { [weak self] in self?.playerLightActivityIndicator.startAnimating() },
+        stopPlayerLightAnimation: { [weak self] in self?.playerLightActivityIndicator.stopAnimating() },
         reset: { [weak self] in self?.boardView.reset() },
+        asyncAfter: { DispatchQueue.main.asyncAfter(deadline: $0, execute: $1) },
         cache: GameDataCacheFactory.make()
     )
 
@@ -135,46 +140,6 @@ extension ViewController {
                 completion(false)
             }
         }
-    }
-}
-
-// MARK: Game management
-
-extension ViewController {
-    
-    func playTurnOfComputer() {
-        guard let turn = viewModel.turn else { preconditionFailure() }
-        let (x, y) = viewModel.validMoves(for: turn).randomElement()!
-
-        switch turn {
-        case .dark:
-            playerDarkActivityIndicator.startAnimating()
-        case .light:
-            playerLightActivityIndicator.startAnimating()
-        }
-        
-        let cleanUp: () -> Void = { [weak self] in
-            guard let self = self else { return }
-            switch turn {
-            case .dark:
-                self.playerDarkActivityIndicator.stopAnimating()
-            case .light:
-                self.playerLightActivityIndicator.stopAnimating()
-            }
-            self.viewModel.playerCancellers[turn] = nil
-        }
-        let canceller = Canceller(cleanUp)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-            guard let self = self else { return }
-            if canceller.isCancelled { return }
-            cleanUp()
-            
-            try! self.placeDisk(turn, atX: x, y: y, animated: true) { [weak self] _ in
-                self?.viewModel.nextTurn()
-            }
-        }
-        
-        viewModel.playerCancellers[turn] = canceller
     }
 }
 

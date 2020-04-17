@@ -2,6 +2,8 @@ import CoreGraphics
 
 public final class ReversiViewModel {
     public typealias SetDisk = (Disk?, Int, Int, Bool, ((Bool) -> Void)?) -> Void
+    public typealias PlaceDisk = (Disk, Int, Int, Bool, @escaping (Bool) -> Void) throws -> Void
+    public typealias AsyncAfter = (DispatchTime, @escaping () -> Void) -> Void
 
     // `nil` if the current game is over
     public var turn: Disk? {
@@ -34,6 +36,7 @@ public final class ReversiViewModel {
     private var viewHasAppeared: Bool = false
     private let messageDiskSize: CGFloat
 
+    private let placeDisk: PlaceDisk
     private let showCanNotPlaceAlert: () -> Void
     private let setPlayerDarkCount: (String) -> Void
     private let setPlayerLightCount: (String) -> Void
@@ -41,37 +44,51 @@ public final class ReversiViewModel {
     private let setMessageDisk: (Disk) -> Void
     private let setMessageText: (String) -> Void
     private let _setDisk: SetDisk
-    private let playTurnOfComputer: () -> Void
     private let setPlayerDarkSelectedIndex: (Int) -> Void
     private let setPlayerLightSelectedIndex: (Int) -> Void
+    private let startPlayerDarkAnimation: () -> Void
+    private let stopPlayerDarkAnimation: () -> Void
+    private let startPlayerLightAnimation: () -> Void
+    private let stopPlayerLightAnimation: () -> Void
     private let reset: () -> Void
+    private let asyncAfter: AsyncAfter
     private let cache: GameDataCacheProtocol
 
     public init(messageDiskSize: CGFloat,
+                placeDisk: @escaping PlaceDisk,
                 showCanNotPlaceAlert: @escaping () -> Void,
                 setPlayerDarkCount: @escaping (String) -> Void,
                 setPlayerLightCount: @escaping (String) -> Void,
                 setMessageDiskSizeConstant: @escaping (CGFloat) -> Void,
                 setMessageDisk: @escaping (Disk) -> Void,
                 setMessageText: @escaping (String) -> Void,
-                playTurnOfComputer: @escaping () -> Void,
                 setDisk: @escaping SetDisk,
                 setPlayerDarkSelectedIndex: @escaping (Int) -> Void,
                 setPlayerLightSelectedIndex: @escaping (Int) -> Void,
+                startPlayerDarkAnimation: @escaping () -> Void,
+                stopPlayerDarkAnimation: @escaping () -> Void,
+                startPlayerLightAnimation: @escaping () -> Void,
+                stopPlayerLightAnimation: @escaping () -> Void,
                 reset: @escaping () -> Void,
+                asyncAfter: @escaping AsyncAfter,
                 cache: GameDataCacheProtocol) {
+        self.placeDisk = placeDisk
         self.showCanNotPlaceAlert = showCanNotPlaceAlert
         self.setPlayerDarkCount = setPlayerDarkCount
         self.setPlayerLightCount = setPlayerLightCount
         self.setMessageDiskSizeConstant = setMessageDiskSizeConstant
         self.setMessageDisk = setMessageDisk
         self.setMessageText = setMessageText
-        self.playTurnOfComputer = playTurnOfComputer
         self._setDisk = setDisk
         self.setPlayerDarkSelectedIndex = setPlayerDarkSelectedIndex
         self.setPlayerLightSelectedIndex = setPlayerLightSelectedIndex
+        self.startPlayerDarkAnimation = startPlayerDarkAnimation
+        self.stopPlayerDarkAnimation = stopPlayerDarkAnimation
+        self.startPlayerLightAnimation = startPlayerLightAnimation
+        self.stopPlayerLightAnimation = stopPlayerLightAnimation
         self.reset = reset
         self.cache = cache
+        self.asyncAfter = asyncAfter
         self.messageDiskSize = messageDiskSize
     }
 
@@ -215,5 +232,43 @@ public final class ReversiViewModel {
             updateMessage()
             waitForPlayer()
         }
+    }
+
+    func playTurnOfComputer() {
+        guard case let .turn(turn) = cache.status else {
+            preconditionFailure()
+        }
+
+        let (x, y) = validMoves(for: turn).randomElement()!
+
+        switch turn {
+        case .dark:
+            startPlayerDarkAnimation()
+        case .light:
+            startPlayerLightAnimation()
+        }
+
+        let cleanUp: () -> Void = { [weak self] in
+            guard let me = self else { return }
+            switch turn {
+            case .dark:
+                me.stopPlayerDarkAnimation()
+            case .light:
+                me.stopPlayerLightAnimation()
+            }
+            me.playerCancellers[turn] = nil
+        }
+        let canceller = Canceller(cleanUp)
+        asyncAfter(.now() + 2.0) { [weak self] in
+            guard let self = self else { return }
+            if canceller.isCancelled { return }
+            cleanUp()
+
+            try! self.placeDisk(turn, x, y, true) { [weak self] _ in
+                self?.nextTurn()
+            }
+        }
+
+        playerCancellers[turn] = canceller
     }
 }
