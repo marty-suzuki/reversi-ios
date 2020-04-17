@@ -157,12 +157,22 @@ public final class ReversiViewModel {
         try cache.save()
     }
 
-    public func setSelectedIndex(_ index: Int, for disk: Disk) {
+    public func setPlayer(for disk: Disk, with index: Int) {
         switch disk {
         case .dark:
             cache.playerDark = GameData.Player(rawValue: index) ?? .manual
         case .light:
             cache.playerLight = GameData.Player(rawValue: index) ?? .manual
+        }
+
+        try? saveGame()
+
+        if let canceller = playerCancellers[disk] {
+            canceller.cancel()
+        }
+
+        if !isAnimating, disk == turn, case .computer = player(of: disk) {
+            playTurnOfComputer()
         }
     }
 

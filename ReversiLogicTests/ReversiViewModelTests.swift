@@ -173,17 +173,76 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(save.calledCount, 1)
     }
 
-    func test_setSelectedIndex() {
+    func test_setPlayer_playerDarkに値が反映される() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         cache.playerDark = .manual
+
+        viewModel.setPlayer(for: .dark, with: 1)
+        XCTAssertEqual(cache.playerDark, .computer)
+
+        viewModel.setPlayer(for: .dark, with: 0)
+        XCTAssertEqual(cache.playerDark, .manual)
+    }
+
+    func test_setPlayer_playerLightに値が反映される() {
+        let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
         cache.playerLight = .manual
 
-        viewModel.setSelectedIndex(1, for: .dark)
-        viewModel.setSelectedIndex(1, for: .light)
-
-        XCTAssertEqual(cache.playerDark, .computer)
+        viewModel.setPlayer(for: .light, with: 1)
         XCTAssertEqual(cache.playerLight, .computer)
+
+        viewModel.setPlayer(for: .light, with: 0)
+        XCTAssertEqual(cache.playerLight, .manual)
+    }
+
+    func test_setPlayer_isAnimatingがfalseで_diskと現在のplayerが一致していて_playerがcomputerの場合() {
+        let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
+        cache.status = .turn(.light)
+
+        viewModel.animationCanceller = nil  // isAnimating = false
+        viewModel.setPlayer(for: .light, with: 1)
+
+        let playTurnOfComputer = dependency.$playTurnOfComputer
+        XCTAssertEqual(playTurnOfComputer.calledCount, 1)
+    }
+
+    func test_setPlayer_isAnimatingがtrueで_diskと現在のplayerが一致していて_playerがcomputerの場合() {
+        let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
+        cache.status = .turn(.light)
+
+        viewModel.animationCanceller = Canceller({}) // isAnimating = true
+        viewModel.setPlayer(for: .light, with: 1)
+
+        let playTurnOfComputer = dependency.$playTurnOfComputer
+        XCTAssertEqual(playTurnOfComputer.calledCount, 0)
+    }
+
+    func test_setPlayer_isAnimatingがfalseで_diskと現在のplayerが不一致で_playerがcomputerの場合() {
+        let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
+        cache.status = .turn(.light)
+
+        viewModel.animationCanceller = nil // isAnimating = false
+        viewModel.setPlayer(for: .dark, with: 1)
+
+        let playTurnOfComputer = dependency.$playTurnOfComputer
+        XCTAssertEqual(playTurnOfComputer.calledCount, 0)
+    }
+
+    func test_setPlayer_isAnimatingがfalseで_diskと現在のplayerが一致していて_playerがmanualの場合() {
+        let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
+        cache.status = .turn(.light)
+
+        viewModel.animationCanceller = nil // isAnimating = false
+        viewModel.setPlayer(for: .light, with: 0)
+
+        let playTurnOfComputer = dependency.$playTurnOfComputer
+        XCTAssertEqual(playTurnOfComputer.calledCount, 0)
     }
 
     func test_updateMessage_trunがnilじゃない場合() {
