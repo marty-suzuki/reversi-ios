@@ -2,10 +2,9 @@ import Foundation
 
 public protocol GameDataCacheProtocol: AnyObject {
     var status: GameData.Status { get set }
-    var playerDark: GameData.Player { get set }
-    var playerLight: GameData.Player { get set }
     var cells: [[GameData.Board.Cell]] { get }
     subscript(coordinate: Coordinate) -> Disk? { get set }
+    subscript(disk: Disk) -> GameData.Player { get set }
     func load(completion: @escaping () -> Void) throws
     func save() throws
     func reset()
@@ -24,17 +23,21 @@ final class GameDataCache: GameDataCacheProtocol {
     private let _saveGame: GameDataIO.SaveGame
 
     var status: GameData.Status = .turn(.dark)
-    var playerDark: GameData.Player = .manual
-    var playerLight: GameData.Player = .manual
+    private(set) var playerDark: GameData.Player
+    private(set) var playerLight: GameData.Player
     private(set) var cells: [[GameData.Board.Cell]]
 
     init(
         loadGame: @escaping GameDataIO.LoadGame,
         saveGame: @escaping GameDataIO.SaveGame,
+        playerDark: GameData.Player = .manual,
+        playerLight: GameData.Player = .manual,
         cells: [[GameData.Board.Cell]] = GameData.Board.initial().cells
     ) {
         self._loadGame = loadGame
         self._saveGame = saveGame
+        self.playerDark = playerDark
+        self.playerLight = playerLight
         self.cells = cells
     }
 
@@ -56,6 +59,21 @@ final class GameDataCache: GameDataCacheProtocol {
                 return
             }
             cells[coordinate.y][coordinate.x].disk = newValue
+        }
+    }
+
+    subscript(disk: Disk) -> GameData.Player {
+        get {
+            switch disk {
+            case .dark: return playerDark
+            case .light: return playerLight
+            }
+        }
+        set {
+            switch disk {
+            case .dark: playerDark = newValue
+            case .light: playerLight = newValue
+            }
         }
     }
 

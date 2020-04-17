@@ -28,23 +28,14 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertNil(viewModel.playerOfCurrentTurn)
 
         cache.status = .turn(.dark)
-        cache.playerDark = .computer
+        cache._getPlayer = .computer
         XCTAssertEqual(viewModel.playerOfCurrentTurn, .computer)
+        XCTAssertEqual(cache.$_getPlayer.parameters, [.dark])
 
         cache.status = .turn(.light)
-        cache.playerLight = .computer
+        cache._getPlayer = .computer
         XCTAssertEqual(viewModel.playerOfCurrentTurn, .computer)
-    }
-
-    func test_player() {
-        let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-
-        cache.playerDark = .computer
-        XCTAssertEqual(viewModel.player(of: .dark), .computer)
-
-        cache.playerLight = .computer
-        XCTAssertEqual(viewModel.player(of: .light), .computer)
+        XCTAssertEqual(cache.$_getPlayer.parameters, [.dark ,.light])
     }
 
     func test_waitForPlayer_turnがdarkで_playerDarkがmanualの場合() {
@@ -52,7 +43,7 @@ final class ReversiViewModelTests: XCTestCase {
         let cache = dependency.gameDataCache
         let turn = Disk.dark
         cache.status = .turn(turn)
-        cache.playerDark = .manual
+        cache._getPlayer = .manual
 
         viewModel.waitForPlayer()
 
@@ -65,7 +56,7 @@ final class ReversiViewModelTests: XCTestCase {
         let cache = dependency.gameDataCache
         let turn = Disk.light
         cache.status = .turn(turn)
-        cache.playerLight = .computer
+        cache._getPlayer = .computer
 
         viewModel.waitForPlayer()
 
@@ -77,8 +68,7 @@ final class ReversiViewModelTests: XCTestCase {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         cache.status = .gameOver
-        cache.playerDark = .computer
-        cache.playerLight = .computer
+        cache._getPlayer = .computer
 
         viewModel.waitForPlayer()
 
@@ -89,7 +79,7 @@ final class ReversiViewModelTests: XCTestCase {
     func test_viewDidAppear_selectedSegmentIndexForが2回呼ばれることはない() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
-        cache.playerDark = .computer
+        cache._getPlayer = .computer
         let turn = Disk.dark
 
         cache.status = .turn(turn)
@@ -135,8 +125,7 @@ final class ReversiViewModelTests: XCTestCase {
         let expectedPlayerLight = GameData.Player.computer
 
         cache.status = .turn(.dark)
-        cache.playerDark = expectedPlayerDark
-        cache.playerLight = expectedPlayerLight
+        cache._getPlayer = expectedPlayerDark
         cache.cells = [[expectedCell]]
 
         try viewModel.loadGame()
@@ -176,34 +165,43 @@ final class ReversiViewModelTests: XCTestCase {
     func test_setPlayer_playerDarkに値が反映される() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
-        cache.playerDark = .manual
+        let disk = Disk.dark
+        cache._getPlayer = .manual
 
-        viewModel.setPlayer(for: .dark, with: 1)
-        XCTAssertEqual(cache.playerDark, .computer)
+        viewModel.setPlayer(for: disk, with: 1)
+        let first = MockGameDataCache.SetPlayer(disk: disk, player: .computer)
+        XCTAssertEqual(cache.$_setPalyer.parameters, [first])
 
-        viewModel.setPlayer(for: .dark, with: 0)
-        XCTAssertEqual(cache.playerDark, .manual)
+        viewModel.setPlayer(for: disk, with: 0)
+        let second = MockGameDataCache.SetPlayer(disk: disk, player: .manual)
+        XCTAssertEqual(cache.$_setPalyer.parameters, [first, second])
     }
 
     func test_setPlayer_playerLightに値が反映される() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
-        cache.playerLight = .manual
+        let disk = Disk.light
+        cache._getPlayer = .manual
 
-        viewModel.setPlayer(for: .light, with: 1)
-        XCTAssertEqual(cache.playerLight, .computer)
+        viewModel.setPlayer(for: disk, with: 1)
+        let first = MockGameDataCache.SetPlayer(disk: disk, player: .computer)
+        XCTAssertEqual(cache.$_setPalyer.parameters, [first])
 
-        viewModel.setPlayer(for: .light, with: 0)
-        XCTAssertEqual(cache.playerLight, .manual)
+        viewModel.setPlayer(for: disk, with: 0)
+        let second = MockGameDataCache.SetPlayer(disk: disk, player: .manual)
+        XCTAssertEqual(cache.$_setPalyer.parameters, [first, second])
     }
 
     func test_setPlayer_isAnimatingがfalseで_diskと現在のplayerが一致していて_playerがcomputerの場合() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
-        cache.status = .turn(.light)
+        let disk = Disk.light
+        cache.status = .turn(disk)
 
         viewModel.animationCanceller = nil  // isAnimating = false
-        viewModel.setPlayer(for: .light, with: 1)
+        cache._getPlayer = .computer
+
+        viewModel.setPlayer(for: disk, with: 1)
 
         let playTurnOfComputer = dependency.$playTurnOfComputer
         XCTAssertEqual(playTurnOfComputer.calledCount, 1)
@@ -212,10 +210,13 @@ final class ReversiViewModelTests: XCTestCase {
     func test_setPlayer_isAnimatingがtrueで_diskと現在のplayerが一致していて_playerがcomputerの場合() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
-        cache.status = .turn(.light)
+        let disk = Disk.light
+        cache.status = .turn(disk)
 
         viewModel.animationCanceller = Canceller({}) // isAnimating = true
-        viewModel.setPlayer(for: .light, with: 1)
+        cache._getPlayer = .computer
+
+        viewModel.setPlayer(for: disk, with: 1)
 
         let playTurnOfComputer = dependency.$playTurnOfComputer
         XCTAssertEqual(playTurnOfComputer.calledCount, 0)
@@ -227,6 +228,8 @@ final class ReversiViewModelTests: XCTestCase {
         cache.status = .turn(.light)
 
         viewModel.animationCanceller = nil // isAnimating = false
+        cache._getPlayer = .computer
+
         viewModel.setPlayer(for: .dark, with: 1)
 
         let playTurnOfComputer = dependency.$playTurnOfComputer
@@ -236,10 +239,13 @@ final class ReversiViewModelTests: XCTestCase {
     func test_setPlayer_isAnimatingがfalseで_diskと現在のplayerが一致していて_playerがmanualの場合() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
-        cache.status = .turn(.light)
+        let disk = Disk.light
+        cache.status = .turn(disk)
 
         viewModel.animationCanceller = nil // isAnimating = false
-        viewModel.setPlayer(for: .light, with: 0)
+        cache._getPlayer = .manual
+
+        viewModel.setPlayer(for: disk, with: 0)
 
         let playTurnOfComputer = dependency.$playTurnOfComputer
         XCTAssertEqual(playTurnOfComputer.calledCount, 0)
@@ -491,9 +497,9 @@ extension ReversiViewModelTests {
     }
 
     fileprivate final class MockGameDataCache: GameDataCacheProtocol {
+
         var status: GameData.Status = .turn(.dark)
-        var playerDark: GameData.Player = .manual
-        var playerLight: GameData.Player = .manual
+        var player: GameData.Player = .manual
         var cells: [[GameData.Board.Cell]] = []
 
         @MockResponse<Void, Void>()
@@ -511,9 +517,20 @@ extension ReversiViewModelTests {
         @MockResponse<(Coordinate, Disk?), Void>()
         var _setDisk: Void
 
+        @MockResponse<Disk, GameData.Player>
+        var _getPlayer = .manual
+
+        @MockResponse<SetPlayer, Void>()
+        var _setPalyer: Void
+
         subscript(coordinate: Coordinate) -> Disk? {
             get { __getDisk.respond(coordinate) }
             set { __setDisk.respond((coordinate, newValue)) }
+        }
+
+        subscript(disk: Disk) -> GameData.Player {
+            get { __getPlayer.respond(disk) }
+            set { __setPalyer.respond(SetPlayer(disk: disk, player: newValue)) }
         }
 
         func load(completion: @escaping () -> Void) throws {
@@ -528,6 +545,18 @@ extension ReversiViewModelTests {
         func reset() {
             __reset.respond()
         }
+    }
+}
+
+extension ReversiViewModelTests.MockGameDataCache {
+    struct GetPlayer: Equatable {
+        let coordinate: Coordinate
+        let disk: Disk?
+    }
+
+    struct SetPlayer: Equatable {
+        let disk: Disk
+        let player: GameData.Player
     }
 }
 

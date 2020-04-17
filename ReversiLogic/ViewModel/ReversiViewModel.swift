@@ -19,10 +19,8 @@ public final class ReversiViewModel {
         switch cache.status {
         case .gameOver:
             return nil
-        case .turn(.dark):
-            return cache.playerDark
-        case .turn(.light):
-            return cache.playerLight
+        case let .turn(disk):
+            return cache[disk]
         }
     }
 
@@ -85,26 +83,13 @@ public final class ReversiViewModel {
         waitForPlayer()
     }
 
-    public func player(of disk: Disk) -> GameData.Player {
-        switch disk {
-        case .dark:
-            return cache.playerDark
-        default:
-            return cache.playerLight
-        }
-    }
-
     public func waitForPlayer() {
         let player: GameData.Player
         switch cache.status {
         case .gameOver:
             return
-
-        case .turn(.dark):
-            player = cache.playerDark
-
-        case .turn(.light):
-            player = cache.playerLight
+        case let .turn(disk):
+            player = cache[disk]
         }
 
         switch player {
@@ -139,8 +124,8 @@ public final class ReversiViewModel {
                 return
             }
 
-            self?.setPlayerDarkSelectedIndex(me.cache.playerDark.rawValue)
-            self?.setPlayerLightSelectedIndex(me.cache.playerLight.rawValue)
+            self?.setPlayerDarkSelectedIndex(me.cache[.dark].rawValue)
+            self?.setPlayerLightSelectedIndex(me.cache[.light].rawValue)
 
             me.cells.forEach { rows in
                 rows.forEach { cell in
@@ -158,12 +143,7 @@ public final class ReversiViewModel {
     }
 
     public func setPlayer(for disk: Disk, with index: Int) {
-        switch disk {
-        case .dark:
-            cache.playerDark = GameData.Player(rawValue: index) ?? .manual
-        case .light:
-            cache.playerLight = GameData.Player(rawValue: index) ?? .manual
-        }
+        cache[disk] = GameData.Player(rawValue: index) ?? .manual
 
         try? saveGame()
 
@@ -171,7 +151,7 @@ public final class ReversiViewModel {
             canceller.cancel()
         }
 
-        if !isAnimating, disk == turn, case .computer = player(of: disk) {
+        if !isAnimating, disk == turn, case .computer = cache[disk] {
             playTurnOfComputer()
         }
     }
