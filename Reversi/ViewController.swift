@@ -194,7 +194,7 @@ extension ViewController {
             self.viewModel.animationCanceller?.cancel()
             self.viewModel.animationCanceller = nil
             
-            for side in Disk.sides {
+            for side in Disk.allCases {
                 self.viewModel.playerCancellers[side]?.cancel()
                 self.viewModel.playerCancellers.removeValue(forKey: side)
             }
@@ -255,18 +255,4 @@ struct DiskPlacementError: Error {
     let disk: Disk
     let x: Int
     let y: Int
-}
-
-// MARK: File-private extensions
-
-extension Disk {
-    init(index: Int) {
-        for side in Disk.sides {
-            if index == side.index {
-                self = side
-                return
-            }
-        }
-        preconditionFailure("Illegal index: \(index)")
-    }
 }
