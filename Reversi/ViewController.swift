@@ -11,14 +11,16 @@ class ViewController: UIViewController {
     @IBOutlet private var playerDarkControl: UISegmentedControl!
     @IBOutlet private var playerLightControl: UISegmentedControl!
 
-    @IBOutlet private var countLabels: [UILabel]!
+    @IBOutlet private var playerDarkCountLabel: UILabel!
+    @IBOutlet private var playerLightCountLabel: UILabel!
+
     @IBOutlet private var playerActivityIndicators: [UIActivityIndicatorView]!
 
     private lazy var viewModel = ReversiViewModel(
         messageDiskSize: messageDiskSizeConstraint.constant,
         showCanNotPlaceAlert: { [weak self] in self?.showCanNotPlaceAlert() },
-        setPlayerDarkCount: { [weak self] in self?.countLabels[0].text = $0 },
-        setPlayerLightCount: { [weak self] in self?.countLabels[1].text = $0 },
+        setPlayerDarkCount: { [weak self] in self?.playerDarkCountLabel.text = $0 },
+        setPlayerLightCount: { [weak self] in self?.playerLightCountLabel.text = $0 },
         setMessageDiskSizeConstant: { [weak self] in self?.messageDiskSizeConstraint.constant = $0 },
         setMessageDisk: { [weak self] in self?.messageDiskView.disk = $0 },
         setMessageText: { [weak self] in self?.messageLabel.text = $0 },
