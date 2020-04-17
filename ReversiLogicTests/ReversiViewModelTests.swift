@@ -20,6 +20,22 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.turn, .light)
     }
 
+    func test_playerOfCurrentTurn() {
+        let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
+        
+        cache.status = .gameOver
+        XCTAssertNil(viewModel.playerOfCurrentTurn)
+
+        cache.status = .turn(.dark)
+        cache.playerDark = .computer
+        XCTAssertEqual(viewModel.playerOfCurrentTurn, .computer)
+
+        cache.status = .turn(.light)
+        cache.playerLight = .computer
+        XCTAssertEqual(viewModel.playerOfCurrentTurn, .computer)
+    }
+
     func test_waitForPlayer_turnがdarkで_playerDarkがmanualの場合() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache

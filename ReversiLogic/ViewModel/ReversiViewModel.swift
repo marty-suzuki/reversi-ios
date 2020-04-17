@@ -15,6 +15,17 @@ public final class ReversiViewModel {
         cache.cells
     }
 
+    public var playerOfCurrentTurn: GameData.Player? {
+        switch cache.status {
+        case .gameOver:
+            return nil
+        case .turn(.dark):
+            return cache.playerDark
+        case .turn(.light):
+            return cache.playerLight
+        }
+    }
+
     public var animationCanceller: Canceller?
     public var isAnimating: Bool {
         animationCanceller != nil
