@@ -14,7 +14,9 @@ class ViewController: UIViewController {
     @IBOutlet private var playerDarkCountLabel: UILabel!
     @IBOutlet private var playerLightCountLabel: UILabel!
 
-    @IBOutlet private var playerActivityIndicators: [UIActivityIndicatorView]!
+    @IBOutlet private var playerDarkActivityIndicator: UIActivityIndicatorView!
+    @IBOutlet private var playerLightActivityIndicator: UIActivityIndicatorView!
+
 
     private lazy var viewModel = ReversiViewModel(
         messageDiskSize: messageDiskSizeConstraint.constant,
@@ -144,11 +146,21 @@ extension ViewController {
         guard let turn = viewModel.turn else { preconditionFailure() }
         let (x, y) = viewModel.validMoves(for: turn).randomElement()!
 
-        playerActivityIndicators[turn.index].startAnimating()
+        switch turn {
+        case .dark:
+            playerDarkActivityIndicator.startAnimating()
+        case .light:
+            playerLightActivityIndicator.startAnimating()
+        }
         
         let cleanUp: () -> Void = { [weak self] in
             guard let self = self else { return }
-            self.playerActivityIndicators[turn.index].stopAnimating()
+            switch turn {
+            case .dark:
+                self.playerDarkActivityIndicator.stopAnimating()
+            case .light:
+                self.playerLightActivityIndicator.stopAnimating()
+            }
             self.viewModel.playerCancellers[turn] = nil
         }
         let canceller = Canceller(cleanUp)

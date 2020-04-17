@@ -182,12 +182,12 @@
                         <outlet property="messageDiskSizeConstraint" destination="gHu-Ly-73K" id="52y-fo-Ths"/>
                         <outlet property="messageDiskView" destination="xhS-zB-FaD" id="Cel-dc-EWk"/>
                         <outlet property="messageLabel" destination="nHv-pJ-hrU" id="bqV-9P-ADo"/>
+                        <outlet property="playerDarkActivityIndicator" destination="VTM-mY-aFg" id="MGR-Bo-ala"/>
                         <outlet property="playerDarkControl" destination="Nf5-NH-Aql" id="OR4-eL-DHr"/>
                         <outlet property="playerDarkCountLabel" destination="NGE-KP-oHh" id="gJT-tR-gCd"/>
+                        <outlet property="playerLightActivityIndicator" destination="ufC-w0-Xwz" id="TMR-eS-eYQ"/>
                         <outlet property="playerLightControl" destination="q90-VO-j8m" id="Kit-5X-h2y"/>
                         <outlet property="playerLightCountLabel" destination="IMh-5o-Uqc" id="xR9-kk-KKf"/>
-                        <outletCollection property="playerActivityIndicators" destination="VTM-mY-aFg" collectionClass="NSMutableArray" id="Ale-OR-NEC"/>
-                        <outletCollection property="playerActivityIndicators" destination="ufC-w0-Xwz" collectionClass="NSMutableArray" id="jdu-St-za6"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
