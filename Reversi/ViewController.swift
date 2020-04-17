@@ -204,27 +204,27 @@ extension ViewController {
         })
         present(alertController, animated: true)
     }
-    
-    @IBAction func changePlayerControlSegment(_ sender: UISegmentedControl) {
-        let side: Disk
-        switch sender {
-        case playerDarkControl:
-            side = .dark
-        case playerLightControl:
-            side = .light
-        default:
-            return
-        }
 
-        viewModel.setSelectedIndex(sender.selectedSegmentIndex, for: side)
+    @IBAction func changePlayerDarkControl(_ sender: UISegmentedControl) {
+        changePlayerControl(for: .dark, with: sender.selectedSegmentIndex)
+    }
+
+    @IBAction func changePlayerLightControl(_ sender: UISegmentedControl) {
+        changePlayerControl(for: .light, with: sender.selectedSegmentIndex)
+    }
+    
+    private func changePlayerControl(for disk: Disk, with selectedIndex: Int) {
+        viewModel.setSelectedIndex(selectedIndex, for: disk)
 
         try? viewModel.saveGame()
         
-        if let canceller = viewModel.playerCancellers[side] {
+        if let canceller = viewModel.playerCancellers[disk] {
             canceller.cancel()
         }
         
-        if !viewModel.isAnimating, side == viewModel.turn, case .computer = GameData.Player(rawValue: sender.selectedSegmentIndex)! {
+        if !viewModel.isAnimating,
+            disk == viewModel.turn,
+            case .computer = viewModel.player(of: disk) {
             playTurnOfComputer()
         }
     }

@@ -85,6 +85,15 @@ public final class ReversiViewModel {
         waitForPlayer()
     }
 
+    public func player(of disk: Disk) -> GameData.Player {
+        switch disk {
+        case .dark:
+            return cache.playerDark
+        default:
+            return cache.playerLight
+        }
+    }
+
     public func waitForPlayer() {
         let player: GameData.Player
         switch cache.status {
