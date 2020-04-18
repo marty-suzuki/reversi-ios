@@ -16,7 +16,6 @@ public protocol GameLogicProtocol: AnyObject {
     func sideWithMoreDisks() -> Disk?
     func flippedDiskCoordinates(by disk: Disk,
                                 at coordinate: Coordinate) -> [Coordinate]
-    func canPlace(disk: Disk, at coordinate: Coordinate) -> Bool
     func validMoves(for disk: Disk) -> [Coordinate]
 }
 

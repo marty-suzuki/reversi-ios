@@ -90,11 +90,10 @@ public final class ReversiViewModel {
         }
     }
 
-
     public func setPlayer(for disk: Disk, with index: Int) {
         cache[disk] = GameData.Player(rawValue: index) ?? .manual
 
-        try? saveGame()
+        try? cache.save()
 
         if let canceller = playerCancellers[disk] {
             canceller.cancel()
@@ -104,7 +103,6 @@ public final class ReversiViewModel {
             playTurnOfComputer()
         }
     }
-
 
     public func handle(selectedCoordinate: Coordinate) {
         guard case let .turn(turn) = cache.status else {
@@ -178,7 +176,7 @@ extension ReversiViewModel {
         updateMessage()
         updateCount()
 
-        try? saveGame()
+        try? cache.save()
     }
 
     func loadGame() throws {
@@ -199,10 +197,6 @@ extension ReversiViewModel {
             self?.updateMessage()
             self?.updateCount()
         }
-    }
-
-    func saveGame() throws {
-        try cache.save()
     }
 
     func updateMessage() {
@@ -228,18 +222,6 @@ extension ReversiViewModel {
         setPlayerLightCount("\(logic.count(of: .light))")
     }
 
-    func flippedDiskCoordinatesByPlacingDisk(_ disk: Disk, at coordinate: Coordinate) -> [Coordinate] {
-        logic.flippedDiskCoordinates(by: disk, at: coordinate)
-    }
-
-    func canPlaceDisk(_ disk: Disk, at coordinate: Coordinate) -> Bool {
-        logic.canPlace(disk: disk, at: coordinate)
-    }
-
-    func validMoves(for side: Disk) -> [Coordinate] {
-        logic.validMoves(for: side)
-    }
-
     func nextTurn() {
         var turn: Disk
         switch cache.status {
@@ -251,8 +233,8 @@ extension ReversiViewModel {
 
         turn.flip()
 
-        if validMoves(for: turn).isEmpty {
-            if validMoves(for: turn.flipped).isEmpty {
+        if logic.validMoves(for: turn).isEmpty {
+            if logic.validMoves(for: turn.flipped).isEmpty {
                 self.cache.status = .gameOver
                 updateMessage()
             } else {
@@ -276,7 +258,7 @@ extension ReversiViewModel {
             preconditionFailure()
         }
 
-        let coordinate = validMoves(for: turn).randomElement()!
+        let coordinate = logic.validMoves(for: turn).randomElement()!
 
         switch turn {
         case .dark:
@@ -346,14 +328,14 @@ extension ReversiViewModel {
                    at coordinate: Coordinate,
                    animated isAnimated: Bool,
                    completion: @escaping (Bool) -> Void) throws {
-        let diskCoordinates = flippedDiskCoordinatesByPlacingDisk(disk, at: coordinate)
+        let diskCoordinates = logic.flippedDiskCoordinates(by: disk, at: coordinate)
         if diskCoordinates.isEmpty {
             throw DiskPlacementError(disk: disk, x: coordinate.x, y: coordinate.y)
         }
 
         let finally: (ReversiViewModel, Bool) -> Void = { viewModel, finished in
             completion(finished)
-            try? viewModel.saveGame()
+            try? viewModel.cache.save()
             viewModel.updateCount()
         }
 

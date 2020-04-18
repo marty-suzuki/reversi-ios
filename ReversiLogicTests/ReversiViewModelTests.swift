@@ -135,18 +135,6 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(parameter.animated, false)
     }
 
-    func test_saveGame() throws {
-        self.dependency = Dependency(board: .initial(),
-                                     messageDiskSize: 0)
-        let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-
-        try viewModel.saveGame()
-
-        let save = cache.$_save
-        XCTAssertEqual(save.calledCount, 1)
-    }
-
     func test_setPlayer_playerDarkに値が反映される() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
