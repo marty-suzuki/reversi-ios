@@ -101,7 +101,15 @@ public final class ReversiViewModel {
         _setDisk(disk, x, y, animated, completion)
     }
 
-    public func newGame() {
+    public func startGame() {
+        do {
+            try loadGame()
+        } catch _ {
+            newGame()
+        }
+    }
+
+    func newGame() {
         reset()
         cache.reset()
 
@@ -114,7 +122,7 @@ public final class ReversiViewModel {
         try? saveGame()
     }
 
-    public func loadGame() throws {
+    func loadGame() throws {
         try cache.load { [weak self] in
             guard let me = self else {
                 return

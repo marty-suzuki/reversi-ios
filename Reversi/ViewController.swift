@@ -2,7 +2,11 @@ import ReversiLogic
 import UIKit
 
 class ViewController: UIViewController {
-    @IBOutlet private var boardView: BoardView!
+    @IBOutlet private var boardView: BoardView! {
+        didSet {
+            boardView.delegate = self
+        }
+    }
     
     @IBOutlet private var messageDiskView: DiskView!
     @IBOutlet private var messageLabel: UILabel!
@@ -40,14 +44,7 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        boardView.delegate = self
-        
-        do {
-            try viewModel.loadGame()
-        } catch _ {
-            viewModel.newGame()
-        }
+        viewModel.startGame()
     }
 
     override func viewDidAppear(_ animated: Bool) {
