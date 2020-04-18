@@ -16,7 +16,10 @@ struct MockGameLogicFactory: GameLogicFactoryProtocol {
 final class MockGameLogic: GameLogicProtocol {
 
     @MockResponse<Disk, Int>
-    var _count = 0
+    var _countOfDark = 0
+
+    @MockResponse<Disk, Int>
+    var _countOfLight = 0
 
     @MockResponse<Void, Disk?>
     var _sideWithMoreDisks = nil
@@ -28,10 +31,18 @@ final class MockGameLogic: GameLogicProtocol {
     var _canPlace = false
 
     @MockResponse<Disk, [Coordinate]>
-    var _validMoves = []
+    var _validMovekForDark = []
+
+    @MockResponse<Disk, [Coordinate]>
+    var _validMovekForLight = []
 
     func count(of disk: Disk) -> Int {
-        __count.respond(disk)
+        switch disk {
+        case .dark:
+            return __countOfDark.respond(disk)
+        case .light:
+            return __countOfLight.respond(disk)
+        }
     }
 
     func sideWithMoreDisks() -> Disk? {
@@ -47,7 +58,12 @@ final class MockGameLogic: GameLogicProtocol {
     }
 
     func validMoves(for disk: Disk) -> [Coordinate] {
-        __validMoves.respond(disk)
+        switch disk {
+        case .dark:
+            return __validMovekForDark.respond(disk)
+        case .light:
+            return __validMovekForLight.respond(disk)
+        }
     }
 }
 

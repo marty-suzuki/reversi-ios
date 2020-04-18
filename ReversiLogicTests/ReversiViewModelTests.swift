@@ -31,6 +31,8 @@ final class ReversiViewModelTests: XCTestCase {
         let turn = Disk.light
         cache.status = .turn(turn)
         cache._getPlayerLight = .computer
+        let logic = dependency.gameLogic
+        logic._validMovekForLight = [Coordinate(x: 0, y: 0)]
 
         viewModel.waitForPlayer()
 
@@ -62,8 +64,10 @@ final class ReversiViewModelTests: XCTestCase {
         let cache = dependency.gameDataCache
         cache._getPlayerDark = .computer
         let turn = Disk.dark
-
         cache.status = .turn(turn)
+        let logic = dependency.gameLogic
+        logic._validMovekForDark = [Coordinate(x: 0, y: 0)]
+
         viewModel.viewDidAppear()
 
         let getPlayerDark = cache.$_getPlayerDark
@@ -179,6 +183,8 @@ final class ReversiViewModelTests: XCTestCase {
         let cache = dependency.gameDataCache
         let disk = Disk.light
         cache.status = .turn(disk)
+        let logic = dependency.gameLogic
+        logic._validMovekForLight = [Coordinate(x: 0, y: 0)]
 
         viewModel.animationCanceller = nil  // isAnimating = false
         cache._getPlayerLight = .computer
@@ -197,6 +203,8 @@ final class ReversiViewModelTests: XCTestCase {
         let cache = dependency.gameDataCache
         let disk = Disk.light
         cache.status = .turn(disk)
+        let logic = dependency.gameLogic
+        logic._validMovekForLight = [Coordinate(x: 0, y: 0)]
 
         viewModel.animationCanceller = Canceller({}) // isAnimating = true
         cache._getPlayerLight = .computer
@@ -272,17 +280,14 @@ final class ReversiViewModelTests: XCTestCase {
     func test_updateMessage_trunがnilで勝者がいる場合() {
         let expectedDisk = Disk.dark
         let expectedSize = CGFloat(arc4random() % 100)
-        let cell = GameData.Board.Cell(
-            x: 1,
-            y: 2,
-            disk: expectedDisk
-        )
-        self.dependency = Dependency(board: .init(cells: [[cell]]),
+        self.dependency = Dependency(board: .init(cells: []),
                                      messageDiskSize: expectedSize)
 
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         cache.status = .gameOver
+        let logic = dependency.gameLogic
+        logic._sideWithMoreDisks = expectedDisk
 
         viewModel.updateMessage()
 
@@ -333,16 +338,11 @@ final class ReversiViewModelTests: XCTestCase {
 
     func test_updateCount() {
         let darkCount = Int(arc4random() % 100)
-        let cells1 = (0..<darkCount)
-            .map { _ in GameData.Board.Cell(x: 0, y: 0, disk: .dark) }
-
         let lightCount = Int(arc4random() % 100)
-        let cells2 = (0..<lightCount)
-            .map { _ in GameData.Board.Cell(x: 0, y: 0, disk: .light) }
-
-        self.dependency = Dependency(board: .init(cells: [cells1, cells2]),
-                                     messageDiskSize: 0)
         let viewModel = dependency.testTarget
+        let logic = dependency.gameLogic
+        logic._countOfDark = darkCount
+        logic._countOfLight = lightCount
 
         viewModel.updateCount()
 
@@ -355,23 +355,12 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(setPlayerLightCount.parameters, ["\(lightCount)"])
     }
     func test_nextTurn_turnがlightのときに_darkの有効な配置がある場合() {
-        let board: [[Disk?]] = [
-            [nil, nil,    nil,   nil,   nil],
-            [nil, .light, .dark, nil,   nil],
-            [nil, .light, .dark, .dark, nil],
-            [nil, .light, nil,   nil,   nil]
-        ]
-        let cells = board.enumerated().map { y, rows in
-            rows.enumerated().map { x, disk in
-                GameData.Board.Cell(x: x, y: y, disk: disk)
-            }
-        }
-        self.dependency = Dependency(board: .init(cells: cells),
-                                     messageDiskSize: 0)
-
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         cache.status = .turn(.light)
+
+        let logic = dependency.gameLogic
+        logic._validMovekForDark = [Coordinate(x: 0, y: 0)]
 
         viewModel.nextTurn()
 
@@ -379,22 +368,13 @@ final class ReversiViewModelTests: XCTestCase {
     }
 
     func test_nextTurn_turnがlightのときに_darkの有効な配置はないが_lightの有効な配置がある場合() {
-        let board: [[Disk?]] = [
-            [nil, nil,   nil],
-            [nil, .dark, .dark],
-            [nil, .light, nil]
-        ]
-        let cells = board.enumerated().map { y, rows in
-            rows.enumerated().map { x, disk in
-                GameData.Board.Cell(x: x, y: y, disk: disk)
-            }
-        }
-        self.dependency = Dependency(board: .init(cells: cells),
-                                     messageDiskSize: 0)
-
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         cache.status = .turn(.light)
+
+        let logic = dependency.gameLogic
+        logic._validMovekForDark = []
+        logic._validMovekForLight = [Coordinate(x: 0, y: 0)]
 
         viewModel.nextTurn()
 
@@ -406,21 +386,13 @@ final class ReversiViewModelTests: XCTestCase {
     }
 
     func test_nextTurn_turnがlightのときに_darkもlightの有効な配置はない場合() {
-        let board: [[Disk?]] = [
-            [.light, .dark],
-            [.dark, .light]
-        ]
-        let cells = board.enumerated().map { y, rows in
-            rows.enumerated().map { x, disk in
-                GameData.Board.Cell(x: x, y: y, disk: disk)
-            }
-        }
-        self.dependency = Dependency(board: .init(cells: cells),
-                                     messageDiskSize: 0)
-
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         cache.status = .turn(.light)
+
+        let logic = dependency.gameLogic
+        logic._validMovekForDark = []
+        logic._validMovekForLight = []
 
         viewModel.nextTurn()
 
@@ -432,6 +404,11 @@ final class ReversiViewModelTests: XCTestCase {
         let cache = dependency.gameDataCache
         let disk = Disk.light
         cache.status = .turn(disk)
+
+        let coordinate = Coordinate(x: 0, y: 0)
+        let logic = dependency.gameLogic
+        logic._validMovekForLight = [coordinate]
+        logic._flippedDiskCoordinates = [coordinate]
 
         viewModel.playTurnOfComputer()
 
@@ -469,21 +446,6 @@ final class ReversiViewModelTests: XCTestCase {
     }
 
     func test_handleSelectedCoordinate() {
-        let board: [[Disk?]] = [
-            [nil, nil,    nil,   nil,   nil],
-            [nil, .light, .dark, nil,   nil],
-            [nil, .light, .dark, .dark, nil],
-            [nil, .light, nil,   nil,   nil]
-        ]
-
-        let cells = board.enumerated().map { y, rows in
-            rows.enumerated().map { x, disk in
-                GameData.Board.Cell(x: x, y: y, disk: disk)
-            }
-        }
-
-        self.dependency = Dependency(board: .init(cells: cells),
-                                     messageDiskSize: 0)
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
 
@@ -497,12 +459,14 @@ final class ReversiViewModelTests: XCTestCase {
         let coordinate = Coordinate(x: 0, y: 0)
         viewModel.handle(selectedCoordinate: coordinate)
 
-        let expected = Dependency.SetDisk(disk: disk,
-                                          x: 0,
-                                          y: 0,
-                                          animated: true,
-                                          completion: nil)
-        XCTAssertEqual(dependency.$setDisk.parameters, [expected])
+        let logic = dependency.gameLogic
+        let flippedDiskCoordinates = logic.$_flippedDiskCoordinates
+        let expected = MockGameLogic.FlippedDiskCoordinates(
+            disk: disk,
+            coordinate: coordinate
+        )
+        XCTAssertEqual(flippedDiskCoordinates.calledCount, 1)
+        XCTAssertEqual(flippedDiskCoordinates.parameters, [expected])
     }
 }
 
@@ -711,6 +675,7 @@ extension ReversiViewModelTests {
         var async: Void
 
         let gameDataCache = MockGameDataCache()
+        let gameLogic = MockGameLogic()
 
         private let messageDiskSize: CGFloat
 
@@ -738,7 +703,7 @@ extension ReversiViewModelTests {
             asyncAfter: { [weak self] in self?._asyncAfter.respond(.init(time: $0, completion: $1)) },
             async: { [weak self] in self?._async.respond($0)  },
             cache: gameDataCache,
-            logicFactory: GameLogicFactory()
+            logicFactory: MockGameLogicFactory(logic: gameLogic)
         )
 
         init(board: GameData.Board, messageDiskSize: CGFloat) {
