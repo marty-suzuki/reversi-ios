@@ -1,8 +1,15 @@
 @testable import ReversiLogic
 
-enum MockGameLogicFactory: GameLogicFactoryProtocol {
-    static func make(cache: GameDataCellGettable & GemeDataDiskGettable) -> GameLogicProtocol {
-        MockGameLogic()
+struct MockGameLogicFactory: GameLogicFactoryProtocol {
+
+    private let logic: MockGameLogic
+
+    init(logic: MockGameLogic) {
+        self.logic = logic
+    }
+
+    func make(cache: GameDataCellGettable & GemeDataDiskGettable) -> GameLogicProtocol {
+        logic
     }
 }
 

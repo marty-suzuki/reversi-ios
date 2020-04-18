@@ -40,7 +40,7 @@ class ViewController: UIViewController {
         asyncAfter: { DispatchQueue.main.asyncAfter(deadline: $0, execute: $1) },
         async: { DispatchQueue.main.async(execute: $0) },
         cache: GameDataCacheFactory.make(),
-        logicFactory: GameLogicFactory.self
+        logicFactory: GameLogicFactory()
     )
 
     override func viewDidLoad() {

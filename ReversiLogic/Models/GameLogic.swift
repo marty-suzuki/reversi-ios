@@ -1,10 +1,12 @@
 public protocol GameLogicFactoryProtocol {
-    static func make(cache: GameDataCellGettable & GemeDataDiskGettable) -> GameLogicProtocol
+    func make(cache: GameDataCellGettable & GemeDataDiskGettable) -> GameLogicProtocol
 }
 
-public enum GameLogicFactory: GameLogicFactoryProtocol {
+public struct GameLogicFactory: GameLogicFactoryProtocol {
 
-    public static func make(cache: GameDataCellGettable & GemeDataDiskGettable) -> GameLogicProtocol {
+    public init() {}
+
+    public func make(cache: GameDataCellGettable & GemeDataDiskGettable) -> GameLogicProtocol {
         GameLogic(cache: cache)
     }
 }

@@ -52,7 +52,7 @@ public final class ReversiViewModel {
                 asyncAfter: @escaping AsyncAfter,
                 async: @escaping Async,
                 cache: GameDataCacheProtocol,
-                logicFactory: GameLogicFactoryProtocol.Type) {
+                logicFactory: GameLogicFactoryProtocol) {
         self.showAlert = showAlert
         self.setPlayerDarkCount = setPlayerDarkCount
         self.setPlayerLightCount = setPlayerLightCount
