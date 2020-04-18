@@ -4,7 +4,11 @@ public protocol GameDataCellGettable: AnyObject {
     var cells: [[GameData.Board.Cell]] { get }
 }
 
-public protocol GameDataCacheProtocol: GameDataCellGettable {
+public protocol GemeDataDiskGettable: AnyObject {
+     subscript(coordinate: Coordinate) -> Disk? { get }
+}
+
+public protocol GameDataCacheProtocol: GameDataCellGettable, GemeDataDiskGettable {
     var status: GameData.Status { get set }
     var playerOfCurrentTurn: GameData.Player? { get }
     subscript(coordinate: Coordinate) -> Disk? { get set }
