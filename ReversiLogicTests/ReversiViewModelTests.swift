@@ -429,8 +429,9 @@ final class ReversiViewModelTests: XCTestCase {
 
         XCTAssertEqual(viewModel.turn, .dark)
 
-        let showCanNotPlaceAlert = dependency.$showCanNotPlaceAlert
-        XCTAssertEqual(showCanNotPlaceAlert.calledCount, 1)
+        let showAlert = dependency.$showAlert
+        XCTAssertEqual(showAlert.calledCount, 1)
+        XCTAssertEqual(showAlert.parameters, [.pass(dismissHandler: {})])
     }
 
     func test_nextTurn_turnがlightのときに_darkもlightの有効な配置はない場合() {
@@ -494,8 +495,8 @@ extension ReversiViewModelTests {
         @MockResponse<(Disk?, Int, Int, Bool), Bool>
         var placeDisk = false
 
-        @MockResponse<Void, Void>()
-        var showCanNotPlaceAlert: Void
+        @MockResponse<Alert, Void>()
+        var showAlert: Void
 
         @MockResponse<String, Void>()
         var setPlayerDarkCount: Void
@@ -552,7 +553,7 @@ extension ReversiViewModelTests {
                 let finished = me._placeDisk.respond((disk, x, y, aniamted))
                 completion(finished)
             },
-            showCanNotPlaceAlert: { [weak self] in self?._showCanNotPlaceAlert.respond() },
+            showAlert: { [weak self] in self?._showAlert.respond($0) },
             setPlayerDarkCount: { [weak self] in self?._setPlayerDarkCount.respond($0) },
             setPlayerLightCount: { [weak self] in self?._setPlayerLightCount.respond($0) },
             setMessageDiskSizeConstant: { [weak self] in self?._setMessageDiskSizeConstant.respond($0) },
