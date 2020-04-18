@@ -1,4 +1,13 @@
-final class GameLogic {
+public protocol GameLogicProtocol: AnyObject {
+    func count(of disk: Disk) -> Int
+    func sideWithMoreDisks() -> Disk?
+    func flippedDiskCoordinates(by disk: Disk,
+                                at coordinate: Coordinate) -> [Coordinate]
+    func canPlace(disk: Disk, at coordinate: Coordinate) -> Bool
+    func validMoves(for disk: Disk) -> [Coordinate]
+}
+
+final class GameLogic: GameLogicProtocol {
 
     private let cache: GameDataCellGettable & GemeDataDiskGettable
 

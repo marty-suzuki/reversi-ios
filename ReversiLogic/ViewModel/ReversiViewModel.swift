@@ -31,7 +31,7 @@ public final class ReversiViewModel {
     private let reset: () -> Void
     private let asyncAfter: AsyncAfter
     private let async: Async
-    private let logic: GameLogic
+    private let logic: GameLogicProtocol
     private let cache: GameDataCacheProtocol
 
     public init(messageDiskSize: CGFloat,
