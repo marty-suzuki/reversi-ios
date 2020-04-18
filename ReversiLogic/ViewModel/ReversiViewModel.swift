@@ -31,6 +31,7 @@ public final class ReversiViewModel {
     private let reset: () -> Void
     private let asyncAfter: AsyncAfter
     private let async: Async
+    private let logic: GameLogic
     private let cache: GameDataCacheProtocol
 
     public init(messageDiskSize: CGFloat,
@@ -69,6 +70,7 @@ public final class ReversiViewModel {
         self.asyncAfter = asyncAfter
         self.async = async
         self.messageDiskSize = messageDiskSize
+        self.logic = GameLogic(cache: cache)
     }
 
     public func viewDidAppear() {
@@ -160,10 +162,6 @@ public final class ReversiViewModel {
         }
     }
 
-    func count(of disk: Disk) -> Int {
-        GameLogic.count(of: disk, from: cache.cells)
-    }
-
     func updateMessage() {
         switch cache.status {
         case let .turn(side):
@@ -171,7 +169,7 @@ public final class ReversiViewModel {
             setMessageDisk(side)
             setMessageText("'s turn")
         case .gameOver:
-            if let winner = GameLogic.sideWithMoreDisks(from: cache.cells) {
+            if let winner = logic.sideWithMoreDisks() {
                 setMessageDiskSizeConstant(messageDiskSize)
                 setMessageDisk(winner)
                 setMessageText(" won")
@@ -183,21 +181,21 @@ public final class ReversiViewModel {
     }
 
     func updateCount() {
-        setPlayerDarkCount("\(count(of: .dark))")
-        setPlayerLightCount("\(count(of: .light))")
+        setPlayerDarkCount("\(logic.count(of: .dark))")
+        setPlayerLightCount("\(logic.count(of: .light))")
     }
 
     func flippedDiskCoordinatesByPlacingDisk(_ disk: Disk, atX x: Int, y: Int) -> [(Int, Int)] {
-        GameLogic.flippedDiskCoordinates(from: cache.cells, by: disk, at: .init(x: x, y: y))
+        logic.flippedDiskCoordinates(by: disk, at: .init(x: x, y: y))
             .map { ($0.x, $0.y) }
     }
 
     func canPlaceDisk(_ disk: Disk, atX x: Int, y: Int) -> Bool {
-        GameLogic.canPlace(disk: disk, from: cache.cells, at: .init(x: x, y: y))
+        logic.canPlace(disk: disk, at: .init(x: x, y: y))
     }
 
     func validMoves(for side: Disk) -> [(x: Int, y: Int)] {
-        GameLogic.validMoves(for: side, from: cache.cells).map { ($0.x, $0.y) }
+        logic.validMoves(for: side).map { ($0.x, $0.y) }
     }
 
     func nextTurn() {

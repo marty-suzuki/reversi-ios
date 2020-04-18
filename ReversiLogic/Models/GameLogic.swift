@@ -1,7 +1,13 @@
-enum GameLogic {
+final class GameLogic {
 
-    static func count(of disk: Disk, from cells: [[GameData.Board.Cell]]) -> Int {
-        cells.reduce(0) { result, rows in
+    private let cache: GameDataCellGettable & GemeDataDiskGettable
+
+    init(cache: GameDataCellGettable & GemeDataDiskGettable) {
+        self.cache = cache
+    }
+
+    func count(of disk: Disk) -> Int {
+        cache.cells.reduce(0) { result, rows in
             rows.reduce(result) { result, cell in
                 if cell.disk == disk {
                     return result + 1
@@ -12,9 +18,9 @@ enum GameLogic {
         }
     }
 
-    static func sideWithMoreDisks(from cells: [[GameData.Board.Cell]]) -> Disk? {
-        let darkCount = count(of: .dark, from: cells)
-        let lightCount = count(of: .light, from: cells)
+    func sideWithMoreDisks() -> Disk? {
+        let darkCount = count(of: .dark)
+        let lightCount = count(of: .light)
         if darkCount == lightCount {
             return nil
         } else {
@@ -22,9 +28,8 @@ enum GameLogic {
         }
     }
 
-    static func flippedDiskCoordinates(from cells: [[GameData.Board.Cell]],
-                                       by disk: Disk,
-                                       at coordinate: Coordinate) -> [Coordinate] {
+    func flippedDiskCoordinates(by disk: Disk,
+                                at coordinate: Coordinate) -> [Coordinate] {
         let directions = [
             (x: -1, y: -1),
             (x:  0, y: -1),
@@ -36,7 +41,7 @@ enum GameLogic {
             (x: -1, y:  1),
         ]
 
-        guard cells[safe: coordinate.y]?[safe: coordinate.x]?.disk == nil else {
+        guard cache.cells[safe: coordinate.y]?[safe: coordinate.x]?.disk == nil else {
             return []
         }
 
@@ -51,7 +56,7 @@ enum GameLogic {
                 x += direction.x
                 y += direction.y
 
-                switch (disk, cells[safe: y]?[safe: x]?.disk) { // Uses tuples to make patterns exhaustive
+                switch (disk, cache.cells[safe: y]?[safe: x]?.disk) { // Uses tuples to make patterns exhaustive
                 case (.dark, .dark?), (.light, .light?):
                     diskCoordinates.append(contentsOf: diskCoordinatesInLine)
                     break flipping
@@ -66,18 +71,15 @@ enum GameLogic {
         return diskCoordinates
     }
 
-    static func canPlace(disk: Disk,
-                         from cells: [[GameData.Board.Cell]],
-                         at coordinate: Coordinate) -> Bool {
-        !flippedDiskCoordinates(from: cells, by: disk, at: coordinate).isEmpty
+    func canPlace(disk: Disk, at coordinate: Coordinate) -> Bool {
+        !flippedDiskCoordinates(by: disk, at: coordinate).isEmpty
     }
 
-    static func validMoves(for disk: Disk,
-                           from cells: [[GameData.Board.Cell]]) -> [Coordinate] {
-        cells.reduce([Coordinate]()) { result, rows in
+    func validMoves(for disk: Disk) -> [Coordinate] {
+        cache.cells.reduce([Coordinate]()) { result, rows in
             rows.reduce(result) { result, cell in
                 let coordinate = Coordinate(x: cell.x, y: cell.y)
-                if canPlace(disk: disk,  from: cells, at: coordinate) {
+                if canPlace(disk: disk, at: coordinate) {
                     return result + [coordinate]
                 } else {
                     return result
