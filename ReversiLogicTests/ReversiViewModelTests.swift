@@ -496,13 +496,37 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(showAlert.calledCount, 1)
         XCTAssertEqual(showAlert.parameters, [.reset(okHandler: {})])
     }
+
+    func test_handleSelectedCoordinate() {
+        let viewModel = dependency.testTarget
+        let cache = dependency.gameDataCache
+
+        let disk = Disk.dark
+        cache.status = .turn(disk)
+        cache._getPlayerDark = .manual
+
+        viewModel.animationCanceller = nil
+
+        let coordinate = Coordinate(x: 0, y: 0)
+        viewModel.handle(selectedCoordinate: coordinate)
+
+        let placeDisk = dependency.$placeDisk
+        XCTAssertEqual(placeDisk.calledCount, 1)
+        let expected = Dependency.PlaceDisk(
+            disk: disk,
+            x: coordinate.x,
+            y: coordinate.y,
+            animated: true
+        )
+        XCTAssertEqual(placeDisk.parameters, [expected])
+    }
 }
 
 extension ReversiViewModelTests {
 
     fileprivate final class Dependency {
 
-        @MockResponse<(Disk?, Int, Int, Bool), Bool>
+        @MockResponse<PlaceDisk, Bool>
         var placeDisk = false
 
         @MockResponse<Alert, Void>()
@@ -556,11 +580,11 @@ extension ReversiViewModelTests {
 
         private(set) lazy var testTarget = ReversiViewModel(
             messageDiskSize: messageDiskSize,
-            placeDisk: { [weak self] disk, x, y, aniamted, completion in
+            placeDisk: { [weak self] disk, x, y, animated, completion in
                 guard let me = self else {
                     return
                 }
-                let finished = me._placeDisk.respond((disk, x, y, aniamted))
+                let finished = me._placeDisk.respond(.init(disk: disk, x: x, y: y, animated: animated))
                 completion(finished)
             },
             showAlert: { [weak self] in self?._showAlert.respond($0) },
@@ -598,6 +622,13 @@ extension ReversiViewModelTests.Dependency {
     struct AsyncAfter {
         let time: DispatchTime
         let completion: () -> Void
+    }
+
+    struct PlaceDisk: Equatable {
+        let disk: Disk?
+        let x: Int
+        let y: Int
+        let animated: Bool
     }
 }
 
