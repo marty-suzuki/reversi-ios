@@ -20,6 +20,7 @@
 		ED20D52E244AD61E00F7BA46 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D52D244AD61E00F7BA46 /* Alert.swift */; };
 		ED20D530244AD70A00F7BA46 /* UIAlertControllerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D52F244AD70A00F7BA46 /* UIAlertControllerExtension.swift */; };
 		ED20D533244ADCAE00F7BA46 /* MockGameDataCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D532244ADCAE00F7BA46 /* MockGameDataCache.swift */; };
+		ED20D535244B276400F7BA46 /* MockGameLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D534244B276400F7BA46 /* MockGameLogic.swift */; };
 		ED4E71452448DA6D00518585 /* GameDataCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4E71442448DA6D00518585 /* GameDataCacheTests.swift */; };
 		ED6EAC7424436B2C00BAF620 /* ReversiLogic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; };
 		ED6EAC7D24436B2C00BAF620 /* ReversiLogic.h in Headers */ = {isa = PBXBuildFile; fileRef = ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -103,6 +104,7 @@
 		ED20D52D244AD61E00F7BA46 /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 		ED20D52F244AD70A00F7BA46 /* UIAlertControllerExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIAlertControllerExtension.swift; sourceTree = "<group>"; };
 		ED20D532244ADCAE00F7BA46 /* MockGameDataCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockGameDataCache.swift; sourceTree = "<group>"; };
+		ED20D534244B276400F7BA46 /* MockGameLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockGameLogic.swift; sourceTree = "<group>"; };
 		ED4E71442448DA6D00518585 /* GameDataCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDataCacheTests.swift; sourceTree = "<group>"; };
 		ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ReversiLogic.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReversiLogic.h; sourceTree = "<group>"; };
@@ -226,6 +228,7 @@
 			isa = PBXGroup;
 			children = (
 				ED20D532244ADCAE00F7BA46 /* MockGameDataCache.swift */,
+				ED20D534244B276400F7BA46 /* MockGameLogic.swift */,
 			);
 			path = Mock;
 			sourceTree = "<group>";
@@ -522,6 +525,7 @@
 				ED20D533244ADCAE00F7BA46 /* MockGameDataCache.swift in Sources */,
 				ED6EAC9F24436EE800BAF620 /* GameDataIOTests.swift in Sources */,
 				EDCC2A582448B5D0009E69F7 /* GameLogicTests.swift in Sources */,
+				ED20D535244B276400F7BA46 /* MockGameLogic.swift in Sources */,
 				ED6EACA82444CD7E00BAF620 /* ReversiViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

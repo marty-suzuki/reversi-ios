@@ -737,7 +737,8 @@ extension ReversiViewModelTests {
             reset: { [weak self] in self?._reset.respond() },
             asyncAfter: { [weak self] in self?._asyncAfter.respond(.init(time: $0, completion: $1)) },
             async: { [weak self] in self?._async.respond($0)  },
-            cache: gameDataCache
+            cache: gameDataCache,
+            logicFactory: GameLogicFactory.self
         )
 
         init(board: GameData.Board, messageDiskSize: CGFloat) {

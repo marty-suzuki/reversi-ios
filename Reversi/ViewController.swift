@@ -39,7 +39,8 @@ class ViewController: UIViewController {
         reset: { [weak self] in self?.boardView.reset() },
         asyncAfter: { DispatchQueue.main.asyncAfter(deadline: $0, execute: $1) },
         async: { DispatchQueue.main.async(execute: $0) },
-        cache: GameDataCacheFactory.make()
+        cache: GameDataCacheFactory.make(),
+        logicFactory: GameLogicFactory.self
     )
 
     override func viewDidLoad() {

@@ -1,3 +1,14 @@
+public protocol GameLogicFactoryProtocol {
+    static func make(cache: GameDataCellGettable & GemeDataDiskGettable) -> GameLogicProtocol
+}
+
+public enum GameLogicFactory: GameLogicFactoryProtocol {
+
+    public static func make(cache: GameDataCellGettable & GemeDataDiskGettable) -> GameLogicProtocol {
+        GameLogic(cache: cache)
+    }
+}
+
 public protocol GameLogicProtocol: AnyObject {
     func count(of disk: Disk) -> Int
     func sideWithMoreDisks() -> Disk?

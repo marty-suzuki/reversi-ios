@@ -51,7 +51,8 @@ public final class ReversiViewModel {
                 reset: @escaping () -> Void,
                 asyncAfter: @escaping AsyncAfter,
                 async: @escaping Async,
-                cache: GameDataCacheProtocol) {
+                cache: GameDataCacheProtocol,
+                logicFactory: GameLogicFactoryProtocol.Type) {
         self.showAlert = showAlert
         self.setPlayerDarkCount = setPlayerDarkCount
         self.setPlayerLightCount = setPlayerLightCount
@@ -70,7 +71,7 @@ public final class ReversiViewModel {
         self.asyncAfter = asyncAfter
         self.async = async
         self.messageDiskSize = messageDiskSize
-        self.logic = GameLogic(cache: cache)
+        self.logic = logicFactory.make(cache: cache)
     }
 
     public func viewDidAppear() {
