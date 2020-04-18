@@ -82,7 +82,73 @@ public final class ReversiViewModel {
         waitForPlayer()
     }
 
-    public func waitForPlayer() {
+    public func startGame() {
+        do {
+            try loadGame()
+        } catch _ {
+            newGame()
+        }
+    }
+
+
+    public func setPlayer(for disk: Disk, with index: Int) {
+        cache[disk] = GameData.Player(rawValue: index) ?? .manual
+
+        try? saveGame()
+
+        if let canceller = playerCancellers[disk] {
+            canceller.cancel()
+        }
+
+        if !isAnimating, cache.status == .turn(disk), case .computer = cache[disk] {
+            playTurnOfComputer()
+        }
+    }
+
+
+    public func handle(selectedCoordinate: Coordinate) {
+        guard case let .turn(turn) = cache.status else {
+            return
+        }
+
+        if isAnimating {
+            return
+        }
+
+        guard case .manual = cache.playerOfCurrentTurn else {
+            return
+        }
+
+        let x = selectedCoordinate.x
+        let y = selectedCoordinate.y
+        // try? because doing nothing when an error occurs
+        try? placeDisk(turn, atX: x, y: y, animated: true) { [weak self] _ in
+            self?.nextTurn()
+        }
+    }
+
+    public func handleReset() {
+        let alert = Alert.reset { [weak self] in
+            guard let me = self else { return }
+
+            me.animationCanceller?.cancel()
+            me.animationCanceller = nil
+
+            for side in Disk.allCases {
+                me.playerCancellers[side]?.cancel()
+                me.playerCancellers.removeValue(forKey: side)
+            }
+
+            me.newGame()
+            me.waitForPlayer()
+        }
+        showAlert(alert)
+    }
+}
+
+extension ReversiViewModel {
+
+    func waitForPlayer() {
         let player: GameData.Player
         switch cache.status {
         case .gameOver:
@@ -99,17 +165,9 @@ public final class ReversiViewModel {
         }
     }
 
-    public func setDisk(_ disk: Disk?, atX x: Int, y: Int, animated: Bool, completion: ((Bool) -> Void)? = nil) {
+    func setDisk(_ disk: Disk?, atX x: Int, y: Int, animated: Bool, completion: ((Bool) -> Void)? = nil) {
         cache[Coordinate(x: x, y: y)] = disk
         _setDisk(disk, x, y, animated, completion)
-    }
-
-    public func startGame() {
-        do {
-            try loadGame()
-        } catch _ {
-            newGame()
-        }
     }
 
     func newGame() {
@@ -147,20 +205,6 @@ public final class ReversiViewModel {
 
     func saveGame() throws {
         try cache.save()
-    }
-
-    public func setPlayer(for disk: Disk, with index: Int) {
-        cache[disk] = GameData.Player(rawValue: index) ?? .manual
-
-        try? saveGame()
-
-        if let canceller = playerCancellers[disk] {
-            canceller.cancel()
-        }
-
-        if !isAnimating, cache.status == .turn(disk), case .computer = cache[disk] {
-            playTurnOfComputer()
-        }
     }
 
     func updateMessage() {
@@ -266,45 +310,6 @@ public final class ReversiViewModel {
         }
 
         playerCancellers[turn] = canceller
-    }
-
-    public func handle(selectedCoordinate: Coordinate) {
-        guard case let .turn(turn) = cache.status else {
-            return
-        }
-
-        if isAnimating {
-            return
-        }
-
-        guard case .manual = cache.playerOfCurrentTurn else {
-            return
-        }
-
-        let x = selectedCoordinate.x
-        let y = selectedCoordinate.y
-        // try? because doing nothing when an error occurs
-        try? placeDisk(turn, atX: x, y: y, animated: true) { [weak self] _ in
-            self?.nextTurn()
-        }
-    }
-
-    public func handleReset() {
-        let alert = Alert.reset { [weak self] in
-            guard let me = self else { return }
-
-            me.animationCanceller?.cancel()
-            me.animationCanceller = nil
-
-            for side in Disk.allCases {
-                me.playerCancellers[side]?.cancel()
-                me.playerCancellers.removeValue(forKey: side)
-            }
-
-            me.newGame()
-            me.waitForPlayer()
-        }
-        showAlert(alert)
     }
 }
 
