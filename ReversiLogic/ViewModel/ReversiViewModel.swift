@@ -226,17 +226,9 @@ public final class ReversiViewModel {
                 self.cache.status = .turn(turn)
                 updateMessage()
 
-                let action = Alert.Action(
-                    title: "Dismiss",
-                    style: .default
-                ) { [weak self] in
+                let alert = Alert.pass { [weak self] in
                     self?.nextTurn()
                 }
-                let alert = Alert(
-                    title: "Pass",
-                    message: "Cannot place a disk.",
-                    actions: [action]
-                )
                 showAlert(alert)
             }
         } else {
@@ -306,8 +298,7 @@ public final class ReversiViewModel {
     }
 
     public func handleReset() {
-        let cancel = Alert.Action(title: "Cancel", style: .cancel, handler: {})
-        let ok = Alert.Action(title: "OK", style: .default) { [weak self] in
+        let alert = Alert.reset { [weak self] in
             guard let me = self else { return }
 
             me.animationCanceller?.cancel()
@@ -321,11 +312,6 @@ public final class ReversiViewModel {
             me.newGame()
             me.waitForPlayer()
         }
-        let alert = Alert(
-            title: "Confirmation",
-            message: "Do you really want to reset the game?",
-            actions: [cancel, ok]
-        )
         showAlert(alert)
     }
 }
