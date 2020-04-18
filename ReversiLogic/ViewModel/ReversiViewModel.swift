@@ -254,11 +254,12 @@ extension ReversiViewModel {
     }
 
     func playTurnOfComputer() {
-        guard case let .turn(turn) = cache.status else {
+        guard
+            case let .turn(turn) = cache.status,
+            let coordinate = logic.validMoves(for: turn).randomElement()
+        else {
             preconditionFailure()
         }
-
-        let coordinate = logic.validMoves(for: turn).randomElement()!
 
         switch turn {
         case .dark:
@@ -283,7 +284,7 @@ extension ReversiViewModel {
             if canceller.isCancelled { return }
             cleanUp()
 
-            try! self.placeDisk(turn, at: coordinate, animated: true) { [weak self] _ in
+            try? self.placeDisk(turn, at: coordinate, animated: true) { [weak self] _ in
                 self?.nextTurn()
             }
         }
