@@ -105,7 +105,7 @@ final class ReversiViewModelTests: XCTestCase {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
 
-        let expectedCell = GameData.Board.Cell(x: 0, y: 0, disk: nil)
+        let expectedCell = GameData.Board.Cell(coordinate: .init(x: 0, y: 0), disk: nil)
         let expectedPlayerDark = GameData.Player.computer
         let expectedPlayerLight = GameData.Player.computer
 
@@ -131,8 +131,7 @@ final class ReversiViewModelTests: XCTestCase {
 
         let parameter = try XCTUnwrap(setDisk.parameters.first)
         XCTAssertEqual(parameter.disk, expectedCell.disk)
-        XCTAssertEqual(parameter.x, expectedCell.x)
-        XCTAssertEqual(parameter.y, expectedCell.y)
+        XCTAssertEqual(parameter.coordinate, expectedCell.coordinate)
         XCTAssertEqual(parameter.animated, false)
     }
 
@@ -306,13 +305,11 @@ final class ReversiViewModelTests: XCTestCase {
 
     func test_updateMessage_trunがnilで勝者がいない場合() {
         let cell1 = GameData.Board.Cell(
-            x: 1,
-            y: 2,
+            coordinate: .init(x: 1, y: 2),
             disk: .dark
         )
         let cell2 = GameData.Board.Cell(
-            x: 1,
-            y: 2,
+            coordinate: .init(x: 2, y: 2),
             disk: .light
         )
         self.dependency = Dependency(board: .init(cells: [[cell1, cell2]]),
@@ -488,7 +485,7 @@ extension ReversiViewModelTests {
     func test_animateSettingDisks_animationCancellerがnilの場合() {
         let viewModel = dependency.testTarget
 
-        let coordinates = [(0, 0), (1, 1)]
+        let coordinates = [Coordinate(x: 0, y: 0), Coordinate(x: 1, y: 1)]
         let disk = Disk.dark
         viewModel.animationCanceller = nil
 
@@ -503,7 +500,7 @@ extension ReversiViewModelTests {
     func test_animateSettingDisks_animationCancellerを途中でキャンセルした場合() throws {
         let viewModel = dependency.testTarget
 
-        let coordinates = [(0, 0), (1, 1)]
+        let coordinates = [Coordinate(x: 0, y: 0), Coordinate(x: 1, y: 1)]
         let disk = Disk.dark
         viewModel.animationCanceller = Canceller({})
 
@@ -513,8 +510,7 @@ extension ReversiViewModelTests {
         }
 
         let expected = Dependency.SetDisk(disk: disk,
-                                          x: 0,
-                                          y: 0,
+                                          coordinate: .init(x: 0, y: 0),
                                           animated: true,
                                           completion: nil)
 
@@ -532,7 +528,7 @@ extension ReversiViewModelTests {
     func test_animateSettingDisks_setDiskのfinishedがfalseの場合() throws {
         let viewModel = dependency.testTarget
 
-        let coordinates = [(0, 0), (1, 1)]
+        let coordinates = [Coordinate(x: 0, y: 0), Coordinate(x: 1, y: 1)]
         let disk = Disk.dark
         viewModel.animationCanceller = Canceller({})
 
@@ -542,8 +538,7 @@ extension ReversiViewModelTests {
         }
 
         let expected = Dependency.SetDisk(disk: disk,
-                                          x: 0,
-                                          y: 0,
+                                          coordinate: .init(x: 0, y: 0),
                                           animated: true,
                                           completion: nil)
 
@@ -558,14 +553,12 @@ extension ReversiViewModelTests {
 
         do {
             let expected1 = Dependency.SetDisk(disk: disk,
-                                               x: 0,
-                                               y: 0,
+                                               coordinate: .init(x: 0, y: 0),
                                                animated: false,
                                                completion: nil)
 
             let expected2 = Dependency.SetDisk(disk: disk,
-                                               x: 1,
-                                               y: 1,
+                                               coordinate: .init(x: 1, y: 1),
                                                animated: false,
                                                completion: nil)
 
@@ -579,7 +572,7 @@ extension ReversiViewModelTests {
     func test_animateSettingDisks_setDiskのfinishedがtrueの場合() throws {
         let viewModel = dependency.testTarget
 
-        let coordinates = [(0, 0), (1, 1)]
+        let coordinates = [Coordinate(x: 0, y: 0), Coordinate(x: 1, y: 1)]
         let disk = Disk.dark
         viewModel.animationCanceller = Canceller({})
 
@@ -592,8 +585,7 @@ extension ReversiViewModelTests {
             let paramater = try XCTUnwrap(dependency.$setDisk.parameters.last)
 
             let expected = Dependency.SetDisk(disk: disk,
-                                              x: 0,
-                                              y: 0,
+                                              coordinate: .init(x: 0, y: 0),
                                               animated: true,
                                               completion: nil)
 
@@ -607,8 +599,7 @@ extension ReversiViewModelTests {
             let paramater = try XCTUnwrap(dependency.$setDisk.parameters.last)
 
             let expected = Dependency.SetDisk(disk: disk,
-                                              x: 1,
-                                              y: 1,
+                                              coordinate: .init(x: 1, y: 1),
                                               animated: true,
                                               completion: nil)
 
@@ -637,8 +628,7 @@ extension ReversiViewModelTests {
 
         var isFinished: Bool?
         try viewModel.placeDisk(disk,
-                                atX: coordinate.x,
-                                y: coordinate.y,
+                                at: coordinate,
                                 animated: false,
                                 completion: { isFinished = $0 })
 
@@ -648,8 +638,7 @@ extension ReversiViewModelTests {
         completion()
 
         let expected = Dependency.SetDisk(disk: disk,
-                                          x: coordinate.x,
-                                          y: coordinate.y,
+                                          coordinate: coordinate,
                                           animated: false,
                                           completion: nil)
         let setDisk = dependency.$setDisk
@@ -670,15 +659,13 @@ extension ReversiViewModelTests {
 
         var isFinished: Bool?
         try viewModel.placeDisk(disk,
-                                atX: coordinate.x,
-                                y: coordinate.y,
+                                at: coordinate,
                                 animated: true,
                                 completion: { isFinished = $0 })
 
         let setDisk = dependency.$setDisk
         let expected = Dependency.SetDisk(disk: disk,
-                                          x: coordinate.x,
-                                          y: coordinate.y,
+                                          coordinate: coordinate,
                                           animated: true,
                                           completion: nil)
 
@@ -692,8 +679,7 @@ extension ReversiViewModelTests {
 
         do {
             let expected2 = Dependency.SetDisk(disk: disk,
-                                               x: coordinate.x,
-                                               y: coordinate.y,
+                                               coordinate: coordinate,
                                                animated: false,
                                                completion: nil)
             XCTAssertEqual(setDisk.calledCount, 3)
@@ -769,11 +755,11 @@ extension ReversiViewModelTests {
             setMessageDiskSizeConstant: { [weak self] in self?._setMessageDiskSizeConstant.respond($0) },
             setMessageDisk: { [weak self] in self?._setMessageDisk.respond($0) },
             setMessageText: { [weak self] in self?._setMessageText.respond($0) },
-            setDisk: { [weak self] disk, x, y, animated, completion in
+            setDisk: { [weak self] disk, coordinate, animated, completion in
                 guard let me = self else {
                     return
                 }
-                me._setDisk.respond(.init(disk: disk, x: x, y: y, animated: animated, completion: completion))
+                me._setDisk.respond(.init(disk: disk, coordinate: coordinate, animated: animated, completion: completion))
             },
             setPlayerDarkSelectedIndex: { [weak self] in self?._setPlayerDarkSelectedIndex.respond($0) },
             setPlayerLightSelectedIndex: { [weak self] in self?._setPlayerLightSelectedIndex.respond($0) },
@@ -803,8 +789,7 @@ extension ReversiViewModelTests.Dependency {
 
     struct SetDisk: Equatable {
         let disk: Disk?
-        let x: Int
-        let y: Int
+        let coordinate: Coordinate
         let animated: Bool
         let completion: ((Bool) -> Void)?
     }
@@ -816,8 +801,7 @@ extension ReversiViewModelTests.Dependency.SetDisk {
         rhs: ReversiViewModelTests.Dependency.SetDisk
     ) -> Bool {
         return lhs.disk == rhs.disk &&
-            lhs.x == rhs.x &&
-            lhs.y == rhs.y &&
+            lhs.coordinate == rhs.coordinate &&
             lhs.animated == rhs.animated
     }
 }

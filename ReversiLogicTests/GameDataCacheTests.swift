@@ -12,7 +12,7 @@ final class GameDataCacheTests: XCTestCase {
     }
 
     func test_load() throws {
-        let expectedCell = GameData.Board.Cell(x: 0, y: 0, disk: nil)
+        let expectedCell = GameData.Board.Cell(coordinate: .init(x: 0, y: 0), disk: nil)
         let expectedStatus = GameData.Status.gameOver
         let expectedPlayerDark = GameData.Player.computer
         let expectedPlayerLight = GameData.Player.computer
@@ -38,11 +38,7 @@ final class GameDataCacheTests: XCTestCase {
     }
 
     func test_save() throws {
-        let expectedCell = GameData.Board.Cell(
-            x: 1,
-            y: 2,
-            disk: .dark
-        )
+        let expectedCell = GameData.Board.Cell(coordinate: .init(x: 1, y: 2), disk: .dark)
         let expectedPlayerDark: GameData.Player = .manual
         let expectedPlayerLight: GameData.Player = .computer
         let expectedStatus: GameData.Status = .turn(.light)

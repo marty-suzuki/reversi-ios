@@ -37,13 +37,11 @@ extension GameData {
 
 extension GameData.Board {
     public struct Cell: Equatable {
-        public let x: Int
-        public let y: Int
+        public let coordinate: Coordinate
         public var disk: Disk?
 
-        public init(x: Int, y: Int, disk: Disk?) {
-            self.x = x
-            self.y = y
+        public init(coordinate: Coordinate, disk: Disk?) {
+            self.coordinate = coordinate
             self.disk = disk
         }
     }
@@ -63,7 +61,7 @@ extension GameData.Board {
 
         let cells: [[Cell]] = disk.enumerated().map { y, rows in
             rows.enumerated().map { x, disk in
-                Cell(x: x, y: y, disk: disk)
+                Cell(coordinate: .init(x: x, y: y), disk: disk)
             }
         }
 

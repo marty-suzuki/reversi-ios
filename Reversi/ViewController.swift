@@ -29,7 +29,7 @@ class ViewController: UIViewController {
         setMessageDiskSizeConstant: { [weak self] in self?.messageDiskSizeConstraint.constant = $0 },
         setMessageDisk: { [weak self] in self?.messageDiskView.disk = $0 },
         setMessageText: { [weak self] in self?.messageLabel.text = $0 },
-        setDisk: { [weak self] in self?.boardView.setDisk($0, atX: $1, y: $2, animated: $3, completion: $4) },
+        setDisk: { [weak self] in self?.boardView.setDisk($0, atX: $1.x, y: $1.y, animated: $2, completion: $3) },
         setPlayerDarkSelectedIndex: { [weak self] in self?.playerDarkControl.selectedSegmentIndex = $0 },
         setPlayerLightSelectedIndex: { [weak self] in self?.playerLightControl.selectedSegmentIndex = $0 },
         startPlayerDarkAnimation: { [weak self] in self?.playerDarkActivityIndicator.startAnimating() },

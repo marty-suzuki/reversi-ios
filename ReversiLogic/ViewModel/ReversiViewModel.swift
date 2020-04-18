@@ -1,7 +1,7 @@
 import CoreGraphics
 
 public final class ReversiViewModel {
-    public typealias SetDisk = (Disk?, Int, Int, Bool, ((Bool) -> Void)?) -> Void
+    public typealias SetDisk = (Disk?, Coordinate, Bool, ((Bool) -> Void)?) -> Void
     public typealias AsyncAfter = (DispatchTime, @escaping () -> Void) -> Void
     public typealias Async = (@escaping () -> Void) -> Void
 
@@ -119,10 +119,8 @@ public final class ReversiViewModel {
             return
         }
 
-        let x = selectedCoordinate.x
-        let y = selectedCoordinate.y
         // try? because doing nothing when an error occurs
-        try? placeDisk(turn, atX: x, y: y, animated: true) { [weak self] _ in
+        try? placeDisk(turn, at: selectedCoordinate, animated: true) { [weak self] _ in
             self?.nextTurn()
         }
     }
@@ -165,9 +163,9 @@ extension ReversiViewModel {
         }
     }
 
-    func setDisk(_ disk: Disk?, atX x: Int, y: Int, animated: Bool, completion: ((Bool) -> Void)? = nil) {
-        cache[Coordinate(x: x, y: y)] = disk
-        _setDisk(disk, x, y, animated, completion)
+    func setDisk(_ disk: Disk?, at coordinate: Coordinate, animated: Bool, completion: ((Bool) -> Void)? = nil) {
+        cache[coordinate] = disk
+        _setDisk(disk, coordinate, animated, completion)
     }
 
     func newGame() {
@@ -194,7 +192,7 @@ extension ReversiViewModel {
 
             me.cache.cells.forEach { rows in
                 rows.forEach { cell in
-                    self?._setDisk(cell.disk, cell.x, cell.y, false, nil)
+                    self?._setDisk(cell.disk, cell.coordinate, false, nil)
                 }
             }
 
@@ -230,17 +228,16 @@ extension ReversiViewModel {
         setPlayerLightCount("\(logic.count(of: .light))")
     }
 
-    func flippedDiskCoordinatesByPlacingDisk(_ disk: Disk, atX x: Int, y: Int) -> [(Int, Int)] {
-        logic.flippedDiskCoordinates(by: disk, at: .init(x: x, y: y))
-            .map { ($0.x, $0.y) }
+    func flippedDiskCoordinatesByPlacingDisk(_ disk: Disk, at coordinate: Coordinate) -> [Coordinate] {
+        logic.flippedDiskCoordinates(by: disk, at: coordinate)
     }
 
-    func canPlaceDisk(_ disk: Disk, atX x: Int, y: Int) -> Bool {
-        logic.canPlace(disk: disk, at: .init(x: x, y: y))
+    func canPlaceDisk(_ disk: Disk, at coordinate: Coordinate) -> Bool {
+        logic.canPlace(disk: disk, at: coordinate)
     }
 
-    func validMoves(for side: Disk) -> [(x: Int, y: Int)] {
-        logic.validMoves(for: side).map { ($0.x, $0.y) }
+    func validMoves(for side: Disk) -> [Coordinate] {
+        logic.validMoves(for: side)
     }
 
     func nextTurn() {
@@ -279,7 +276,7 @@ extension ReversiViewModel {
             preconditionFailure()
         }
 
-        let (x, y) = validMoves(for: turn).randomElement()!
+        let coordinate = validMoves(for: turn).randomElement()!
 
         switch turn {
         case .dark:
@@ -304,7 +301,7 @@ extension ReversiViewModel {
             if canceller.isCancelled { return }
             cleanUp()
 
-            try! self.placeDisk(turn, atX: x, y: y, animated: true) { [weak self] _ in
+            try! self.placeDisk(turn, at: coordinate, animated: true) { [weak self] _ in
                 self?.nextTurn()
             }
         }
@@ -315,12 +312,10 @@ extension ReversiViewModel {
 
 extension ReversiViewModel {
 
-    func animateSettingDisks<C: Collection>(
-        at coordinates: C,
-        to disk: Disk,
-        completion: @escaping (Bool) -> Void
-    ) where C.Element == (Int, Int) {
-        guard let (x, y) = coordinates.first else {
+    func animateSettingDisks(at coordinates: [Coordinate],
+                             to disk: Disk,
+                             completion: @escaping (Bool) -> Void) {
+        guard let coordinate = coordinates.first else {
             completion(true)
             return
         }
@@ -328,14 +323,14 @@ extension ReversiViewModel {
         guard let animationCanceller = self.animationCanceller else {
             return
         }
-        setDisk(disk, atX: x, y: y, animated: true) { [weak self] finished in
+        setDisk(disk, at: coordinate, animated: true) { [weak self] finished in
             guard let self = self else { return }
             if animationCanceller.isCancelled { return }
             if finished {
-                self.animateSettingDisks(at: coordinates.dropFirst(), to: disk, completion: completion)
+                self.animateSettingDisks(at: Array(coordinates.dropFirst()), to: disk, completion: completion)
             } else {
-                for (x, y) in coordinates {
-                    self.setDisk(disk, atX: x, y: y, animated: false)
+                for coordinate in coordinates {
+                    self.setDisk(disk, at: coordinate, animated: false)
                 }
                 completion(false)
             }
@@ -348,12 +343,12 @@ extension ReversiViewModel {
     ///     If `animated` is `false`,  this closure is performed at the beginning of the next run loop cycle. This parameter may be `nil`.
     /// - Throws: `DiskPlacementError` if the `disk` cannot be placed at (`x`, `y`).
     func placeDisk(_ disk: Disk,
-                   atX x: Int, y: Int,
+                   at coordinate: Coordinate,
                    animated isAnimated: Bool,
                    completion: @escaping (Bool) -> Void) throws {
-        let diskCoordinates = flippedDiskCoordinatesByPlacingDisk(disk, atX: x, y: y)
+        let diskCoordinates = flippedDiskCoordinatesByPlacingDisk(disk, at: coordinate)
         if diskCoordinates.isEmpty {
-            throw DiskPlacementError(disk: disk, x: x, y: y)
+            throw DiskPlacementError(disk: disk, x: coordinate.x, y: coordinate.y)
         }
 
         let finally: (ReversiViewModel, Bool) -> Void = { viewModel, finished in
@@ -367,7 +362,7 @@ extension ReversiViewModel {
                 self?.animationCanceller = nil
             }
             animationCanceller = Canceller(cleanUp)
-            animateSettingDisks(at: [(x, y)] + diskCoordinates, to: disk) { [weak self] finished in
+            animateSettingDisks(at: [coordinate] + diskCoordinates, to: disk) { [weak self] finished in
                 guard let me = self else { return }
                 guard let canceller = me.animationCanceller else { return }
                 if canceller.isCancelled { return }
@@ -378,9 +373,9 @@ extension ReversiViewModel {
         } else {
             async { [weak self] in
                 guard let me = self else { return }
-                me.setDisk(disk, atX: x, y: y, animated: false)
-                for (x, y) in diskCoordinates {
-                    me.setDisk(disk, atX: x, y: y, animated: false)
+                me.setDisk(disk, at: coordinate, animated: false)
+                for coordinate in diskCoordinates {
+                    me.setDisk(disk, at: coordinate, animated: false)
                 }
 
                 finally(me, true)

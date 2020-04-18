@@ -100,9 +100,8 @@ final class GameLogic: GameLogicProtocol {
     func validMoves(for disk: Disk) -> [Coordinate] {
         cache.cells.reduce([Coordinate]()) { result, rows in
             rows.reduce(result) { result, cell in
-                let coordinate = Coordinate(x: cell.x, y: cell.y)
-                if canPlace(disk: disk, at: coordinate) {
-                    return result + [coordinate]
+                if canPlace(disk: disk, at: cell.coordinate) {
+                    return result + [cell.coordinate]
                 } else {
                     return result
                 }

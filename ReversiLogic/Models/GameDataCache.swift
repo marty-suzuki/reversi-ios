@@ -62,7 +62,7 @@ final class GameDataCache: GameDataCacheProtocol {
         get {
             guard
                 let cell = cells[safe: coordinate.y]?[safe: coordinate.x],
-                cell.x == coordinate.x && cell.y == coordinate.y
+                cell.coordinate == coordinate
             else {
                 return nil
             }
@@ -71,7 +71,7 @@ final class GameDataCache: GameDataCacheProtocol {
         set {
             guard
                 let cell = cells[safe: coordinate.y]?[safe: coordinate.x],
-                cell.x == coordinate.x && cell.y == coordinate.y
+                cell.coordinate == coordinate
             else {
                 return
             }
