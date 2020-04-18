@@ -486,6 +486,16 @@ final class ReversiViewModelTests: XCTestCase {
 
         XCTAssertNil(viewModel.playerCancellers[disk])
     }
+
+    func test_handleReset() {
+        let viewModel = dependency.testTarget
+
+        viewModel.handleReset()
+
+        let showAlert = dependency.$showAlert
+        XCTAssertEqual(showAlert.calledCount, 1)
+        XCTAssertEqual(showAlert.parameters, [.reset(okHandler: {})])
+    }
 }
 
 extension ReversiViewModelTests {
