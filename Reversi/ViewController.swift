@@ -1,13 +1,14 @@
 import ReversiLogic
+import RxCocoa
+import RxSwift
 import UIKit
 
 class ViewController: UIViewController {
     @IBOutlet private var boardView: BoardView! {
-        didSet {
-            boardView.delegate = self
-        }
+        didSet { boardView.delegate = self }
     }
     
+    @IBOutlet private var resetButton: UIButton!
     @IBOutlet private var messageDiskView: DiskView!
     @IBOutlet private var messageLabel: UILabel!
     @IBOutlet private var messageDiskSizeConstraint: NSLayoutConstraint!
@@ -21,22 +22,10 @@ class ViewController: UIViewController {
     @IBOutlet private var playerDarkActivityIndicator: UIActivityIndicatorView!
     @IBOutlet private var playerLightActivityIndicator: UIActivityIndicatorView!
 
+    private let disposeBag = DisposeBag()
+
     private lazy var viewModel = ReversiViewModel(
         messageDiskSize: messageDiskSizeConstraint.constant,
-        showAlert: { [weak self] in self?.showAlert($0) },
-        setPlayerDarkCount: { [weak self] in self?.playerDarkCountLabel.text = $0 },
-        setPlayerLightCount: { [weak self] in self?.playerLightCountLabel.text = $0 },
-        setMessageDiskSizeConstant: { [weak self] in self?.messageDiskSizeConstraint.constant = $0 },
-        setMessageDisk: { [weak self] in self?.messageDiskView.disk = $0 },
-        setMessageText: { [weak self] in self?.messageLabel.text = $0 },
-        setDisk: { [weak self] in self?.boardView.setDisk($0, atX: $1.x, y: $1.y, animated: $2, completion: $3) },
-        setPlayerDarkSelectedIndex: { [weak self] in self?.playerDarkControl.selectedSegmentIndex = $0 },
-        setPlayerLightSelectedIndex: { [weak self] in self?.playerLightControl.selectedSegmentIndex = $0 },
-        startPlayerDarkAnimation: { [weak self] in self?.playerDarkActivityIndicator.startAnimating() },
-        stopPlayerDarkAnimation: { [weak self] in self?.playerDarkActivityIndicator.stopAnimating() },
-        startPlayerLightAnimation: { [weak self] in self?.playerLightActivityIndicator.startAnimating() },
-        stopPlayerLightAnimation: { [weak self] in self?.playerLightActivityIndicator.stopAnimating() },
-        reset: { [weak self] in self?.boardView.reset() },
         asyncAfter: { DispatchQueue.main.asyncAfter(deadline: $0, execute: $1) },
         async: { DispatchQueue.main.async(execute: $0) },
         cache: GameDataCacheFactory.make(),
@@ -45,35 +34,98 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel.startGame()
+
+        defer { viewModel.startGame() }
+
+        let scheduler = ConcurrentMainScheduler.instance
+
+        viewModel.showAlert
+            .bind(to: Binder(self, scheduler: scheduler) { me, alert in
+                let alertController = UIAlertController.make(alert: alert)
+                me.present(alertController, animated: true)
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.messageDisk
+            .bind(to: Binder(self, scheduler: scheduler) { me, disk in
+                me.messageDiskView.disk = disk
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.messageDiskSizeConstant
+            .bind(to: Binder(self, scheduler: scheduler) { me, constant in
+                me.messageDiskSizeConstraint.constant = constant
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.resetBoard
+            .bind(to: Binder(self, scheduler: scheduler) { me, _ in
+                me.boardView.reset()
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.updateBoard
+            .bind(to: Binder(self, scheduler: scheduler) { me, update in
+                me.boardView.setDisk(update.disk,
+                                     atX: update.coordinate.x,
+                                     y: update.coordinate.y,
+                                     animated: update.animated,
+                                     completion: update.completion)
+            })
+            .disposed(by: disposeBag)
+
+        viewModel.messageText
+            .bind(to: messageLabel.rx.text)
+            .disposed(by: disposeBag)
+
+        viewModel.isPlayerDarkAnimating
+            .bind(to: playerDarkActivityIndicator.rx.isAnimating)
+            .disposed(by: disposeBag)
+
+        viewModel.isPlayerLightAnimating
+            .bind(to: playerLightActivityIndicator.rx.isAnimating)
+            .disposed(by: disposeBag)
+
+        viewModel.playerDarkCount
+            .bind(to: playerDarkCountLabel.rx.text)
+            .disposed(by: disposeBag)
+
+        viewModel.playerLightCount
+            .bind(to: playerLightCountLabel.rx.text)
+            .disposed(by: disposeBag)
+
+        viewModel.playerDarkSelectedIndex
+            .bind(to: playerDarkControl.rx.selectedSegmentIndex)
+            .disposed(by: disposeBag)
+
+        viewModel.playerLightSelectedIndex
+            .bind(to: playerLightControl.rx.selectedSegmentIndex)
+            .disposed(by: disposeBag)
+
+        playerDarkControl.rx.selectedSegmentIndex
+            .changed
+            .bind(to: Binder(self, scheduler: scheduler) { me, index in
+                me.viewModel.setPlayer(for: .dark, with: index)
+            })
+            .disposed(by: disposeBag)
+
+        playerLightControl.rx.selectedSegmentIndex
+            .changed
+            .bind(to: Binder(self, scheduler: scheduler) { me, index in
+                me.viewModel.setPlayer(for: .light, with: index)
+            })
+            .disposed(by: disposeBag)
+
+        resetButton.rx.tap
+            .bind(to: Binder(self, scheduler: scheduler) { me, _ in
+                me.viewModel.handleReset()
+            })
+            .disposed(by: disposeBag)
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         viewModel.viewDidAppear()
-    }
-
-    private func showAlert(_ alert: Alert) {
-        let alertController = UIAlertController.make(alert: alert)
-        present(alertController, animated: true)
-    }
-}
-
-// MARK: Inputs
-
-extension ViewController {
-    @IBAction func pressResetButton(_ sender: UIButton) {
-        viewModel.handleReset()
-    }
-
-    @IBAction func changePlayerDarkControl(_ sender: UISegmentedControl) {
-        viewModel.setPlayer(for: .dark,
-                            with: sender.selectedSegmentIndex)
-    }
-
-    @IBAction func changePlayerLightControl(_ sender: UISegmentedControl) {
-        viewModel.setPlayer(for: .light,
-                            with: sender.selectedSegmentIndex)
     }
 }
 

@@ -1,7 +1,7 @@
 import CoreGraphics
+import RxSwift
 
 public final class ReversiViewModel {
-    public typealias SetDisk = (Disk?, Coordinate, Bool, ((Bool) -> Void)?) -> Void
     public typealias AsyncAfter = (DispatchTime, @escaping () -> Void) -> Void
     public typealias Async = (@escaping () -> Void) -> Void
 
@@ -15,58 +15,41 @@ public final class ReversiViewModel {
     private var viewHasAppeared: Bool = false
     private let messageDiskSize: CGFloat
 
-    private let showAlert: (Alert) -> Void
-    private let setPlayerDarkCount: (String) -> Void
-    private let setPlayerLightCount: (String) -> Void
-    private let setMessageDiskSizeConstant: (CGFloat) -> Void
-    private let setMessageDisk: (Disk) -> Void
-    private let setMessageText: (String) -> Void
-    private let _setDisk: SetDisk
-    private let setPlayerDarkSelectedIndex: (Int) -> Void
-    private let setPlayerLightSelectedIndex: (Int) -> Void
-    private let startPlayerDarkAnimation: () -> Void
-    private let stopPlayerDarkAnimation: () -> Void
-    private let startPlayerLightAnimation: () -> Void
-    private let stopPlayerLightAnimation: () -> Void
-    private let reset: () -> Void
+    @PublishWrapper
+    public private(set) var messageDisk: Observable<Disk>
+    @PublishWrapper
+    public private(set) var messageDiskSizeConstant: Observable<CGFloat>
+    @PublishWrapper
+    public private(set) var messageText: Observable<String>
+    @PublishWrapper
+    public private(set) var showAlert: Observable<Alert>
+    @PublishWrapper
+    public private(set) var isPlayerDarkAnimating: Observable<Bool>
+    @PublishWrapper
+    public private(set) var isPlayerLightAnimating: Observable<Bool>
+    @PublishWrapper
+    public private(set) var playerDarkCount: Observable<String>
+    @PublishWrapper
+    public private(set) var playerLightCount: Observable<String>
+    @PublishWrapper
+    public private(set) var playerDarkSelectedIndex: Observable<Int>
+    @PublishWrapper
+    public private(set) var playerLightSelectedIndex: Observable<Int>
+    @PublishWrapper
+    public private(set) var resetBoard: Observable<Void>
+    @PublishWrapper
+    public private(set) var updateBoard: Observable<UpdateDisk>
+
     private let asyncAfter: AsyncAfter
     private let async: Async
     private let logic: GameLogicProtocol
     private let cache: GameDataCacheProtocol
 
     public init(messageDiskSize: CGFloat,
-                showAlert: @escaping (Alert) -> Void,
-                setPlayerDarkCount: @escaping (String) -> Void,
-                setPlayerLightCount: @escaping (String) -> Void,
-                setMessageDiskSizeConstant: @escaping (CGFloat) -> Void,
-                setMessageDisk: @escaping (Disk) -> Void,
-                setMessageText: @escaping (String) -> Void,
-                setDisk: @escaping SetDisk,
-                setPlayerDarkSelectedIndex: @escaping (Int) -> Void,
-                setPlayerLightSelectedIndex: @escaping (Int) -> Void,
-                startPlayerDarkAnimation: @escaping () -> Void,
-                stopPlayerDarkAnimation: @escaping () -> Void,
-                startPlayerLightAnimation: @escaping () -> Void,
-                stopPlayerLightAnimation: @escaping () -> Void,
-                reset: @escaping () -> Void,
                 asyncAfter: @escaping AsyncAfter,
                 async: @escaping Async,
                 cache: GameDataCacheProtocol,
                 logicFactory: GameLogicFactoryProtocol) {
-        self.showAlert = showAlert
-        self.setPlayerDarkCount = setPlayerDarkCount
-        self.setPlayerLightCount = setPlayerLightCount
-        self.setMessageDiskSizeConstant = setMessageDiskSizeConstant
-        self.setMessageDisk = setMessageDisk
-        self.setMessageText = setMessageText
-        self._setDisk = setDisk
-        self.setPlayerDarkSelectedIndex = setPlayerDarkSelectedIndex
-        self.setPlayerLightSelectedIndex = setPlayerLightSelectedIndex
-        self.startPlayerDarkAnimation = startPlayerDarkAnimation
-        self.stopPlayerDarkAnimation = stopPlayerDarkAnimation
-        self.startPlayerLightAnimation = startPlayerLightAnimation
-        self.stopPlayerLightAnimation = stopPlayerLightAnimation
-        self.reset = reset
         self.cache = cache
         self.asyncAfter = asyncAfter
         self.async = async
@@ -138,7 +121,7 @@ public final class ReversiViewModel {
             me.newGame()
             me.waitForPlayer()
         }
-        showAlert(alert)
+        _showAlert.accept(alert)
     }
 }
 
@@ -161,17 +144,18 @@ extension ReversiViewModel {
         }
     }
 
-    func setDisk(_ disk: Disk?, at coordinate: Coordinate, animated: Bool, completion: ((Bool) -> Void)? = nil) {
+    func setDisk(_ disk: Disk?, at coordinate: Coordinate, animated: Bool, completion: ((Bool) -> Void)?) {
         cache[coordinate] = disk
-        _setDisk(disk, coordinate, animated, completion)
+        let update = UpdateDisk(disk: disk, coordinate: coordinate, animated: animated, completion: completion)
+        _updateBoard.accept(update)
     }
 
     func newGame() {
-        reset()
+        _resetBoard.accept()
         cache.reset()
 
-        setPlayerDarkSelectedIndex(GameData.Player.manual.rawValue)
-        setPlayerLightSelectedIndex(GameData.Player.manual.rawValue)
+        _playerDarkSelectedIndex.accept(cache[.dark].rawValue)
+        _playerLightSelectedIndex.accept(cache[.light].rawValue)
 
         updateMessage()
         updateCount()
@@ -185,12 +169,13 @@ extension ReversiViewModel {
                 return
             }
 
-            self?.setPlayerDarkSelectedIndex(me.cache[.dark].rawValue)
-            self?.setPlayerLightSelectedIndex(me.cache[.light].rawValue)
+            self?._playerDarkSelectedIndex.accept(me.cache[.dark].rawValue)
+            self?._playerLightSelectedIndex.accept(me.cache[.light].rawValue)
 
             me.cache.cells.forEach { rows in
                 rows.forEach { cell in
-                    self?._setDisk(cell.disk, cell.coordinate, false, nil)
+                    let update = UpdateDisk(disk: cell.disk, coordinate: cell.coordinate, animated: false, completion: nil)
+                    self?._updateBoard.accept(update)
                 }
             }
 
@@ -202,24 +187,24 @@ extension ReversiViewModel {
     func updateMessage() {
         switch cache.status {
         case let .turn(side):
-            setMessageDiskSizeConstant(messageDiskSize)
-            setMessageDisk(side)
-            setMessageText("'s turn")
+            _messageDiskSizeConstant.accept(messageDiskSize)
+            _messageDisk.accept(side)
+            _messageText.accept("'s turn")
         case .gameOver:
             if let winner = logic.sideWithMoreDisks() {
-                setMessageDiskSizeConstant(messageDiskSize)
-                setMessageDisk(winner)
-                setMessageText(" won")
+                _messageDiskSizeConstant.accept(messageDiskSize)
+                _messageDisk.accept(winner)
+                _messageText.accept(" won")
             } else {
-                setMessageDiskSizeConstant(0)
-                setMessageText("Tied")
+                _messageDiskSizeConstant.accept(0)
+                _messageText.accept("Tied")
             }
         }
     }
 
     func updateCount() {
-        setPlayerDarkCount("\(logic.count(of: .dark))")
-        setPlayerLightCount("\(logic.count(of: .light))")
+        _playerDarkCount.accept("\(logic.count(of: .dark))")
+        _playerLightCount.accept("\(logic.count(of: .light))")
     }
 
     func nextTurn() {
@@ -244,7 +229,7 @@ extension ReversiViewModel {
                 let alert = Alert.pass { [weak self] in
                     self?.nextTurn()
                 }
-                showAlert(alert)
+                _showAlert.accept(alert)
             }
         } else {
             self.cache.status = .turn(turn)
@@ -263,18 +248,18 @@ extension ReversiViewModel {
 
         switch turn {
         case .dark:
-            startPlayerDarkAnimation()
+            _isPlayerDarkAnimating.accept(true)
         case .light:
-            startPlayerLightAnimation()
+            _isPlayerLightAnimating.accept(true)
         }
 
         let cleanUp: () -> Void = { [weak self] in
             guard let me = self else { return }
             switch turn {
             case .dark:
-                me.stopPlayerDarkAnimation()
+                me._isPlayerDarkAnimating.accept(false)
             case .light:
-                me.stopPlayerLightAnimation()
+                me._isPlayerLightAnimating.accept(false)
             }
             me.playerCancellers[turn] = nil
         }
@@ -313,7 +298,7 @@ extension ReversiViewModel {
                 self.animateSettingDisks(at: Array(coordinates.dropFirst()), to: disk, completion: completion)
             } else {
                 for coordinate in coordinates {
-                    self.setDisk(disk, at: coordinate, animated: false)
+                    self.setDisk(disk, at: coordinate, animated: false, completion: nil)
                 }
                 completion(false)
             }
@@ -356,9 +341,9 @@ extension ReversiViewModel {
         } else {
             async { [weak self] in
                 guard let me = self else { return }
-                me.setDisk(disk, at: coordinate, animated: false)
+                me.setDisk(disk, at: coordinate, animated: false, completion: nil)
                 for coordinate in diskCoordinates {
-                    me.setDisk(disk, at: coordinate, animated: false)
+                    me.setDisk(disk, at: coordinate, animated: false, completion: nil)
                 }
 
                 finally(me, true)
@@ -370,5 +355,12 @@ extension ReversiViewModel {
         let disk: Disk
         let x: Int
         let y: Int
+    }
+
+    public struct UpdateDisk {
+        public let disk: Disk?
+        public let coordinate: Coordinate
+        public let animated: Bool
+        public let completion: ((Bool) -> Void)?
     }
 }

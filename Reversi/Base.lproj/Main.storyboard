@@ -74,9 +74,6 @@
                                             <segment title="Manual"/>
                                             <segment title="Computer"/>
                                         </segments>
-                                        <connections>
-                                            <action selector="changePlayerDarkControl:" destination="BYZ-38-t0r" eventType="valueChanged" id="uLm-7H-1ta"/>
-                                        </connections>
                                     </segmentedControl>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NGE-KP-oHh">
                                         <rect key="frame" x="219" y="1" width="15" height="29"/>
@@ -121,9 +118,6 @@
                                             <segment title="Manual"/>
                                             <segment title="Computer"/>
                                         </segments>
-                                        <connections>
-                                            <action selector="changePlayerLightControl:" destination="BYZ-38-t0r" eventType="valueChanged" id="WdE-jC-iSa"/>
-                                        </connections>
                                     </segmentedControl>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IMh-5o-Uqc">
                                         <rect key="frame" x="36" y="1" width="15" height="29"/>
@@ -151,9 +145,6 @@
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3cI-5a-D7h">
                                 <rect key="frame" x="187.5" y="832" width="39" height="30"/>
                                 <state key="normal" title="Reset"/>
-                                <connections>
-                                    <action selector="pressResetButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Mad-K8-Vag"/>
-                                </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
@@ -188,6 +179,7 @@
                         <outlet property="playerLightActivityIndicator" destination="ufC-w0-Xwz" id="TMR-eS-eYQ"/>
                         <outlet property="playerLightControl" destination="q90-VO-j8m" id="Kit-5X-h2y"/>
                         <outlet property="playerLightCountLabel" destination="IMh-5o-Uqc" id="xR9-kk-KKf"/>
+                        <outlet property="resetButton" destination="3cI-5a-D7h" id="Jna-9J-86j"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
