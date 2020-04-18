@@ -9,17 +9,6 @@ final class ReversiViewModelTests: XCTestCase {
         self.dependency = Dependency(board: .initial(), messageDiskSize: 0)
     }
 
-    func test_turn() {
-        let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-
-        cache.status = .gameOver
-        XCTAssertNil(viewModel.turn)
-
-        cache.status = .turn(.light)
-        XCTAssertEqual(viewModel.turn, .light)
-    }
-
     func test_waitForPlayer_turnがdarkで_playerDarkがmanualの場合() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
@@ -123,7 +112,7 @@ final class ReversiViewModelTests: XCTestCase {
 
         try viewModel.loadGame()
 
-        XCTAssertEqual(viewModel.turn, .dark)
+        XCTAssertEqual(cache.status, .turn(.dark))
 
         let setPlayerDarkSelectedIndex = dependency.$setPlayerDarkSelectedIndex
         XCTAssertEqual(setPlayerDarkSelectedIndex.calledCount, 1)
@@ -386,7 +375,7 @@ final class ReversiViewModelTests: XCTestCase {
 
         viewModel.nextTurn()
 
-        XCTAssertEqual(viewModel.turn, .dark)
+        XCTAssertEqual(cache.status, .turn(.dark))
     }
 
     func test_nextTurn_turnがlightのときに_darkの有効な配置はないが_lightの有効な配置がある場合() {
@@ -409,7 +398,7 @@ final class ReversiViewModelTests: XCTestCase {
 
         viewModel.nextTurn()
 
-        XCTAssertEqual(viewModel.turn, .dark)
+        XCTAssertEqual(cache.status, .turn(.dark))
 
         let showAlert = dependency.$showAlert
         XCTAssertEqual(showAlert.calledCount, 1)
@@ -435,7 +424,7 @@ final class ReversiViewModelTests: XCTestCase {
 
         viewModel.nextTurn()
 
-        XCTAssertNil(viewModel.turn)
+        XCTAssertEqual(cache.status, .gameOver)
     }
 
     func test_playTurnOfComputer() throws {

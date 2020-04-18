@@ -5,14 +5,6 @@ public final class ReversiViewModel {
     public typealias AsyncAfter = (DispatchTime, @escaping () -> Void) -> Void
     public typealias Async = (@escaping () -> Void) -> Void
 
-    // `nil` if the current game is over
-    public var turn: Disk? {
-        switch cache.status {
-        case .gameOver: return nil
-        case let .turn(disk): return disk
-        }
-    }
-
     public var animationCanceller: Canceller?
     public var isAnimating: Bool {
         animationCanceller != nil
@@ -155,7 +147,7 @@ public final class ReversiViewModel {
             canceller.cancel()
         }
 
-        if !isAnimating, disk == turn, case .computer = cache[disk] {
+        if !isAnimating, cache.status == .turn(disk), case .computer = cache[disk] {
             playTurnOfComputer()
         }
     }
@@ -165,12 +157,12 @@ public final class ReversiViewModel {
     }
 
     func updateMessage() {
-        switch turn {
-        case let .some(side):
+        switch cache.status {
+        case let .turn(side):
             setMessageDiskSizeConstant(messageDiskSize)
             setMessageDisk(side)
             setMessageText("'s turn")
-        case .none:
+        case .gameOver:
             if let winner = GameLogic.sideWithMoreDisks(from: cache.cells) {
                 setMessageDiskSizeConstant(messageDiskSize)
                 setMessageDisk(winner)
@@ -201,7 +193,13 @@ public final class ReversiViewModel {
     }
 
     func nextTurn() {
-        guard var turn = turn else { return }
+        var turn: Disk
+        switch cache.status {
+        case let .turn(disk):
+            turn = disk
+        case .gameOver:
+            return
+        }
 
         turn.flip()
 
