@@ -622,6 +622,88 @@ extension ReversiViewModelTests {
     }
 }
 
+// - MARK: placeDisk
+
+extension ReversiViewModelTests {
+
+    func test_placeDisk_animatedがfalseの場合() throws {
+        let viewModel = dependency.testTarget
+        let logic = dependency.gameLogic
+
+        let coordinate = Coordinate(x: 0, y: 1)
+        let disk = Disk.dark
+
+        logic._flippedDiskCoordinates = [coordinate]
+
+        var isFinished: Bool?
+        try viewModel.placeDisk(disk,
+                                atX: coordinate.x,
+                                y: coordinate.y,
+                                animated: false,
+                                completion: { isFinished = $0 })
+
+        let async = dependency.$async
+        XCTAssertEqual(async.calledCount, 1)
+        let completion = try XCTUnwrap(async.parameters.last)
+        completion()
+
+        let expected = Dependency.SetDisk(disk: disk,
+                                          x: coordinate.x,
+                                          y: coordinate.y,
+                                          animated: false,
+                                          completion: nil)
+        let setDisk = dependency.$setDisk
+        XCTAssertEqual(setDisk.calledCount, 2)
+        XCTAssertEqual(setDisk.parameters, [expected, expected])
+
+        XCTAssertEqual(isFinished, true)
+    }
+
+    func test_placeDisk_animatedがtrueの場合() throws {
+        let viewModel = dependency.testTarget
+        let logic = dependency.gameLogic
+
+        let coordinate = Coordinate(x: 0, y: 1)
+        let disk = Disk.dark
+
+        logic._flippedDiskCoordinates = [coordinate]
+
+        var isFinished: Bool?
+        try viewModel.placeDisk(disk,
+                                atX: coordinate.x,
+                                y: coordinate.y,
+                                animated: true,
+                                completion: { isFinished = $0 })
+
+        let setDisk = dependency.$setDisk
+        let expected = Dependency.SetDisk(disk: disk,
+                                          x: coordinate.x,
+                                          y: coordinate.y,
+                                          animated: true,
+                                          completion: nil)
+
+        do {
+            XCTAssertEqual(setDisk.calledCount, 1)
+            let parameter = try XCTUnwrap(setDisk.parameters.last)
+            parameter.completion?(false)
+
+            XCTAssertEqual(parameter, expected)
+        }
+
+        do {
+            let expected2 = Dependency.SetDisk(disk: disk,
+                                               x: coordinate.x,
+                                               y: coordinate.y,
+                                               animated: false,
+                                               completion: nil)
+            XCTAssertEqual(setDisk.calledCount, 3)
+            XCTAssertEqual(setDisk.parameters, [expected, expected2, expected2])
+        }
+
+        XCTAssertEqual(isFinished, false)
+    }
+}
+
 extension ReversiViewModelTests {
 
     fileprivate final class Dependency {
