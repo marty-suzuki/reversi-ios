@@ -1,9 +1,12 @@
 import Foundation
 
-public protocol GameDataCacheProtocol: AnyObject {
+public protocol GameDataCellGettable: AnyObject {
+    var cells: [[GameData.Board.Cell]] { get }
+}
+
+public protocol GameDataCacheProtocol: GameDataCellGettable {
     var status: GameData.Status { get set }
     var playerOfCurrentTurn: GameData.Player? { get }
-    var cells: [[GameData.Board.Cell]] { get }
     subscript(coordinate: Coordinate) -> Disk? { get set }
     subscript(disk: Disk) -> GameData.Player { get set }
     func load(completion: @escaping () -> Void) throws
