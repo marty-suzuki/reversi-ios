@@ -306,3 +306,33 @@ public final class ReversiViewModel {
         showAlert(alert)
     }
 }
+
+extension ReversiViewModel {
+
+    public func animateSettingDisks<C: Collection>(
+        at coordinates: C,
+        to disk: Disk,
+        completion: @escaping (Bool) -> Void
+    ) where C.Element == (Int, Int) {
+        guard let (x, y) = coordinates.first else {
+            completion(true)
+            return
+        }
+
+        guard let animationCanceller = self.animationCanceller else {
+            return
+        }
+        setDisk(disk, atX: x, y: y, animated: true) { [weak self] finished in
+            guard let self = self else { return }
+            if animationCanceller.isCancelled { return }
+            if finished {
+                self.animateSettingDisks(at: coordinates.dropFirst(), to: disk, completion: completion)
+            } else {
+                for (x, y) in coordinates {
+                    self.setDisk(disk, atX: x, y: y, animated: false)
+                }
+                completion(false)
+            }
+        }
+    }
+}

@@ -137,10 +137,10 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(setDisk.calledCount, 1)
 
         let parameter = try XCTUnwrap(setDisk.parameters.first)
-        XCTAssertEqual(parameter.0, expectedCell.disk)
-        XCTAssertEqual(parameter.1, expectedCell.x)
-        XCTAssertEqual(parameter.2, expectedCell.y)
-        XCTAssertEqual(parameter.3, false)
+        XCTAssertEqual(parameter.disk, expectedCell.disk)
+        XCTAssertEqual(parameter.x, expectedCell.x)
+        XCTAssertEqual(parameter.y, expectedCell.y)
+        XCTAssertEqual(parameter.animated, false)
     }
 
     func test_saveGame() throws {
@@ -505,6 +505,158 @@ final class ReversiViewModelTests: XCTestCase {
     }
 }
 
+// - MARK: animateSettingDisks
+
+extension ReversiViewModelTests {
+
+    func test_animateSettingDisks_coordinatesが0件の場合() {
+        let viewModel = dependency.testTarget
+
+        var isFinished: Bool?
+        viewModel.animateSettingDisks(at: [], to: .dark) {
+            isFinished = $0
+        }
+
+        XCTAssertEqual(isFinished, true)
+    }
+
+    func test_animateSettingDisks_animationCancellerがnilの場合() {
+        let viewModel = dependency.testTarget
+
+        let coordinates = [(0, 0), (1, 1)]
+        let disk = Disk.dark
+        viewModel.animationCanceller = nil
+
+        var isFinished: Bool?
+        viewModel.animateSettingDisks(at: coordinates, to: disk) {
+            isFinished = $0
+        }
+
+        XCTAssertNil(isFinished)
+    }
+
+    func test_animateSettingDisks_animationCancellerを途中でキャンセルした場合() throws {
+        let viewModel = dependency.testTarget
+
+        let coordinates = [(0, 0), (1, 1)]
+        let disk = Disk.dark
+        viewModel.animationCanceller = Canceller({})
+
+        var isFinished: Bool?
+        viewModel.animateSettingDisks(at: coordinates, to: disk) {
+            isFinished = $0
+        }
+
+        let expected = Dependency.SetDisk(disk: disk,
+                                          x: 0,
+                                          y: 0,
+                                          animated: true,
+                                          completion: nil)
+
+        let paramater = try XCTUnwrap(dependency.$setDisk.parameters.first)
+
+        XCTAssertEqual(paramater, expected)
+        XCTAssertEqual(dependency.$setDisk.calledCount, 1)
+
+        viewModel.animationCanceller?.cancel()
+        paramater.completion?(false)
+
+        XCTAssertNil(isFinished)
+    }
+
+    func test_animateSettingDisks_setDiskのfinishedがfalseの場合() throws {
+        let viewModel = dependency.testTarget
+
+        let coordinates = [(0, 0), (1, 1)]
+        let disk = Disk.dark
+        viewModel.animationCanceller = Canceller({})
+
+        var isFinished: Bool?
+        viewModel.animateSettingDisks(at: coordinates, to: disk) {
+            isFinished = $0
+        }
+
+        let expected = Dependency.SetDisk(disk: disk,
+                                          x: 0,
+                                          y: 0,
+                                          animated: true,
+                                          completion: nil)
+
+        do {
+            let paramater = try XCTUnwrap(dependency.$setDisk.parameters.first)
+
+            XCTAssertEqual(paramater, expected)
+            XCTAssertEqual(dependency.$setDisk.calledCount, 1)
+
+            paramater.completion?(false)
+        }
+
+        do {
+            let expected1 = Dependency.SetDisk(disk: disk,
+                                               x: 0,
+                                               y: 0,
+                                               animated: false,
+                                               completion: nil)
+
+            let expected2 = Dependency.SetDisk(disk: disk,
+                                               x: 1,
+                                               y: 1,
+                                               animated: false,
+                                               completion: nil)
+
+            XCTAssertEqual(dependency.$setDisk.parameters, [expected, expected1, expected2])
+            XCTAssertEqual(dependency.$setDisk.calledCount, 3)
+        }
+
+        XCTAssertEqual(isFinished, false)
+    }
+
+    func test_animateSettingDisks_setDiskのfinishedがtrueの場合() throws {
+        let viewModel = dependency.testTarget
+
+        let coordinates = [(0, 0), (1, 1)]
+        let disk = Disk.dark
+        viewModel.animationCanceller = Canceller({})
+
+        var isFinished: Bool?
+        viewModel.animateSettingDisks(at: coordinates, to: disk) {
+            isFinished = $0
+        }
+
+        do {
+            let paramater = try XCTUnwrap(dependency.$setDisk.parameters.last)
+
+            let expected = Dependency.SetDisk(disk: disk,
+                                              x: 0,
+                                              y: 0,
+                                              animated: true,
+                                              completion: nil)
+
+            XCTAssertEqual(paramater, expected)
+            XCTAssertEqual(dependency.$setDisk.calledCount, 1)
+
+            paramater.completion?(true)
+        }
+
+        do {
+            let paramater = try XCTUnwrap(dependency.$setDisk.parameters.last)
+
+            let expected = Dependency.SetDisk(disk: disk,
+                                              x: 1,
+                                              y: 1,
+                                              animated: true,
+                                              completion: nil)
+
+            XCTAssertEqual(paramater, expected)
+            XCTAssertEqual(dependency.$setDisk.calledCount, 2)
+
+            paramater.completion?(true)
+        }
+
+        XCTAssertEqual(isFinished, true)
+    }
+}
+
 extension ReversiViewModelTests {
 
     fileprivate final class Dependency {
@@ -530,8 +682,8 @@ extension ReversiViewModelTests {
         @MockResponse<String, Void>()
         var setMessageText: Void
 
-        @MockResponse<(Disk?, Int, Int, Bool), Bool>()
-        var setDisk = false
+        @MockResponse<SetDisk, Void>()
+        var setDisk: Void
 
         @MockResponse<Int, Void>()
         var setPlayerDarkSelectedIndex: Void
@@ -580,8 +732,7 @@ extension ReversiViewModelTests {
                 guard let me = self else {
                     return
                 }
-                let finished = me._setDisk.respond((disk, x, y, animated))
-                completion?(finished)
+                me._setDisk.respond(.init(disk: disk, x: x, y: y, animated: animated, completion: completion))
             },
             setPlayerDarkSelectedIndex: { [weak self] in self?._setPlayerDarkSelectedIndex.respond($0) },
             setPlayerLightSelectedIndex: { [weak self] in self?._setPlayerLightSelectedIndex.respond($0) },
@@ -612,6 +763,26 @@ extension ReversiViewModelTests.Dependency {
         let x: Int
         let y: Int
         let animated: Bool
+    }
+
+    struct SetDisk: Equatable {
+        let disk: Disk?
+        let x: Int
+        let y: Int
+        let animated: Bool
+        let completion: ((Bool) -> Void)?
+    }
+}
+
+extension ReversiViewModelTests.Dependency.SetDisk {
+    fileprivate static func == (
+        lhs: ReversiViewModelTests.Dependency.SetDisk,
+        rhs: ReversiViewModelTests.Dependency.SetDisk
+    ) -> Bool {
+        return lhs.disk == rhs.disk &&
+            lhs.x == rhs.x &&
+            lhs.y == rhs.y &&
+            lhs.animated == rhs.animated
     }
 }
 

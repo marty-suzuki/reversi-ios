@@ -90,7 +90,7 @@ extension ViewController {
                 self?.viewModel.animationCanceller = nil
             }
             viewModel.animationCanceller = Canceller(cleanUp)
-            animateSettingDisks(at: [(x, y)] + diskCoordinates, to: disk) { [weak self] finished in
+            viewModel.animateSettingDisks(at: [(x, y)] + diskCoordinates, to: disk) { [weak self] finished in
                 guard let viewModel = self?.viewModel else { return }
                 guard let canceller = viewModel.animationCanceller else { return }
                 if canceller.isCancelled { return }
@@ -107,29 +107,6 @@ extension ViewController {
                 }
 
                 finally(viewModel, true)
-            }
-        }
-    }
-    
-    private func animateSettingDisks<C: Collection>(at coordinates: C, to disk: Disk, completion: @escaping (Bool) -> Void)
-        where C.Element == (Int, Int)
-    {
-        guard let (x, y) = coordinates.first else {
-            completion(true)
-            return
-        }
-
-        let animationCanceller = viewModel.animationCanceller!
-        viewModel.setDisk(disk, atX: x, y: y, animated: true) { [weak self] finished in
-            guard let self = self else { return }
-            if animationCanceller.isCancelled { return }
-            if finished {
-                self.animateSettingDisks(at: coordinates.dropFirst(), to: disk, completion: completion)
-            } else {
-                for (x, y) in coordinates {
-                    self.viewModel.setDisk(disk, atX: x, y: y, animated: false)
-                }
-                completion(false)
             }
         }
     }
