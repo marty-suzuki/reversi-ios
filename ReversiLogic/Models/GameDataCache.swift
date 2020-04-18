@@ -2,6 +2,7 @@ import Foundation
 
 public protocol GameDataCacheProtocol: AnyObject {
     var status: GameData.Status { get set }
+    var playerOfCurrentTurn: GameData.Player? { get }
     var cells: [[GameData.Board.Cell]] { get }
     subscript(coordinate: Coordinate) -> Disk? { get set }
     subscript(disk: Disk) -> GameData.Player { get set }
@@ -26,6 +27,15 @@ final class GameDataCache: GameDataCacheProtocol {
     private(set) var playerDark: GameData.Player
     private(set) var playerLight: GameData.Player
     private(set) var cells: [[GameData.Board.Cell]]
+
+    var playerOfCurrentTurn: GameData.Player? {
+        switch status {
+        case .gameOver:
+            return nil
+        case let .turn(disk):
+            return self[disk]
+        }
+    }
 
     init(
         loadGame: @escaping GameDataIO.LoadGame,

@@ -1,7 +1,8 @@
 @testable import ReversiLogic
 
 final class MockGameDataCache: GameDataCacheProtocol {
-
+    
+    var playerOfCurrentTurn: GameData.Player?
     var status: GameData.Status = .turn(.dark)
     var player: GameData.Player = .manual
     var cells: [[GameData.Board.Cell]] = []

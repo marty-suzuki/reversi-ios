@@ -103,6 +103,21 @@ final class GameDataCacheTests: XCTestCase {
         XCTAssertEqual(cache.playerDark, .computer)
         XCTAssertEqual(cache.playerLight, .manual)
     }
+
+    func test_playerOfCurrentTurn() {
+        let cache = dependency.testTarget
+
+        cache.status = .gameOver
+        XCTAssertNil(cache.playerOfCurrentTurn)
+
+        cache.status = .turn(.dark)
+        cache[.dark] = .computer
+        XCTAssertEqual(cache.playerOfCurrentTurn, .computer)
+
+        cache.status = .turn(.light)
+        cache[.light] = .computer
+        XCTAssertEqual(cache.playerOfCurrentTurn, .computer)
+    }
 }
 
 extension GameDataCacheTests {
