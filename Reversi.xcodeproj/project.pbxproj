@@ -18,6 +18,7 @@
 		D642BDD623AA0B3900396732 /* CellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDD523AA0B3900396732 /* CellView.swift */; };
 		D642BDDC23AA137C00396732 /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDDB23AA137C00396732 /* BoardView.swift */; };
 		ED20D52E244AD61E00F7BA46 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D52D244AD61E00F7BA46 /* Alert.swift */; };
+		ED20D530244AD70A00F7BA46 /* UIAlertControllerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D52F244AD70A00F7BA46 /* UIAlertControllerExtension.swift */; };
 		ED4E71452448DA6D00518585 /* GameDataCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4E71442448DA6D00518585 /* GameDataCacheTests.swift */; };
 		ED6EAC7424436B2C00BAF620 /* ReversiLogic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; };
 		ED6EAC7D24436B2C00BAF620 /* ReversiLogic.h in Headers */ = {isa = PBXBuildFile; fileRef = ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -99,6 +100,7 @@
 		D642BDD523AA0B3900396732 /* CellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellView.swift; sourceTree = "<group>"; };
 		D642BDDB23AA137C00396732 /* BoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
 		ED20D52D244AD61E00F7BA46 /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
+		ED20D52F244AD70A00F7BA46 /* UIAlertControllerExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIAlertControllerExtension.swift; sourceTree = "<group>"; };
 		ED4E71442448DA6D00518585 /* GameDataCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDataCacheTests.swift; sourceTree = "<group>"; };
 		ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ReversiLogic.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReversiLogic.h; sourceTree = "<group>"; };
@@ -286,6 +288,7 @@
 			isa = PBXGroup;
 			children = (
 				ED8CC36124475F0100CD2CAB /* CollectionExtension.swift */,
+				ED20D52F244AD70A00F7BA46 /* UIAlertControllerExtension.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -492,6 +495,7 @@
 				EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */,
 				ED6EACA62444BDE100BAF620 /* Canceller.swift in Sources */,
 				ED6EAC9524436C3300BAF620 /* Disk.swift in Sources */,
+				ED20D530244AD70A00F7BA46 /* UIAlertControllerExtension.swift in Sources */,
 				ED6EAC9B24436D9400BAF620 /* GameDataIO.swift in Sources */,
 				ED20D52E244AD61E00F7BA46 /* Alert.swift in Sources */,
 				ED8CC36224475F0100CD2CAB /* CollectionExtension.swift in Sources */,
