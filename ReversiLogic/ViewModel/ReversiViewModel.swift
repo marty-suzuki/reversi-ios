@@ -2,8 +2,8 @@ import CoreGraphics
 
 public final class ReversiViewModel {
     public typealias SetDisk = (Disk?, Int, Int, Bool, ((Bool) -> Void)?) -> Void
-    public typealias PlaceDisk = (Disk, Int, Int, Bool, @escaping (Bool) -> Void) throws -> Void
     public typealias AsyncAfter = (DispatchTime, @escaping () -> Void) -> Void
+    public typealias Async = (@escaping () -> Void) -> Void
 
     // `nil` if the current game is over
     public var turn: Disk? {
@@ -27,7 +27,6 @@ public final class ReversiViewModel {
     private var viewHasAppeared: Bool = false
     private let messageDiskSize: CGFloat
 
-    private let placeDisk: PlaceDisk
     private let showAlert: (Alert) -> Void
     private let setPlayerDarkCount: (String) -> Void
     private let setPlayerLightCount: (String) -> Void
@@ -43,10 +42,10 @@ public final class ReversiViewModel {
     private let stopPlayerLightAnimation: () -> Void
     private let reset: () -> Void
     private let asyncAfter: AsyncAfter
+    private let async: Async
     private let cache: GameDataCacheProtocol
 
     public init(messageDiskSize: CGFloat,
-                placeDisk: @escaping PlaceDisk,
                 showAlert: @escaping (Alert) -> Void,
                 setPlayerDarkCount: @escaping (String) -> Void,
                 setPlayerLightCount: @escaping (String) -> Void,
@@ -62,8 +61,8 @@ public final class ReversiViewModel {
                 stopPlayerLightAnimation: @escaping () -> Void,
                 reset: @escaping () -> Void,
                 asyncAfter: @escaping AsyncAfter,
+                async: @escaping Async,
                 cache: GameDataCacheProtocol) {
-        self.placeDisk = placeDisk
         self.showAlert = showAlert
         self.setPlayerDarkCount = setPlayerDarkCount
         self.setPlayerLightCount = setPlayerLightCount
@@ -80,6 +79,7 @@ public final class ReversiViewModel {
         self.reset = reset
         self.cache = cache
         self.asyncAfter = asyncAfter
+        self.async = async
         self.messageDiskSize = messageDiskSize
     }
 
@@ -146,7 +146,7 @@ public final class ReversiViewModel {
         }
     }
 
-    public func saveGame() throws {
+    func saveGame() throws {
         try cache.save()
     }
 
@@ -164,11 +164,11 @@ public final class ReversiViewModel {
         }
     }
 
-    public func count(of disk: Disk) -> Int {
+    func count(of disk: Disk) -> Int {
         GameLogic.count(of: disk, from: cells)
     }
 
-    public func updateMessage() {
+    func updateMessage() {
         switch turn {
         case let .some(side):
             setMessageDiskSizeConstant(messageDiskSize)
@@ -186,25 +186,25 @@ public final class ReversiViewModel {
         }
     }
 
-    public func updateCount() {
+    func updateCount() {
         setPlayerDarkCount("\(count(of: .dark))")
         setPlayerLightCount("\(count(of: .light))")
     }
 
-    public func flippedDiskCoordinatesByPlacingDisk(_ disk: Disk, atX x: Int, y: Int) -> [(Int, Int)] {
+    func flippedDiskCoordinatesByPlacingDisk(_ disk: Disk, atX x: Int, y: Int) -> [(Int, Int)] {
         GameLogic.flippedDiskCoordinates(from: cells, by: disk, at: .init(x: x, y: y))
             .map { ($0.x, $0.y) }
     }
 
-    public func canPlaceDisk(_ disk: Disk, atX x: Int, y: Int) -> Bool {
+    func canPlaceDisk(_ disk: Disk, atX x: Int, y: Int) -> Bool {
         GameLogic.canPlace(disk: disk, from: cells, at: .init(x: x, y: y))
     }
 
-    public func validMoves(for side: Disk) -> [(x: Int, y: Int)] {
+    func validMoves(for side: Disk) -> [(x: Int, y: Int)] {
         GameLogic.validMoves(for: side, from: cells).map { ($0.x, $0.y) }
     }
 
-    public func nextTurn() {
+    func nextTurn() {
         guard var turn = turn else { return }
 
         turn.flip()
@@ -259,7 +259,7 @@ public final class ReversiViewModel {
             if canceller.isCancelled { return }
             cleanUp()
 
-            try! self.placeDisk(turn, x, y, true) { [weak self] _ in
+            try! self.placeDisk(turn, atX: x, y: y, animated: true) { [weak self] _ in
                 self?.nextTurn()
             }
         }
@@ -283,7 +283,7 @@ public final class ReversiViewModel {
         let x = selectedCoordinate.x
         let y = selectedCoordinate.y
         // try? because doing nothing when an error occurs
-        try? placeDisk(turn, x, y, true) { [weak self] _ in
+        try? placeDisk(turn, atX: x, y: y, animated: true) { [weak self] _ in
             self?.nextTurn()
         }
     }
@@ -309,7 +309,7 @@ public final class ReversiViewModel {
 
 extension ReversiViewModel {
 
-    public func animateSettingDisks<C: Collection>(
+    func animateSettingDisks<C: Collection>(
         at coordinates: C,
         to disk: Disk,
         completion: @escaping (Bool) -> Void
@@ -334,5 +334,57 @@ extension ReversiViewModel {
                 completion(false)
             }
         }
+    }
+
+    /// - Parameter completion: A closure to be executed when the animation sequence ends.
+    ///     This closure has no return value and takes a single Boolean argument that indicates
+    ///     whether or not the animations actually finished before the completion handler was called.
+    ///     If `animated` is `false`,  this closure is performed at the beginning of the next run loop cycle. This parameter may be `nil`.
+    /// - Throws: `DiskPlacementError` if the `disk` cannot be placed at (`x`, `y`).
+    func placeDisk(_ disk: Disk,
+                   atX x: Int, y: Int,
+                   animated isAnimated: Bool,
+                   completion: @escaping (Bool) -> Void) throws {
+        let diskCoordinates = flippedDiskCoordinatesByPlacingDisk(disk, atX: x, y: y)
+        if diskCoordinates.isEmpty {
+            throw DiskPlacementError(disk: disk, x: x, y: y)
+        }
+
+        let finally: (ReversiViewModel, Bool) -> Void = { viewModel, finished in
+            completion(finished)
+            try? viewModel.saveGame()
+            viewModel.updateCount()
+        }
+
+        if isAnimated {
+            let cleanUp: () -> Void = { [weak self] in
+                self?.animationCanceller = nil
+            }
+            animationCanceller = Canceller(cleanUp)
+            animateSettingDisks(at: [(x, y)] + diskCoordinates, to: disk) { [weak self] finished in
+                guard let me = self else { return }
+                guard let canceller = me.animationCanceller else { return }
+                if canceller.isCancelled { return }
+                cleanUp()
+
+                finally(me, finished)
+            }
+        } else {
+            async { [weak self] in
+                guard let me = self else { return }
+                me.setDisk(disk, atX: x, y: y, animated: false)
+                for (x, y) in diskCoordinates {
+                    me.setDisk(disk, atX: x, y: y, animated: false)
+                }
+
+                finally(me, true)
+            }
+        }
+    }
+
+    struct DiskPlacementError: Error {
+        let disk: Disk
+        let x: Int
+        let y: Int
     }
 }

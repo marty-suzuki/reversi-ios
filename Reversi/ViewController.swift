@@ -19,7 +19,6 @@ class ViewController: UIViewController {
 
     private lazy var viewModel = ReversiViewModel(
         messageDiskSize: messageDiskSizeConstraint.constant,
-        placeDisk: { [weak self] in try self?.placeDisk($0, atX: $1, y: $2, animated: $3, completion: $4) },
         showAlert: { [weak self] in self?.showAlert($0) },
         setPlayerDarkCount: { [weak self] in self?.playerDarkCountLabel.text = $0 },
         setPlayerLightCount: { [weak self] in self?.playerLightCountLabel.text = $0 },
@@ -35,6 +34,7 @@ class ViewController: UIViewController {
         stopPlayerLightAnimation: { [weak self] in self?.playerLightActivityIndicator.stopAnimating() },
         reset: { [weak self] in self?.boardView.reset() },
         asyncAfter: { DispatchQueue.main.asyncAfter(deadline: $0, execute: $1) },
+        async: { DispatchQueue.main.async(execute: $0) },
         cache: GameDataCacheFactory.make()
     )
 
@@ -61,57 +61,6 @@ class ViewController: UIViewController {
     }
 }
 
-// MARK: Reversi logics
-
-extension ViewController {
-
-    /// - Parameter completion: A closure to be executed when the animation sequence ends.
-    ///     This closure has no return value and takes a single Boolean argument that indicates
-    ///     whether or not the animations actually finished before the completion handler was called.
-    ///     If `animated` is `false`,  this closure is performed at the beginning of the next run loop cycle. This parameter may be `nil`.
-    /// - Throws: `DiskPlacementError` if the `disk` cannot be placed at (`x`, `y`).
-    func placeDisk(_ disk: Disk,
-                   atX x: Int, y: Int,
-                   animated isAnimated: Bool,
-                   completion: @escaping (Bool) -> Void) throws {
-        let diskCoordinates = viewModel.flippedDiskCoordinatesByPlacingDisk(disk, atX: x, y: y)
-        if diskCoordinates.isEmpty {
-            throw DiskPlacementError(disk: disk, x: x, y: y)
-        }
-
-        let finally: (ReversiViewModel, Bool) -> Void = { viewModel, finished in
-            completion(finished)
-            try? viewModel.saveGame()
-            viewModel.updateCount()
-        }
-
-        if isAnimated {
-            let cleanUp: () -> Void = { [weak self] in
-                self?.viewModel.animationCanceller = nil
-            }
-            viewModel.animationCanceller = Canceller(cleanUp)
-            viewModel.animateSettingDisks(at: [(x, y)] + diskCoordinates, to: disk) { [weak self] finished in
-                guard let viewModel = self?.viewModel else { return }
-                guard let canceller = viewModel.animationCanceller else { return }
-                if canceller.isCancelled { return }
-                cleanUp()
-
-                finally(viewModel, finished)
-            }
-        } else {
-            DispatchQueue.main.async { [weak self] in
-                guard let viewModel = self?.viewModel else { return }
-                viewModel.setDisk(disk, atX: x, y: y, animated: false)
-                for (x, y) in diskCoordinates {
-                    viewModel.setDisk(disk, atX: x, y: y, animated: false)
-                }
-
-                finally(viewModel, true)
-            }
-        }
-    }
-}
-
 // MARK: Inputs
 
 extension ViewController {
@@ -134,12 +83,4 @@ extension ViewController: BoardViewDelegate {
     func boardView(_ boardView: BoardView, didSelectCellAtX x: Int, y: Int) {
         viewModel.handle(selectedCoordinate: .init(x: x, y: y))
     }
-}
-
-// MARK: Additional types
-
-struct DiskPlacementError: Error {
-    let disk: Disk
-    let x: Int
-    let y: Int
 }

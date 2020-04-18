@@ -480,6 +480,21 @@ final class ReversiViewModelTests: XCTestCase {
     }
 
     func test_handleSelectedCoordinate() {
+        let board: [[Disk?]] = [
+            [nil, nil,    nil,   nil,   nil],
+            [nil, .light, .dark, nil,   nil],
+            [nil, .light, .dark, .dark, nil],
+            [nil, .light, nil,   nil,   nil]
+        ]
+
+        let cells = board.enumerated().map { y, rows in
+            rows.enumerated().map { x, disk in
+                GameData.Board.Cell(x: x, y: y, disk: disk)
+            }
+        }
+
+        self.dependency = Dependency(board: .init(cells: cells),
+                                     messageDiskSize: 0)
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
 
@@ -493,15 +508,12 @@ final class ReversiViewModelTests: XCTestCase {
         let coordinate = Coordinate(x: 0, y: 0)
         viewModel.handle(selectedCoordinate: coordinate)
 
-        let placeDisk = dependency.$placeDisk
-        XCTAssertEqual(placeDisk.calledCount, 1)
-        let expected = Dependency.PlaceDisk(
-            disk: disk,
-            x: coordinate.x,
-            y: coordinate.y,
-            animated: true
-        )
-        XCTAssertEqual(placeDisk.parameters, [expected])
+        let expected = Dependency.SetDisk(disk: disk,
+                                          x: 0,
+                                          y: 0,
+                                          animated: true,
+                                          completion: nil)
+        XCTAssertEqual(dependency.$setDisk.parameters, [expected])
     }
 }
 
@@ -661,9 +673,6 @@ extension ReversiViewModelTests {
 
     fileprivate final class Dependency {
 
-        @MockResponse<PlaceDisk, Bool>
-        var placeDisk = false
-
         @MockResponse<Alert, Void>()
         var showAlert: Void
 
@@ -709,19 +718,15 @@ extension ReversiViewModelTests {
         @MockResponse<AsyncAfter, Void>()
         var asyncAfter: Void
 
+        @MockResponse<() -> Void, Void>()
+        var async: Void
+
         let gameDataCache = MockGameDataCache()
 
         private let messageDiskSize: CGFloat
 
         private(set) lazy var testTarget = ReversiViewModel(
             messageDiskSize: messageDiskSize,
-            placeDisk: { [weak self] disk, x, y, animated, completion in
-                guard let me = self else {
-                    return
-                }
-                let finished = me._placeDisk.respond(.init(disk: disk, x: x, y: y, animated: animated))
-                completion(finished)
-            },
             showAlert: { [weak self] in self?._showAlert.respond($0) },
             setPlayerDarkCount: { [weak self] in self?._setPlayerDarkCount.respond($0) },
             setPlayerLightCount: { [weak self] in self?._setPlayerLightCount.respond($0) },
@@ -742,6 +747,7 @@ extension ReversiViewModelTests {
             stopPlayerLightAnimation: { [weak self] in self?._stopPlayerLightAnimation.respond() },
             reset: { [weak self] in self?._reset.respond() },
             asyncAfter: { [weak self] in self?._asyncAfter.respond(.init(time: $0, completion: $1)) },
+            async: { [weak self] in self?._async.respond($0)  },
             cache: gameDataCache
         )
 
@@ -756,13 +762,6 @@ extension ReversiViewModelTests.Dependency {
     struct AsyncAfter {
         let time: DispatchTime
         let completion: () -> Void
-    }
-
-    struct PlaceDisk: Equatable {
-        let disk: Disk?
-        let x: Int
-        let y: Int
-        let animated: Bool
     }
 
     struct SetDisk: Equatable {
