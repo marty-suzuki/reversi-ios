@@ -17,6 +17,7 @@ public struct GameLogicFactory: GameLogicFactoryProtocol {
 
 @dynamicMemberLookup
 public protocol GameLogicProtocol: GameDataSettable {
+    var playerCancellers: [Disk: Canceller] { get set }
     var countOfDark: ValueObservable<Int> { get }
     var countOfLight: ValueObservable<Int> { get }
     var playerOfCurrentTurn:  ValueObservable<GameData.Player?> { get }
@@ -27,11 +28,14 @@ public protocol GameLogicProtocol: GameDataSettable {
     func validMoves(for disk: Disk) -> [Coordinate]
 
     func waitForPlayer()
+    func setPlayer(for disk: Disk, with index: Int)
 
     subscript<T>(dynamicMember keyPath: KeyPath<GameDataGettable, ValueObservable<T>>) -> ValueObservable<T> { get }
 }
 
 final class GameLogic: GameLogicProtocol {
+
+    var playerCancellers: [Disk: Canceller] = [:]
 
     @BehaviorWrapper(value: 0)
     private(set) var countOfDark: ValueObservable<Int>
@@ -180,6 +184,34 @@ final class GameLogic: GameLogicProtocol {
             _playTurnOfComputer.accept()
         }
     }
+
+    func setPlayer(for disk: Disk, with index: Int) {
+        switch disk {
+        case .dark:
+            cache.setPlayerOfDark(GameData.Player(rawValue: index) ?? .manual)
+        case .light:
+            cache.setPlayerOfLight(GameData.Player(rawValue: index) ?? .manual)
+        }
+
+        try? cache.save()
+
+        if let canceller = playerCancellers[disk] {
+            canceller.cancel()
+        }
+
+        let player: GameData.Player
+        switch disk {
+        case .dark:
+            player = cache.playerDark.value
+        case .light:
+            player = cache.playerLight.value
+        }
+
+        if cache.status.value == .turn(disk), case .computer = player {
+            _playTurnOfComputer.accept()
+        }
+    }
+
 }
 
 extension GameLogic {

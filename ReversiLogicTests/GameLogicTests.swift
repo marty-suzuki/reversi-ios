@@ -9,6 +9,11 @@ final class GameLogicTests: XCTestCase {
     override func setUp() {
         self.dependency = Dependency()
     }
+}
+
+// - MARK: count
+
+extension GameLogicTests {
 
     func test_countOfDark() {
         let disk = Disk.dark
@@ -39,6 +44,11 @@ final class GameLogicTests: XCTestCase {
         let count = dependency.testTarget.countOfLight.value
         XCTAssertEqual(count, x * y)
     }
+}
+
+// - MARK: playerOfCurrentTurn
+
+extension GameLogicTests {
 
     func test_playerOfCurrentTurn() {
         let logic = dependency.testTarget
@@ -55,6 +65,11 @@ final class GameLogicTests: XCTestCase {
         cache.$playerLight.accept(.computer)
         XCTAssertEqual(logic.playerOfCurrentTurn.value, .computer)
     }
+}
+
+// - MARK: sideWithMoreDisks
+
+extension GameLogicTests {
 
     func test_sideWithMoreDisks_darkの方が多い() {
         dependency.cache.$cells.accept([
@@ -93,6 +108,11 @@ final class GameLogicTests: XCTestCase {
         let result = dependency.testTarget.sideWithMoreDisks.value
         XCTAssertNil(result)
     }
+}
+
+// - MARK: flippedDiskCoordinatesByPlacingDisk
+
+extension GameLogicTests {
 
     func test_flippedDiskCoordinatesByPlacingDisk_diskが有効な位置の場合() throws {
         let board: [[Disk?]] = [
@@ -171,6 +191,11 @@ final class GameLogicTests: XCTestCase {
             XCTAssertTrue(coordinates.isEmpty)
         }
     }
+}
+
+// - MARK: validMoves
+
+extension GameLogicTests {
 
     func test_validMoves() throws {
         let board: [[Disk?]] = [
@@ -195,6 +220,11 @@ final class GameLogicTests: XCTestCase {
         ]
         XCTAssertEqual(coordinates, expected)
     }
+}
+
+// - MARK: waitForPlayer
+
+extension GameLogicTests {
 
     func test_waitForPlayer_turnがdarkで_playerDarkがmanualの場合() {
         let viewModel = dependency.testTarget
@@ -234,6 +264,76 @@ final class GameLogicTests: XCTestCase {
         let playTurnOfComputer = dependency.$playTurnOfComputer
         XCTAssertEqual(playTurnOfComputer.calledCount, 0)
     }
+}
+
+// - MARK: setPlayer
+
+extension GameLogicTests {
+
+    func test_setPlayer_playerDarkに値が反映される() {
+        let logic = dependency.testTarget
+        let cache = dependency.cache
+        let disk = Disk.dark
+        cache.$playerDark.accept(.manual)
+
+        logic.setPlayer(for: disk, with: 1)
+        XCTAssertEqual(cache.$_setPalyerDark.parameters, [.computer])
+
+        logic.setPlayer(for: disk, with: 0)
+        XCTAssertEqual(cache.$_setPalyerDark.parameters, [.computer, .manual])
+    }
+
+    func test_setPlayer_playerLightに値が反映される() {
+        let logic = dependency.testTarget
+        let cache = dependency.cache
+        let disk = Disk.light
+        cache.$playerLight.accept(.manual)
+
+        logic.setPlayer(for: disk, with: 1)
+        XCTAssertEqual(cache.$_setPalyerLight.parameters, [.computer])
+
+        logic.setPlayer(for: disk, with: 0)
+        XCTAssertEqual(cache.$_setPalyerLight.parameters, [.computer, .manual])
+    }
+
+    func test_setPlayer_diskと現在のplayerが一致していて_playerがcomputerの場合() {
+        let logic = dependency.testTarget
+        let cache = dependency.cache
+        let disk = Disk.light
+        cache.$status.accept(.turn(disk))
+        cache.$playerLight.accept(.computer)
+
+        logic.setPlayer(for: disk, with: 1)
+
+        let playTurnOfComputer = dependency.$playTurnOfComputer
+        XCTAssertEqual(playTurnOfComputer.calledCount, 1)
+    }
+
+    func test_setPlayer_diskと現在のplayerが不一致で_playerがcomputerの場合() {
+        let logic = dependency.testTarget
+        let cache = dependency.cache
+        cache.$status.accept(.turn(.light))
+        cache.$playerLight.accept(.computer)
+
+        logic.setPlayer(for: .dark, with: 1)
+
+        let playTurnOfComputer = dependency.$playTurnOfComputer
+        XCTAssertEqual(playTurnOfComputer.calledCount, 0)
+    }
+
+    func test_setPlayer_diskと現在のplayerが一致していて_playerがmanualの場合() {
+        let logic = dependency.testTarget
+        let cache = dependency.cache
+        let disk = Disk.light
+        cache.$status.accept(.turn(disk))
+        cache.$playerLight.accept(.manual)
+
+        logic.setPlayer(for: disk, with: 0)
+
+        let playTurnOfComputer = dependency.$playTurnOfComputer
+        XCTAssertEqual(playTurnOfComputer.calledCount, 0)
+    }
+
 }
 
 extension GameLogicTests {

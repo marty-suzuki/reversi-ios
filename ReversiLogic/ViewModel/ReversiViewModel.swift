@@ -10,9 +10,6 @@ public final class ReversiViewModel {
         animationCanceller != nil
     }
 
-    public var playerCancellers: [Disk: Canceller] = [:]
-
-    private var viewHasAppeared: Bool = false
     private let messageDiskSize: CGFloat
 
     @PublishWrapper
@@ -91,6 +88,9 @@ public final class ReversiViewModel {
 
         logic.playTurnOfComputer
             .subscribe(onNext: { [weak self] in
+                guard let me = self, !me.isAnimating else {
+                    return
+                }
                 self?.playTurnOfComputer()
             })
             .disposed(by: disposeBag)
@@ -113,30 +113,7 @@ public final class ReversiViewModel {
     }
 
     public func setPlayer(for disk: Disk, with index: Int) {
-        switch disk {
-        case .dark:
-            logic.setPlayerOfDark(GameData.Player(rawValue: index) ?? .manual)
-        case .light:
-            logic.setPlayerOfLight(GameData.Player(rawValue: index) ?? .manual)
-        }
-
-        try? logic.save()
-
-        if let canceller = playerCancellers[disk] {
-            canceller.cancel()
-        }
-
-        let player: GameData.Player
-        switch disk {
-        case .dark:
-            player = logic.playerDark.value
-        case .light:
-            player = logic.playerLight.value
-        }
-
-        if !isAnimating, logic.status.value == .turn(disk), case .computer = player {
-            playTurnOfComputer()
-        }
+        logic.setPlayer(for: disk, with: index)
     }
 
     public func handle(selectedCoordinate: Coordinate) {
@@ -166,8 +143,8 @@ public final class ReversiViewModel {
             me.animationCanceller = nil
 
             for side in Disk.allCases {
-                me.playerCancellers[side]?.cancel()
-                me.playerCancellers.removeValue(forKey: side)
+                me.logic.playerCancellers[side]?.cancel()
+                me.logic.playerCancellers.removeValue(forKey: side)
             }
 
             me.newGame()
@@ -267,7 +244,7 @@ extension ReversiViewModel {
             case .light:
                 me._isPlayerLightAnimating.accept(false)
             }
-            me.playerCancellers[turn] = nil
+            me.logic.playerCancellers[turn] = nil
         }
         let canceller = Canceller(cleanUp)
         asyncAfter(.now() + 2.0) { [weak self] in
@@ -280,7 +257,7 @@ extension ReversiViewModel {
             }
         }
 
-        playerCancellers[turn] = canceller
+        logic.playerCancellers[turn] = canceller
     }
 }
 

@@ -78,107 +78,6 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(parameter.animated, false)
     }
 
-    func test_setPlayer_playerDarkに値が反映される() {
-        let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-        let disk = Disk.dark
-        cache.$playerDark.accept(.manual)
-
-        viewModel.setPlayer(for: disk, with: 1)
-        XCTAssertEqual(cache.$_setPalyerDark.parameters, [.computer])
-
-        viewModel.setPlayer(for: disk, with: 0)
-        XCTAssertEqual(cache.$_setPalyerDark.parameters, [.computer, .manual])
-    }
-
-    func test_setPlayer_playerLightに値が反映される() {
-        let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-        let disk = Disk.light
-        cache.$playerLight.accept(.manual)
-
-        viewModel.setPlayer(for: disk, with: 1)
-        XCTAssertEqual(cache.$_setPalyerLight.parameters, [.computer])
-
-        viewModel.setPlayer(for: disk, with: 0)
-        XCTAssertEqual(cache.$_setPalyerLight.parameters, [.computer, .manual])
-    }
-
-    func test_setPlayer_isAnimatingがfalseで_diskと現在のplayerが一致していて_playerがcomputerの場合() {
-        let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-        let disk = Disk.light
-        cache.$status.accept(.turn(disk))
-        let logic = dependency.gameLogic
-        logic._validMovekForLight = [Coordinate(x: 0, y: 0)]
-
-        viewModel.animationCanceller = nil  // isAnimating = false
-        cache.$playerLight.accept(.computer)
-
-        viewModel.setPlayer(for: disk, with: 1)
-
-        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
-        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
-
-        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
-        XCTAssertEqual(isPlayerLightAnimating.calledCount, 1)
-    }
-
-    func test_setPlayer_isAnimatingがtrueで_diskと現在のplayerが一致していて_playerがcomputerの場合() {
-        let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-        let disk = Disk.light
-        cache.$status.accept(.turn(disk))
-        let logic = dependency.gameLogic
-        logic._validMovekForLight = [Coordinate(x: 0, y: 0)]
-
-        viewModel.animationCanceller = Canceller({}) // isAnimating = true
-        cache.$playerLight.accept(.computer)
-
-        viewModel.setPlayer(for: disk, with: 1)
-
-        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
-        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
-
-        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
-        XCTAssertEqual(isPlayerLightAnimating.calledCount, 0)
-    }
-
-    func test_setPlayer_isAnimatingがfalseで_diskと現在のplayerが不一致で_playerがcomputerの場合() {
-        let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-        cache.$status.accept(.turn(.light))
-
-        viewModel.animationCanceller = nil // isAnimating = false
-        cache.$playerLight.accept(.computer)
-
-        viewModel.setPlayer(for: .dark, with: 1)
-
-        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
-        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
-
-        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
-        XCTAssertEqual(isPlayerLightAnimating.calledCount, 0)
-    }
-
-    func test_setPlayer_isAnimatingがfalseで_diskと現在のplayerが一致していて_playerがmanualの場合() {
-        let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-        let disk = Disk.light
-        cache.$status.accept(.turn(disk))
-
-        viewModel.animationCanceller = nil // isAnimating = false
-        cache.$playerLight.accept(.manual)
-
-        viewModel.setPlayer(for: disk, with: 0)
-
-        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
-        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
-
-        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
-        XCTAssertEqual(isPlayerLightAnimating.calledCount, 0)
-    }
-
     func test_status_gameOverじゃない場合() {
         let expectedSize = CGFloat(arc4random() % 100)
         self.dependency = Dependency(cells: GameData.initial.cells, messageDiskSize: expectedSize)
@@ -338,7 +237,7 @@ final class ReversiViewModelTests: XCTestCase {
         let asyncAfter = dependency.$asyncAfter
         XCTAssertEqual(asyncAfter.calledCount, 1)
 
-        XCTAssertNotNil(viewModel.playerCancellers[disk])
+        XCTAssertNotNil(logic.playerCancellers[disk])
 
         let completion = try XCTUnwrap(asyncAfter.parameters.first?.completion)
         completion()
@@ -346,7 +245,7 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
         XCTAssertEqual(isPlayerLightAnimating.calledCount, 2)
 
-        XCTAssertNil(viewModel.playerCancellers[disk])
+        XCTAssertNil(logic.playerCancellers[disk])
     }
 
     func test_handleReset() {

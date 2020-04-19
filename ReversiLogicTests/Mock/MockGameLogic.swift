@@ -16,6 +16,9 @@ struct MockGameLogicFactory: GameLogicFactoryProtocol {
 
 final class MockGameLogic: GameLogicProtocol {
 
+    @CountableProperty
+    var playerCancellers: [Disk : Canceller] = [:]
+
     @MockPublishWrapper
     private(set) var playTurnOfComputer: Observable<Void>
 
@@ -46,6 +49,9 @@ final class MockGameLogic: GameLogicProtocol {
     @MockResponse<Void, Void>()
     var _waitForPlayer: Void
 
+    @MockResponse<SetPlayer, Void>()
+    var _setPlayer: Void
+
     let cache = MockGameDataCache()
 
     func flippedDiskCoordinates(by disk: Disk, at coordinate: Coordinate) -> [Coordinate] {
@@ -67,6 +73,10 @@ final class MockGameLogic: GameLogicProtocol {
 
     func waitForPlayer() {
         __waitForPlayer.respond()
+    }
+
+    func setPlayer(for disk: Disk, with index: Int) {
+        __setPlayer.respond(.init(disk: disk, index: index))
     }
 }
 
@@ -115,5 +125,10 @@ extension MockGameLogic {
     struct CanPlace: Equatable {
         let disk: Disk
         let coordinate: Coordinate
+    }
+
+    struct SetPlayer: Equatable {
+        let disk: Disk
+        let index: Int
     }
 }
