@@ -1,3 +1,4 @@
+import RxSwift
 import XCTest
 @testable import ReversiLogic
 
@@ -18,11 +19,11 @@ final class ReversiViewModelTests: XCTestCase {
 
         viewModel.waitForPlayer()
 
-        let startPlayerDarkAnimation = dependency.$startPlayerDarkAnimation
-        XCTAssertEqual(startPlayerDarkAnimation.calledCount, 0)
+        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
+        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
 
-        let startPlayerLightAnimation = dependency.$startPlayerLightAnimation
-         XCTAssertEqual(startPlayerLightAnimation.calledCount, 0)
+        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
+         XCTAssertEqual(isPlayerLightAnimating.calledCount, 0)
     }
 
     func test_waitForPlayer_turnがlightで_playerLightがcomputerの場合() {
@@ -36,11 +37,11 @@ final class ReversiViewModelTests: XCTestCase {
 
         viewModel.waitForPlayer()
 
-        let startPlayerDarkAnimation = dependency.$startPlayerDarkAnimation
-        XCTAssertEqual(startPlayerDarkAnimation.calledCount, 0)
+        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
+        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
 
-        let startPlayerLightAnimation = dependency.$startPlayerLightAnimation
-         XCTAssertEqual(startPlayerLightAnimation.calledCount, 1)
+        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
+         XCTAssertEqual(isPlayerLightAnimating.calledCount, 1)
     }
 
     func test_waitForPlayer_statusがgameOverの場合() {
@@ -52,11 +53,11 @@ final class ReversiViewModelTests: XCTestCase {
 
         viewModel.waitForPlayer()
 
-        let startPlayerDarkAnimation = dependency.$startPlayerDarkAnimation
-        XCTAssertEqual(startPlayerDarkAnimation.calledCount, 0)
+        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
+        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
 
-        let startPlayerLightAnimation = dependency.$startPlayerLightAnimation
-         XCTAssertEqual(startPlayerLightAnimation.calledCount, 0)
+        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
+         XCTAssertEqual(isPlayerLightAnimating.calledCount, 0)
     }
 
     func test_viewDidAppear_waitForPlayerが2回呼ばれることはない() {
@@ -126,10 +127,10 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(setPlayerLightSelectedIndex.calledCount, 1)
         XCTAssertEqual(setPlayerLightSelectedIndex.parameters, [expectedPlayerLight.rawValue])
 
-        let setDisk = dependency.$setDisk
-        XCTAssertEqual(setDisk.calledCount, 1)
+        let updateBoard = dependency.$updateBoard
+        XCTAssertEqual(updateBoard.calledCount, 1)
 
-        let parameter = try XCTUnwrap(setDisk.parameters.first)
+        let parameter = try XCTUnwrap(updateBoard.parameters.first)
         XCTAssertEqual(parameter.disk, expectedCell.disk)
         XCTAssertEqual(parameter.coordinate, expectedCell.coordinate)
         XCTAssertEqual(parameter.animated, false)
@@ -178,11 +179,11 @@ final class ReversiViewModelTests: XCTestCase {
 
         viewModel.setPlayer(for: disk, with: 1)
 
-        let startPlayerDarkAnimation = dependency.$startPlayerDarkAnimation
-        XCTAssertEqual(startPlayerDarkAnimation.calledCount, 0)
+        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
+        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
 
-        let startPlayerLightAnimation = dependency.$startPlayerLightAnimation
-        XCTAssertEqual(startPlayerLightAnimation.calledCount, 1)
+        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
+        XCTAssertEqual(isPlayerLightAnimating.calledCount, 1)
     }
 
     func test_setPlayer_isAnimatingがtrueで_diskと現在のplayerが一致していて_playerがcomputerの場合() {
@@ -198,11 +199,11 @@ final class ReversiViewModelTests: XCTestCase {
 
         viewModel.setPlayer(for: disk, with: 1)
 
-        let startPlayerLightAnimation = dependency.$startPlayerLightAnimation
-        XCTAssertEqual(startPlayerLightAnimation.calledCount, 0)
+        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
+        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
 
-        let startPlayerDarkAnimation = dependency.$startPlayerDarkAnimation
-        XCTAssertEqual(startPlayerDarkAnimation.calledCount, 0)
+        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
+        XCTAssertEqual(isPlayerLightAnimating.calledCount, 0)
     }
 
     func test_setPlayer_isAnimatingがfalseで_diskと現在のplayerが不一致で_playerがcomputerの場合() {
@@ -215,11 +216,11 @@ final class ReversiViewModelTests: XCTestCase {
 
         viewModel.setPlayer(for: .dark, with: 1)
 
-        let startPlayerLightAnimation = dependency.$startPlayerLightAnimation
-        XCTAssertEqual(startPlayerLightAnimation.calledCount, 0)
+        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
+        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
 
-        let startPlayerDarkAnimation = dependency.$startPlayerDarkAnimation
-        XCTAssertEqual(startPlayerDarkAnimation.calledCount, 0)
+        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
+        XCTAssertEqual(isPlayerLightAnimating.calledCount, 0)
     }
 
     func test_setPlayer_isAnimatingがfalseで_diskと現在のplayerが一致していて_playerがmanualの場合() {
@@ -233,11 +234,11 @@ final class ReversiViewModelTests: XCTestCase {
 
         viewModel.setPlayer(for: disk, with: 0)
 
-        let startPlayerLightAnimation = dependency.$startPlayerLightAnimation
-        XCTAssertEqual(startPlayerLightAnimation.calledCount, 0)
+        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
+        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
 
-        let startPlayerDarkAnimation = dependency.$startPlayerDarkAnimation
-        XCTAssertEqual(startPlayerDarkAnimation.calledCount, 0)
+        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
+        XCTAssertEqual(isPlayerLightAnimating.calledCount, 0)
     }
 
     func test_updateMessage_trunがnilじゃない場合() {
@@ -397,11 +398,11 @@ final class ReversiViewModelTests: XCTestCase {
 
         viewModel.playTurnOfComputer()
 
-        let startPlayerDarkAnimation = dependency.$startPlayerDarkAnimation
-        XCTAssertEqual(startPlayerDarkAnimation.calledCount, 0)
+        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
+        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
 
-        let startPlayerLightAnimation = dependency.$startPlayerLightAnimation
-        XCTAssertEqual(startPlayerLightAnimation.calledCount, 1)
+        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
+        XCTAssertEqual(isPlayerLightAnimating.calledCount, 1)
 
         let asyncAfter = dependency.$asyncAfter
         XCTAssertEqual(asyncAfter.calledCount, 1)
@@ -411,11 +412,8 @@ final class ReversiViewModelTests: XCTestCase {
         let completion = try XCTUnwrap(asyncAfter.parameters.first?.completion)
         completion()
 
-        let stopPlayerDarkAnimation = dependency.$stopPlayerDarkAnimation
-        XCTAssertEqual(stopPlayerDarkAnimation.calledCount, 0)
-
-        let stopPlayerLightAnimation = dependency.$stopPlayerLightAnimation
-        XCTAssertEqual(stopPlayerLightAnimation.calledCount, 1)
+        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
+        XCTAssertEqual(isPlayerLightAnimating.calledCount, 2)
 
         XCTAssertNil(viewModel.playerCancellers[disk])
     }
@@ -502,10 +500,10 @@ extension ReversiViewModelTests {
                                           animated: true,
                                           completion: nil)
 
-        let paramater = try XCTUnwrap(dependency.$setDisk.parameters.first)
+        let paramater = try XCTUnwrap(dependency.$updateBoard.parameters.first)
 
         XCTAssertEqual(paramater, expected)
-        XCTAssertEqual(dependency.$setDisk.calledCount, 1)
+        XCTAssertEqual(dependency.$updateBoard.calledCount, 1)
 
         viewModel.animationCanceller?.cancel()
         paramater.completion?(false)
@@ -531,10 +529,10 @@ extension ReversiViewModelTests {
                                           completion: nil)
 
         do {
-            let paramater = try XCTUnwrap(dependency.$setDisk.parameters.first)
+            let paramater = try XCTUnwrap(dependency.$updateBoard.parameters.first)
 
             XCTAssertEqual(paramater, expected)
-            XCTAssertEqual(dependency.$setDisk.calledCount, 1)
+            XCTAssertEqual(dependency.$updateBoard.calledCount, 1)
 
             paramater.completion?(false)
         }
@@ -550,8 +548,8 @@ extension ReversiViewModelTests {
                                                animated: false,
                                                completion: nil)
 
-            XCTAssertEqual(dependency.$setDisk.parameters, [expected, expected1, expected2])
-            XCTAssertEqual(dependency.$setDisk.calledCount, 3)
+            XCTAssertEqual(dependency.$updateBoard.parameters, [expected, expected1, expected2])
+            XCTAssertEqual(dependency.$updateBoard.calledCount, 3)
         }
 
         XCTAssertEqual(isFinished, false)
@@ -570,7 +568,7 @@ extension ReversiViewModelTests {
         }
 
         do {
-            let paramater = try XCTUnwrap(dependency.$setDisk.parameters.last)
+            let paramater = try XCTUnwrap(dependency.$updateBoard.parameters.last)
 
             let expected = Dependency.SetDisk(disk: disk,
                                               coordinate: .init(x: 0, y: 0),
@@ -578,13 +576,13 @@ extension ReversiViewModelTests {
                                               completion: nil)
 
             XCTAssertEqual(paramater, expected)
-            XCTAssertEqual(dependency.$setDisk.calledCount, 1)
+            XCTAssertEqual(dependency.$updateBoard.calledCount, 1)
 
             paramater.completion?(true)
         }
 
         do {
-            let paramater = try XCTUnwrap(dependency.$setDisk.parameters.last)
+            let paramater = try XCTUnwrap(dependency.$updateBoard.parameters.last)
 
             let expected = Dependency.SetDisk(disk: disk,
                                               coordinate: .init(x: 1, y: 1),
@@ -592,7 +590,7 @@ extension ReversiViewModelTests {
                                               completion: nil)
 
             XCTAssertEqual(paramater, expected)
-            XCTAssertEqual(dependency.$setDisk.calledCount, 2)
+            XCTAssertEqual(dependency.$updateBoard.calledCount, 2)
 
             paramater.completion?(true)
         }
@@ -629,9 +627,9 @@ extension ReversiViewModelTests {
                                           coordinate: coordinate,
                                           animated: false,
                                           completion: nil)
-        let setDisk = dependency.$setDisk
-        XCTAssertEqual(setDisk.calledCount, 2)
-        XCTAssertEqual(setDisk.parameters, [expected, expected])
+        let updateBoard = dependency.$updateBoard
+        XCTAssertEqual(updateBoard.calledCount, 2)
+        XCTAssertEqual(updateBoard.parameters, [expected, expected])
 
         XCTAssertEqual(isFinished, true)
     }
@@ -651,15 +649,15 @@ extension ReversiViewModelTests {
                                 animated: true,
                                 completion: { isFinished = $0 })
 
-        let setDisk = dependency.$setDisk
+        let updateBoard = dependency.$updateBoard
         let expected = Dependency.SetDisk(disk: disk,
                                           coordinate: coordinate,
                                           animated: true,
                                           completion: nil)
 
         do {
-            XCTAssertEqual(setDisk.calledCount, 1)
-            let parameter = try XCTUnwrap(setDisk.parameters.last)
+            XCTAssertEqual(updateBoard.calledCount, 1)
+            let parameter = try XCTUnwrap(updateBoard.parameters.last)
             parameter.completion?(false)
 
             XCTAssertEqual(parameter, expected)
@@ -670,8 +668,8 @@ extension ReversiViewModelTests {
                                                coordinate: coordinate,
                                                animated: false,
                                                completion: nil)
-            XCTAssertEqual(setDisk.calledCount, 3)
-            XCTAssertEqual(setDisk.parameters, [expected, expected2, expected2])
+            XCTAssertEqual(updateBoard.calledCount, 3)
+            XCTAssertEqual(updateBoard.parameters, [expected, expected2, expected2])
         }
 
         XCTAssertEqual(isFinished, false)
@@ -701,7 +699,7 @@ extension ReversiViewModelTests {
         var setMessageText: Void
 
         @MockResponse<SetDisk, Void>()
-        var setDisk: Void
+        var updateBoard: Void
 
         @MockResponse<Int, Void>()
         var setPlayerDarkSelectedIndex: Void
@@ -709,17 +707,11 @@ extension ReversiViewModelTests {
         @MockResponse<Int, Void>()
         var setPlayerLightSelectedIndex: Void
 
-        @MockResponse<Void, Void>()
-        var startPlayerDarkAnimation: Void
+        @MockResponse<Bool, Void>()
+        var isPlayerDarkAnimating: Void
 
-        @MockResponse<Void, Void>()
-        var stopPlayerDarkAnimation: Void
-
-        @MockResponse<Void, Void>()
-        var startPlayerLightAnimation: Void
-
-        @MockResponse<Void, Void>()
-        var stopPlayerLightAnimation: Void
+        @MockResponse<Bool, Void>()
+        var isPlayerLightAnimating: Void
 
         @MockResponse<Void, Void>()
         var reset: Void
@@ -734,28 +726,10 @@ extension ReversiViewModelTests {
         let gameLogic = MockGameLogic()
 
         private let messageDiskSize: CGFloat
+        private let disposeBag = DisposeBag()
 
         private(set) lazy var testTarget = ReversiViewModel(
             messageDiskSize: messageDiskSize,
-            showAlert: { [weak self] in self?._showAlert.respond($0) },
-            setPlayerDarkCount: { [weak self] in self?._setPlayerDarkCount.respond($0) },
-            setPlayerLightCount: { [weak self] in self?._setPlayerLightCount.respond($0) },
-            setMessageDiskSizeConstant: { [weak self] in self?._setMessageDiskSizeConstant.respond($0) },
-            setMessageDisk: { [weak self] in self?._setMessageDisk.respond($0) },
-            setMessageText: { [weak self] in self?._setMessageText.respond($0) },
-            setDisk: { [weak self] disk, coordinate, animated, completion in
-                guard let me = self else {
-                    return
-                }
-                me._setDisk.respond(.init(disk: disk, coordinate: coordinate, animated: animated, completion: completion))
-            },
-            setPlayerDarkSelectedIndex: { [weak self] in self?._setPlayerDarkSelectedIndex.respond($0) },
-            setPlayerLightSelectedIndex: { [weak self] in self?._setPlayerLightSelectedIndex.respond($0) },
-            startPlayerDarkAnimation: { [weak self] in self?._startPlayerDarkAnimation.respond() },
-            stopPlayerDarkAnimation: { [weak self] in self?._stopPlayerDarkAnimation.respond() },
-            startPlayerLightAnimation: { [weak self] in self?._startPlayerLightAnimation.respond() },
-            stopPlayerLightAnimation: { [weak self] in self?._stopPlayerLightAnimation.respond() },
-            reset: { [weak self] in self?._reset.respond() },
             asyncAfter: { [weak self] in self?._asyncAfter.respond(.init(time: $0, completion: $1)) },
             async: { [weak self] in self?._async.respond($0)  },
             cache: gameDataCache,
@@ -765,6 +739,62 @@ extension ReversiViewModelTests {
         init(board: GameData.Board, messageDiskSize: CGFloat) {
             self.gameDataCache.cells = board.cells
             self.messageDiskSize = messageDiskSize
+
+            testTarget.messageDiskSizeConstant
+                .subscribe(onNext: { [weak self] in self?._setMessageDiskSizeConstant.respond($0) })
+                .disposed(by: disposeBag)
+
+            testTarget.messageDisk
+                .subscribe(onNext: { [weak self] in self?._setMessageDisk.respond($0) })
+                .disposed(by: disposeBag)
+
+            testTarget.messageText
+                .subscribe(onNext: { [weak self] in self?._setMessageText.respond($0) })
+                .disposed(by: disposeBag)
+
+            testTarget.resetBoard
+                .subscribe(onNext: { [weak self] in self?._reset.respond() })
+                .disposed(by: disposeBag)
+
+            testTarget.showAlert
+                .subscribe(onNext: { [weak self] in self?._showAlert.respond($0) })
+                .disposed(by: disposeBag)
+
+            testTarget.playerDarkCount
+                .subscribe(onNext: { [weak self] in self?._setPlayerDarkCount.respond($0) })
+                .disposed(by: disposeBag)
+
+            testTarget.playerLightCount
+                .subscribe(onNext: { [weak self] in self?._setPlayerLightCount.respond($0) })
+                .disposed(by: disposeBag)
+
+            testTarget.playerDarkSelectedIndex
+                .subscribe(onNext: { [weak self] in self?._setPlayerDarkSelectedIndex.respond($0) })
+                .disposed(by: disposeBag)
+
+            testTarget.playerLightSelectedIndex
+                .subscribe(onNext: { [weak self] in self?._setPlayerLightSelectedIndex.respond($0) })
+                .disposed(by: disposeBag)
+
+            testTarget.isPlayerDarkAnimating
+                .subscribe(onNext: { [weak self] in self?._isPlayerDarkAnimating.respond($0) })
+                .disposed(by: disposeBag)
+
+            testTarget.isPlayerLightAnimating
+                .subscribe(onNext: { [weak self] in self?._isPlayerLightAnimating.respond($0) })
+                .disposed(by: disposeBag)
+
+            testTarget.updateBoard
+                .subscribe(onNext: { [weak self] value in
+                    guard let me = self else {
+                        return
+                    }
+                    me._updateBoard.respond(.init(disk: value.disk,
+                                                  coordinate: value.coordinate,
+                                                  animated: value.animated,
+                                                  completion: value.completion))
+                })
+                .disposed(by: disposeBag)
         }
     }
 }

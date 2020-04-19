@@ -407,9 +407,12 @@
 			buildRules = (
 			);
 			dependencies = (
+				ED20D564244BFED800F7BA46 /* PBXTargetDependency */,
 				ED6EAC7624436B2C00BAF620 /* PBXTargetDependency */,
 			);
 			name = ReversiLogicTests;
+			packageProductDependencies = (
+			);
 			productName = ReversiLogicTests;
 			productReference = ED6EAC7324436B2C00BAF620 /* ReversiLogicTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -572,6 +575,10 @@
 		ED20D54F244B809400F7BA46 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			productRef = ED20D54E244B809400F7BA46 /* RxSwift */;
+		};
+		ED20D564244BFED800F7BA46 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = ED20D563244BFED800F7BA46 /* RxTest */;
 		};
 		ED6EAC7624436B2C00BAF620 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -979,6 +986,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = ED20D536244B7C5E00F7BA46 /* XCRemoteSwiftPackageReference "RxSwift" */;
 			productName = RxSwift;
+		};
+		ED20D563244BFED800F7BA46 /* RxTest */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ED20D536244B7C5E00F7BA46 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxTest;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
