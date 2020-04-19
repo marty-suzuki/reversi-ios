@@ -68,6 +68,29 @@ public final class ReversiViewModel {
             .map { $0.rawValue }
             .bind(to: _playerLightSelectedIndex)
             .disposed(by: disposeBag)
+
+        cache.status
+            .subscribe(onNext: { [weak self] status in
+                guard let me = self else {
+                    return
+                }
+                switch status {
+                case let .turn(side):
+                    me._messageDiskSizeConstant.accept(messageDiskSize)
+                    me._messageDisk.accept(side)
+                    me._messageText.accept("'s turn")
+                case .gameOver:
+                    if let winner = me.logic.sideWithMoreDisks() {
+                        me._messageDiskSizeConstant.accept(messageDiskSize)
+                        me._messageDisk.accept(winner)
+                        me._messageText.accept(" won")
+                    } else {
+                        me._messageDiskSizeConstant.accept(0)
+                        me._messageText.accept("Tied")
+                    }
+                }
+            })
+            .disposed(by: disposeBag)
     }
 
     public func viewDidAppear() {
@@ -108,13 +131,13 @@ public final class ReversiViewModel {
             player = cache.playerLight.value
         }
 
-        if !isAnimating, cache.status == .turn(disk), case .computer = player {
+        if !isAnimating, cache.status.value == .turn(disk), case .computer = player {
             playTurnOfComputer()
         }
     }
 
     public func handle(selectedCoordinate: Coordinate) {
-        guard case let .turn(turn) = cache.status else {
+        guard case let .turn(turn) = cache.status.value else {
             return
         }
 
@@ -155,7 +178,7 @@ extension ReversiViewModel {
 
     func waitForPlayer() {
         let player: GameData.Player
-        switch cache.status {
+        switch cache.status.value {
         case .gameOver:
             return
         case .turn(.dark):
@@ -182,7 +205,6 @@ extension ReversiViewModel {
         _resetBoard.accept()
         cache.reset()
 
-        updateMessage()
         updateCount()
 
         try? cache.save()
@@ -201,26 +223,7 @@ extension ReversiViewModel {
                 }
             }
 
-            self?.updateMessage()
             self?.updateCount()
-        }
-    }
-
-    func updateMessage() {
-        switch cache.status {
-        case let .turn(side):
-            _messageDiskSizeConstant.accept(messageDiskSize)
-            _messageDisk.accept(side)
-            _messageText.accept("'s turn")
-        case .gameOver:
-            if let winner = logic.sideWithMoreDisks() {
-                _messageDiskSizeConstant.accept(messageDiskSize)
-                _messageDisk.accept(winner)
-                _messageText.accept(" won")
-            } else {
-                _messageDiskSizeConstant.accept(0)
-                _messageText.accept("Tied")
-            }
         }
     }
 
@@ -231,7 +234,7 @@ extension ReversiViewModel {
 
     func nextTurn() {
         var turn: Disk
-        switch cache.status {
+        switch cache.status.value {
         case let .turn(disk):
             turn = disk
         case .gameOver:
@@ -242,11 +245,9 @@ extension ReversiViewModel {
 
         if logic.validMoves(for: turn).isEmpty {
             if logic.validMoves(for: turn.flipped).isEmpty {
-                self.cache.status = .gameOver
-                updateMessage()
+                self.cache.setStatus(.gameOver)
             } else {
-                self.cache.status = .turn(turn)
-                updateMessage()
+                self.cache.setStatus(.turn(turn))
 
                 let alert = Alert.pass { [weak self] in
                     self?.nextTurn()
@@ -254,15 +255,14 @@ extension ReversiViewModel {
                 _showAlert.accept(alert)
             }
         } else {
-            self.cache.status = .turn(turn)
-            updateMessage()
+            self.cache.setStatus(.turn(turn))
             waitForPlayer()
         }
     }
 
     func playTurnOfComputer() {
         guard
-            case let .turn(turn) = cache.status,
+            case let .turn(turn) = cache.status.value,
             let coordinate = logic.validMoves(for: turn).randomElement()
         else {
             preconditionFailure()

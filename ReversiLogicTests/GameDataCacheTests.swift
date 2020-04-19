@@ -29,7 +29,7 @@ final class GameDataCacheTests: XCTestCase {
         }
 
         XCTAssertTrue(isCompletionCalled)
-        XCTAssertEqual(cache.status, expectedStatus)
+        XCTAssertEqual(cache.status.value, expectedStatus)
         XCTAssertEqual(cache.playerDark.value, expectedPlayerDark)
         XCTAssertEqual(cache.playerLight.value, expectedPlayerLight)
         XCTAssertEqual(cache.cells, [[expectedCell]])
@@ -45,7 +45,7 @@ final class GameDataCacheTests: XCTestCase {
         let cache = dependency.testTarget
         cache.setPlayerOfDark(expectedPlayerDark)
         cache.setPlayerOfLight(expectedPlayerLight)
-        cache.status = expectedStatus
+        cache.setStatus(expectedStatus)
 
         try cache.save()
 
@@ -62,14 +62,14 @@ final class GameDataCacheTests: XCTestCase {
     func test_rest() {
         self.dependency = Dependency(cells: [])
         let cache = dependency.testTarget
-        cache.status = .gameOver
+        cache.setStatus(.gameOver)
         cache.setPlayerOfDark(.computer)
         cache.setPlayerOfLight(.computer)
 
         cache.reset()
 
         XCTAssertEqual(cache.cells, GameData.initial.cells)
-        XCTAssertEqual(cache.status, GameData.initial.status)
+        XCTAssertEqual(cache.status.value, GameData.initial.status)
         XCTAssertEqual(cache.playerDark.value, GameData.initial.playerDark)
         XCTAssertEqual(cache.playerLight.value, GameData.initial.playerLight)
     }
@@ -77,14 +77,14 @@ final class GameDataCacheTests: XCTestCase {
     func test_playerOfCurrentTurn() {
         let cache = dependency.testTarget
 
-        cache.status = .gameOver
+        cache.setStatus(.gameOver)
         XCTAssertNil(cache.playerOfCurrentTurn)
 
-        cache.status = .turn(.dark)
+        cache.setStatus(.turn(.dark))
         cache.setPlayerOfDark(.computer)
         XCTAssertEqual(cache.playerOfCurrentTurn, .computer)
 
-        cache.status = .turn(.light)
+        cache.setStatus(.turn(.light))
         cache.setPlayerOfLight(.computer)
         XCTAssertEqual(cache.playerOfCurrentTurn, .computer)
     }

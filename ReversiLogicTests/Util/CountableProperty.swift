@@ -25,5 +25,10 @@ extension CountableProperty {
     final class Counts {
         fileprivate(set) var getterCalledCount = 0
         fileprivate(set) var setterCalledCount = 0
+
+        func clear() {
+            getterCalledCount = 0
+            setterCalledCount = 0
+        }
     }
 }

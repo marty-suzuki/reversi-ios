@@ -9,7 +9,7 @@ public protocol GemeDataDiskGettable: AnyObject {
 }
 
 public protocol GameDataCacheProtocol: GameDataCellGettable, GemeDataDiskGettable {
-    var status: GameData.Status { get set }
+    var status: ValueObservable<GameData.Status> { get }
     var playerOfCurrentTurn: GameData.Player? { get }
     var playerDark: ValueObservable<GameData.Player> { get }
     var playerLight: ValueObservable<GameData.Player> { get }
@@ -17,6 +17,7 @@ public protocol GameDataCacheProtocol: GameDataCellGettable, GemeDataDiskGettabl
     func load(completion: @escaping () -> Void) throws
     func save() throws
     func reset()
+    func setStatus(_ status: GameData.Status)
     func setPlayerOfDark(_ player: GameData.Player)
     func setPlayerOfLight(_ player: GameData.Player)
 }
@@ -33,7 +34,8 @@ final class GameDataCache: GameDataCacheProtocol {
     private let _loadGame: GameDataIO.LoadGame
     private let _saveGame: GameDataIO.SaveGame
 
-    var status: GameData.Status = GameData.initial.status
+    @BehaviorWrapper(value: GameData.initial.status)
+    private(set) var status: ValueObservable<GameData.Status>
 
     @BehaviorWrapper(value: GameData.initial.playerDark)
     private(set) var playerDark: ValueObservable<GameData.Player>
@@ -44,7 +46,7 @@ final class GameDataCache: GameDataCacheProtocol {
     private(set) var cells: [[GameData.Cell]]
 
     var playerOfCurrentTurn: GameData.Player? {
-        switch status {
+        switch status.value {
         case .gameOver:
             return nil
         case .turn(.dark):
@@ -93,9 +95,13 @@ final class GameDataCache: GameDataCacheProtocol {
         _playerLight.accept(player)
     }
 
+    func setStatus(_ status: GameData.Status) {
+        _status.accept(status)
+    }
+
     func load(completion: @escaping () -> Void) throws {
         try _loadGame({ try String(contentsOfFile: $0, encoding: .utf8) }) { [weak self] data in
-            self?.status = data.status
+            self?._status.accept(data.status)
             self?._playerDark.accept(data.playerDark)
             self?._playerLight.accept(data.playerLight)
             self?.cells = data.cells
@@ -104,7 +110,7 @@ final class GameDataCache: GameDataCacheProtocol {
     }
 
     func save() throws {
-        let data = GameData(status: status,
+        let data = GameData(status: status.value,
                             playerDark: playerDark.value,
                             playerLight: playerLight.value,
                             cells: cells)
@@ -116,7 +122,7 @@ final class GameDataCache: GameDataCacheProtocol {
 
     func reset() {
         self.cells = GameData.initial.cells
-        self.status = GameData.initial.status
+        self._status.accept(GameData.initial.status)
         self._playerDark.accept(GameData.initial.playerDark)
         self._playerLight.accept(GameData.initial.playerLight)
     }

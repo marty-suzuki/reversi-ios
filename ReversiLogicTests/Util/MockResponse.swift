@@ -28,6 +28,11 @@ extension MockResponse {
         init(initial: Value) {
             self.value = initial
         }
+
+        func clear() {
+            calledCount = 0
+            parameters = []
+        }
     }
 }
 

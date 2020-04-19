@@ -10,8 +10,8 @@ final class MockGameDataCache: GameDataCacheProtocol {
 
     var playerOfCurrentTurn: GameData.Player?
 
-    @CountableProperty
-    var status: GameData.Status = .turn(.dark)
+    @MockBehaviorWrapeer(value: .turn(.dark))
+    var status: ValueObservable<GameData.Status>
 
     var cells: [[GameData.Cell]] = []
 
@@ -36,6 +36,9 @@ final class MockGameDataCache: GameDataCacheProtocol {
     @MockResponse<GameData.Player, Void>()
     var _setPalyerLight: Void
 
+    @MockResponse<GameData.Status, Void>()
+    var _setStatus: Void
+
     subscript(coordinate: Coordinate) -> Disk? {
         get { __getDisk.respond(coordinate) }
         set { __setDisk.respond((coordinate, newValue)) }
@@ -47,6 +50,10 @@ final class MockGameDataCache: GameDataCacheProtocol {
 
     func setPlayerOfLight(_ player: GameData.Player) {
         __setPalyerLight.respond(player)
+    }
+
+    func setStatus(_ status: GameData.Status) {
+        __setStatus.respond(status)
     }
 
     func load(completion: @escaping () -> Void) throws {

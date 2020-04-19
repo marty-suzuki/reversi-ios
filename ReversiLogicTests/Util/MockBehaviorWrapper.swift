@@ -26,8 +26,13 @@ extension MockBehaviorWrapeer {
     final class Response {
         fileprivate(set) var calledCount = 0
         let accept: (Element) -> Void
+
         init(accept: @escaping (Element) -> Void) {
             self.accept = accept
+        }
+
+        func clear() {
+            calledCount = 0
         }
     }
 }
