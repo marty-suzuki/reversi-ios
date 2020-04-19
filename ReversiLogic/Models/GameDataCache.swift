@@ -9,16 +9,17 @@ public protocol GameDataGettable: AnyObject {
 }
 
 public protocol GameDataSettable: AnyObject {
-    subscript(coordinate: Coordinate) -> Disk? { get set }
-    func load() -> Single<Void>
     func save() throws
-    func reset()
     func setStatus(_ status: GameData.Status)
     func setPlayerOfDark(_ player: GameData.Player)
     func setPlayerOfLight(_ player: GameData.Player)
 }
 
-public protocol GameDataCacheProtocol: GameDataGettable, GameDataSettable {}
+public protocol GameDataCacheProtocol: GameDataGettable, GameDataSettable {
+    subscript(coordinate: Coordinate) -> Disk? { get set }
+    func load() -> Single<Void>
+    func reset()
+}
 
 final class GameDataCache: GameDataCacheProtocol {
 

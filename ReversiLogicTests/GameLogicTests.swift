@@ -1,3 +1,4 @@
+import RxCocoa
 import RxSwift
 import XCTest
 @testable import ReversiLogic
@@ -333,7 +334,44 @@ extension GameLogicTests {
         let playTurnOfComputer = dependency.$playTurnOfComputer
         XCTAssertEqual(playTurnOfComputer.calledCount, 0)
     }
+}
 
+// - MARK: startGame
+
+extension GameLogicTests {
+
+    func test_newGame() {
+        let logic = dependency.testTarget
+        let cache = dependency.cache
+
+        let newGameBegan = BehaviorRelay<Void?>(value: nil)
+        let disposable = logic.newGameBegan
+            .bind(to: newGameBegan)
+        defer { disposable.dispose() }
+
+        logic.newGame()
+
+        let reset = cache.$_reset
+        XCTAssertEqual(reset.calledCount, 1)
+
+        let save = cache.$_save
+        XCTAssertEqual(save.calledCount, 1)
+
+        XCTAssertNotNil(newGameBegan.value)
+    }
+
+    func test_startGame() throws {
+        let logic = dependency.testTarget
+
+        let gameLoaded = BehaviorRelay<Void?>(value: nil)
+        let disposable = logic.gameLoaded
+            .bind(to: gameLoaded)
+        defer { disposable.dispose() }
+
+        logic.startGame()
+
+        XCTAssertNotNil(gameLoaded.value)
+    }
 }
 
 extension GameLogicTests {

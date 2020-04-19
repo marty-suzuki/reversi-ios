@@ -98,25 +98,22 @@ public final class ReversiViewModel {
             })
             .disposed(by: disposeBag)
 
-        _startGame
-            .flatMap { [logic] in
-                logic.load()
-            }
+        logic.gameLoaded
             .subscribe(onNext: { [weak self] in
-                guard let me = self else {
-                    return
-                }
-
-                me.logic.cells.value.forEach { rows in
+                self?.logic.cells.value.forEach { rows in
                     rows.forEach { cell in
                         let update = UpdateDisk(disk: cell.disk, coordinate: cell.coordinate, animated: false, completion: nil)
                         self?._updateBoard.accept(update)
                     }
                 }
-
                 self?.updateCount()
-            }, onError: { [weak self] _ in
-                self?.newGame()
+            })
+            .disposed(by: disposeBag)
+
+        logic.newGameBegan
+            .subscribe(onNext: { [weak self] in
+                self?._resetBoard.accept()
+                self?.updateCount()
             })
             .disposed(by: disposeBag)
     }
@@ -130,7 +127,7 @@ public final class ReversiViewModel {
     }
 
     public func startGame() {
-        _startGame.accept(())
+        logic.startGame()
     }
 
     public func setPlayer(for disk: Disk, with index: Int) {
@@ -168,7 +165,7 @@ public final class ReversiViewModel {
                 me.logic.playerCancellers.removeValue(forKey: side)
             }
 
-            me.newGame()
+            me.logic.newGame()
             me.logic.waitForPlayer()
         }
         _showAlert.accept(alert)
@@ -178,18 +175,9 @@ public final class ReversiViewModel {
 extension ReversiViewModel {
 
     func setDisk(_ disk: Disk?, at coordinate: Coordinate, animated: Bool, completion: ((Bool) -> Void)?) {
-        logic[coordinate] = disk
+        logic.setDisk(disk, at: coordinate)
         let update = UpdateDisk(disk: disk, coordinate: coordinate, animated: animated, completion: completion)
         _updateBoard.accept(update)
-    }
-
-    func newGame() {
-        _resetBoard.accept()
-        logic.reset()
-
-        updateCount()
-
-        try? logic.save()
     }
 
     func updateCount() {

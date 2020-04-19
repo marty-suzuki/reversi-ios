@@ -1,3 +1,4 @@
+import RxCocoa
 import RxSwift
 
 @dynamicMemberLookup
@@ -8,12 +9,16 @@ public protocol GameLogicProtocol: GameDataSettable {
     var playerOfCurrentTurn:  ValueObservable<GameData.Player?> { get }
     var sideWithMoreDisks: ValueObservable<Disk?> { get }
     var playTurnOfComputer: Observable<Void> { get }
+    var gameLoaded: Observable<Void> { get }
+    var newGameBegan: Observable<Void> { get }
     func flippedDiskCoordinates(by disk: Disk,
                                 at coordinate: Coordinate) -> [Coordinate]
     func validMoves(for disk: Disk) -> [Coordinate]
-
     func waitForPlayer()
     func setPlayer(for disk: Disk, with index: Int)
+    func startGame()
+    func newGame()
+    func setDisk(_ disk: Disk?, at coordinate: Coordinate)
 
     subscript<T>(dynamicMember keyPath: KeyPath<GameDataGettable, ValueObservable<T>>) -> ValueObservable<T> { get }
 }
@@ -37,8 +42,17 @@ final class GameLogic: GameLogicProtocol {
     @PublishWrapper
     private(set) var playTurnOfComputer: Observable<Void>
 
+    @PublishWrapper
+    private(set) var gameLoaded: Observable<Void>
+
+    @PublishWrapper
+    private(set) var newGameBegan: Observable<Void>
+
     private let cache: GameDataCacheProtocol
     private let disposeBag = DisposeBag()
+
+    private let _startGame = PublishRelay<Void>()
+    private let _newGame = PublishRelay<Void>()
 
     init(cache: GameDataCacheProtocol) {
         self.cache = cache
@@ -85,6 +99,25 @@ final class GameLogic: GameLogicProtocol {
                 }
             }
             .bind(to: _sideWithMoreDisks)
+            .disposed(by: disposeBag)
+
+        _startGame
+            .flatMap { [cache] _ -> Observable<Void> in
+                cache.load().asObservable()
+            }
+            .subscribe(onNext: { [weak self] in
+                self?._gameLoaded.accept()
+            }, onError: { [weak self] _ in
+                self?._newGame.accept(())
+            })
+            .disposed(by: disposeBag)
+
+        _newGame
+            .subscribe(onNext: { [weak self, cache] in
+                cache.reset()
+                self?._newGameBegan.accept()
+                try? cache.save()
+            })
             .disposed(by: disposeBag)
     }
 
@@ -197,25 +230,21 @@ final class GameLogic: GameLogicProtocol {
         }
     }
 
+    func startGame() {
+        _startGame.accept(())
+    }
+
+    func newGame() {
+        _newGame.accept(())
+    }
 }
 
 extension GameLogic {
-    subscript(coordinate: Coordinate) -> Disk? {
-        get { cache[coordinate] }
-        set { cache[coordinate] = newValue }
-    }
-
-    func load() -> Single<Void> {
-        cache.load()
-    }
 
     func save() throws {
         try cache.save()
     }
 
-    func reset() {
-        cache.reset()
-    }
     func setStatus(_ status: GameData.Status) {
         cache.setStatus(status)
     }
@@ -226,5 +255,9 @@ extension GameLogic {
 
     func setPlayerOfLight(_ player: GameData.Player) {
         cache.setPlayerOfLight(player)
+    }
+
+    func setDisk(_ disk: Disk?, at coordinate: Coordinate) {
+        cache[coordinate] = disk
     }
 }

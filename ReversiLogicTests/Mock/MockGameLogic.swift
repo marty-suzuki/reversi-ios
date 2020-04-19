@@ -16,6 +16,12 @@ struct MockGameLogicFactory: GameLogicFactoryProtocol {
 
 final class MockGameLogic: GameLogicProtocol {
 
+    @MockPublishWrapper
+    private(set) var gameLoaded: Observable<Void>
+
+    @MockPublishWrapper
+    private(set) var newGameBegan: Observable<Void>
+
     @CountableProperty
     var playerCancellers: [Disk : Canceller] = [:]
 
@@ -52,6 +58,12 @@ final class MockGameLogic: GameLogicProtocol {
     @MockResponse<SetPlayer, Void>()
     var _setPlayer: Void
 
+    @MockResponse<Void, Void>()
+    var _newGame: Void
+
+    @MockResponse<Void, Void>()
+    var _startGame: Void
+
     let cache = MockGameDataCache()
 
     func flippedDiskCoordinates(by disk: Disk, at coordinate: Coordinate) -> [Coordinate] {
@@ -78,6 +90,14 @@ final class MockGameLogic: GameLogicProtocol {
     func setPlayer(for disk: Disk, with index: Int) {
         __setPlayer.respond(.init(disk: disk, index: index))
     }
+
+    func startGame() {
+        __startGame.respond()
+    }
+
+    func newGame() {
+        __newGame.respond()
+    }
 }
 
 extension MockGameLogic {
@@ -86,21 +106,8 @@ extension MockGameLogic {
         cache[keyPath: keyPath]
     }
 
-    subscript(coordinate: Coordinate) -> Disk? {
-        get { cache[coordinate] }
-        set { cache[coordinate] = newValue }
-    }
-
-    func load() -> Single<Void> {
-        cache.load()
-    }
-
     func save() throws {
         try cache.save()
-    }
-
-    func reset() {
-        cache.reset()
     }
 
     func setStatus(_ status: GameData.Status) {
@@ -113,6 +120,10 @@ extension MockGameLogic {
 
     func setPlayerOfLight(_ player: GameData.Player) {
         cache.setPlayerOfLight(player)
+    }
+
+    func setDisk(_ disk: Disk?, at coordinate: Coordinate) {
+        cache[coordinate] = disk
     }
 }
 
