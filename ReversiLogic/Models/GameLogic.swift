@@ -21,9 +21,13 @@ public protocol GameLogicProtocol: GameDataSettable {
     var countOfLight: ValueObservable<Int> { get }
     var playerOfCurrentTurn:  ValueObservable<GameData.Player?> { get }
     var sideWithMoreDisks: ValueObservable<Disk?> { get }
+    var playTurnOfComputer: Observable<Void> { get }
     func flippedDiskCoordinates(by disk: Disk,
                                 at coordinate: Coordinate) -> [Coordinate]
     func validMoves(for disk: Disk) -> [Coordinate]
+
+    func waitForPlayer()
+
     subscript<T>(dynamicMember keyPath: KeyPath<GameDataGettable, ValueObservable<T>>) -> ValueObservable<T> { get }
 }
 
@@ -40,6 +44,9 @@ final class GameLogic: GameLogicProtocol {
 
     @BehaviorWrapper(value: nil)
     private(set) var sideWithMoreDisks: ValueObservable<Disk?>
+
+    @PublishWrapper
+    private(set) var playTurnOfComputer: Observable<Void>
 
     private let cache: GameDataCacheProtocol
     private let disposeBag = DisposeBag()
@@ -152,6 +159,25 @@ final class GameLogic: GameLogicProtocol {
                     return result
                 }
             }
+        }
+    }
+
+    func waitForPlayer() {
+        let player: GameData.Player
+        switch cache.status.value {
+        case .gameOver:
+            return
+        case .turn(.dark):
+            player = cache.playerDark.value
+        case .turn(.light):
+            player = cache.playerLight.value
+        }
+
+        switch player {
+        case .manual:
+            break
+        case .computer:
+            _playTurnOfComputer.accept()
         }
     }
 }

@@ -47,6 +47,7 @@
 		EDCC2A542448B324009E69F7 /* GameLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A532448B324009E69F7 /* GameLogic.swift */; };
 		EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A552448B3E9009E69F7 /* Coordinate.swift */; };
 		EDCC2A582448B5D0009E69F7 /* GameLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */; };
+		EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -130,6 +131,7 @@
 		EDCC2A532448B324009E69F7 /* GameLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLogic.swift; sourceTree = "<group>"; };
 		EDCC2A552448B3E9009E69F7 /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
 		EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLogicTests.swift; sourceTree = "<group>"; };
+		EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPublishWrapper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -312,6 +314,7 @@
 			children = (
 				ED6EACAA2444D3C200BAF620 /* MockResponse.swift */,
 				ED9AEF7B244C39F8004A068C /* MockBehaviorWrapper.swift */,
+				EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */,
 				ED9AEF7D244C4223004A068C /* CountableProperty.swift */,
 			);
 			path = Util;
@@ -569,6 +572,7 @@
 				ED20D535244B276400F7BA46 /* MockGameLogic.swift in Sources */,
 				ED6EACA82444CD7E00BAF620 /* ReversiViewModelTests.swift in Sources */,
 				ED9AEF7C244C39F8004A068C /* MockBehaviorWrapper.swift in Sources */,
+				EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

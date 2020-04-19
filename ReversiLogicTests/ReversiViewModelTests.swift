@@ -11,56 +11,6 @@ final class ReversiViewModelTests: XCTestCase {
                                      messageDiskSize: 0)
     }
 
-    func test_waitForPlayer_turnがdarkで_playerDarkがmanualの場合() {
-        let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-        let turn = Disk.dark
-        cache.$status.accept(.turn(turn))
-        cache.$playerDark.accept(.manual)
-
-        viewModel.waitForPlayer()
-
-        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
-        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
-
-        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
-         XCTAssertEqual(isPlayerLightAnimating.calledCount, 0)
-    }
-
-    func test_waitForPlayer_turnがlightで_playerLightがcomputerの場合() {
-        let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-        let turn = Disk.light
-        cache.$status.accept(.turn(turn))
-        cache.$playerLight.accept(.computer)
-        let logic = dependency.gameLogic
-        logic._validMovekForLight = [Coordinate(x: 0, y: 0)]
-
-        viewModel.waitForPlayer()
-
-        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
-        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
-
-        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
-         XCTAssertEqual(isPlayerLightAnimating.calledCount, 1)
-    }
-
-    func test_waitForPlayer_statusがgameOverの場合() {
-        let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-        cache.$status.accept(.gameOver)
-        cache.$playerDark.accept(.computer)
-        cache.$playerLight.accept(.computer)
-
-        viewModel.waitForPlayer()
-
-        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
-        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
-
-        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
-         XCTAssertEqual(isPlayerLightAnimating.calledCount, 0)
-    }
-
     func test_viewDidAppear_waitForPlayerが2回呼ばれることはない() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
@@ -69,14 +19,13 @@ final class ReversiViewModelTests: XCTestCase {
         cache.$status.accept(.turn(turn))
         let logic = dependency.gameLogic
         logic._validMovekForDark = [Coordinate(x: 0, y: 0)]
-        let status = cache.$status
-        status.clear()
+        let waitForPlayer = logic.$_waitForPlayer
 
         viewModel.viewDidAppear()
-        XCTAssertEqual(status.calledCount, 1)
+        XCTAssertEqual(waitForPlayer.calledCount, 1)
 
         viewModel.viewDidAppear()
-        XCTAssertEqual(status.calledCount, 1)
+        XCTAssertEqual(waitForPlayer.calledCount, 1)
     }
 
     func test_newGame() {

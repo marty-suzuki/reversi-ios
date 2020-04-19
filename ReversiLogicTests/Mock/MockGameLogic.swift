@@ -1,3 +1,4 @@
+import RxSwift
 @testable import ReversiLogic
 
 struct MockGameLogicFactory: GameLogicFactoryProtocol {
@@ -14,6 +15,9 @@ struct MockGameLogicFactory: GameLogicFactoryProtocol {
 }
 
 final class MockGameLogic: GameLogicProtocol {
+
+    @MockPublishWrapper
+    private(set) var playTurnOfComputer: Observable<Void>
 
     @MockBehaviorWrapeer(value: 0)
     private(set) var countOfDark: ValueObservable<Int>
@@ -39,6 +43,9 @@ final class MockGameLogic: GameLogicProtocol {
     @MockResponse<Disk, [Coordinate]>
     var _validMovekForLight = []
 
+    @MockResponse<Void, Void>()
+    var _waitForPlayer: Void
+
     let cache = MockGameDataCache()
 
     func flippedDiskCoordinates(by disk: Disk, at coordinate: Coordinate) -> [Coordinate] {
@@ -56,6 +63,10 @@ final class MockGameLogic: GameLogicProtocol {
         case .light:
             return __validMovekForLight.respond(disk)
         }
+    }
+
+    func waitForPlayer() {
+        __waitForPlayer.respond()
     }
 }
 

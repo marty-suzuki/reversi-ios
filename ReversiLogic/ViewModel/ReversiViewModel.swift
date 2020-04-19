@@ -88,14 +88,20 @@ public final class ReversiViewModel {
                 }
             })
             .disposed(by: disposeBag)
+
+        logic.playTurnOfComputer
+            .subscribe(onNext: { [weak self] in
+                self?.playTurnOfComputer()
+            })
+            .disposed(by: disposeBag)
     }
 
+    private lazy var callOnceViewDidAppear: Void = {
+        logic.waitForPlayer()
+    }()
+
     public func viewDidAppear() {
-        if viewHasAppeared {
-            return
-        }
-        viewHasAppeared = true
-        waitForPlayer()
+        _ = callOnceViewDidAppear
     }
 
     public func startGame() {
@@ -165,32 +171,13 @@ public final class ReversiViewModel {
             }
 
             me.newGame()
-            me.waitForPlayer()
+            me.logic.waitForPlayer()
         }
         _showAlert.accept(alert)
     }
 }
 
 extension ReversiViewModel {
-
-    func waitForPlayer() {
-        let player: GameData.Player
-        switch logic.status.value {
-        case .gameOver:
-            return
-        case .turn(.dark):
-            player = logic.playerDark.value
-        case .turn(.light):
-            player = logic.playerLight.value
-        }
-
-        switch player {
-        case .manual:
-            break
-        case .computer:
-            playTurnOfComputer()
-        }
-    }
 
     func setDisk(_ disk: Disk?, at coordinate: Coordinate, animated: Bool, completion: ((Bool) -> Void)?) {
         logic[coordinate] = disk
@@ -252,8 +239,8 @@ extension ReversiViewModel {
                 _showAlert.accept(alert)
             }
         } else {
-            self.logic.setStatus(.turn(turn))
-            waitForPlayer()
+            logic.setStatus(.turn(turn))
+            logic.waitForPlayer()
         }
     }
 

@@ -1,3 +1,4 @@
+import RxSwift
 import XCTest
 @testable import ReversiLogic
 
@@ -194,17 +195,63 @@ final class GameLogicTests: XCTestCase {
         ]
         XCTAssertEqual(coordinates, expected)
     }
+
+    func test_waitForPlayer_turnがdarkで_playerDarkがmanualの場合() {
+        let viewModel = dependency.testTarget
+        let cache = dependency.cache
+        let turn = Disk.dark
+        cache.$status.accept(.turn(turn))
+        cache.$playerDark.accept(.manual)
+
+        viewModel.waitForPlayer()
+
+        let playTurnOfComputer = dependency.$playTurnOfComputer
+        XCTAssertEqual(playTurnOfComputer.calledCount, 0)
+    }
+
+    func test_waitForPlayer_turnがlightで_playerLightがcomputerの場合() {
+        let viewModel = dependency.testTarget
+        let cache = dependency.cache
+        let turn = Disk.light
+        cache.$status.accept(.turn(turn))
+        cache.$playerLight.accept(.computer)
+
+        viewModel.waitForPlayer()
+
+        let playTurnOfComputer = dependency.$playTurnOfComputer
+        XCTAssertEqual(playTurnOfComputer.calledCount, 1)
+    }
+
+    func test_waitForPlayer_statusがgameOverの場合() {
+        let viewModel = dependency.testTarget
+        let cache = dependency.cache
+        cache.$status.accept(.gameOver)
+        cache.$playerDark.accept(.computer)
+        cache.$playerLight.accept(.computer)
+
+        viewModel.waitForPlayer()
+
+        let playTurnOfComputer = dependency.$playTurnOfComputer
+        XCTAssertEqual(playTurnOfComputer.calledCount, 0)
+    }
 }
 
 extension GameLogicTests {
 
     private final class Dependency {
 
-        let testTarget: GameLogic
+        @MockResponse<Void, Void>()
+        var playTurnOfComputer: Void
+
+        private(set) lazy var testTarget = GameLogic(cache: cache)
         let cache = MockGameDataCache()
 
+        private let disposeBag = DisposeBag()
+
         init() {
-            self.testTarget = GameLogic(cache: cache)
+            testTarget.playTurnOfComputer
+                .subscribe(onNext: { [weak self] in self?._playTurnOfComputer.respond() })
+                .disposed(by: disposeBag)
         }
     }
 }
