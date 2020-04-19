@@ -1,19 +1,22 @@
 import RxSwift
 
 public protocol GameLogicFactoryProtocol {
-    func make(cache: GameDataGettable) -> GameLogicProtocol
+    func make() -> GameLogicProtocol
 }
 
 public struct GameLogicFactory: GameLogicFactoryProtocol {
 
     public init() {}
 
-    public func make(cache: GameDataGettable) -> GameLogicProtocol {
-        GameLogic(cache: cache)
+    public func make() -> GameLogicProtocol {
+        let cache = GameDataCache(loadGame: GameDataIO.loadGame,
+                                  saveGame: GameDataIO.save)
+        return GameLogic(cache: cache)
     }
 }
 
-public protocol GameLogicProtocol: AnyObject {
+@dynamicMemberLookup
+public protocol GameLogicProtocol: GameDataSettable {
     var countOfDark: ValueObservable<Int> { get }
     var countOfLight: ValueObservable<Int> { get }
     var playerOfCurrentTurn:  ValueObservable<GameData.Player?> { get }
@@ -21,6 +24,7 @@ public protocol GameLogicProtocol: AnyObject {
     func flippedDiskCoordinates(by disk: Disk,
                                 at coordinate: Coordinate) -> [Coordinate]
     func validMoves(for disk: Disk) -> [Coordinate]
+    subscript<T>(dynamicMember keyPath: KeyPath<GameDataGettable, ValueObservable<T>>) -> ValueObservable<T> { get }
 }
 
 final class GameLogic: GameLogicProtocol {
@@ -37,10 +41,10 @@ final class GameLogic: GameLogicProtocol {
     @BehaviorWrapper(value: nil)
     private(set) var sideWithMoreDisks: ValueObservable<Disk?>
 
-    private let cache: GameDataGettable
+    private let cache: GameDataCacheProtocol
     private let disposeBag = DisposeBag()
 
-    init(cache: GameDataGettable) {
+    init(cache: GameDataCacheProtocol) {
         self.cache = cache
 
         let countOf: (Disk, [[GameData.Cell]]) -> Int = { disk, cells in
@@ -86,6 +90,10 @@ final class GameLogic: GameLogicProtocol {
             }
             .bind(to: _sideWithMoreDisks)
             .disposed(by: disposeBag)
+    }
+
+    subscript<T>(dynamicMember keyPath: KeyPath<GameDataGettable, ValueObservable<T>>) -> ValueObservable<T> {
+        cache[keyPath: keyPath]
     }
 
     func flippedDiskCoordinates(by disk: Disk,
@@ -145,5 +153,35 @@ final class GameLogic: GameLogicProtocol {
                 }
             }
         }
+    }
+}
+
+extension GameLogic {
+    subscript(coordinate: Coordinate) -> Disk? {
+        get { cache[coordinate] }
+        set { cache[coordinate] = newValue }
+    }
+
+    func load(completion: @escaping () -> Void) throws {
+        try cache.load(completion: completion)
+    }
+
+    func save() throws {
+        try cache.save()
+    }
+
+    func reset() {
+        cache.reset()
+    }
+    func setStatus(_ status: GameData.Status) {
+        cache.setStatus(status)
+    }
+
+    func setPlayerOfDark(_ player: GameData.Player) {
+        cache.setPlayerOfDark(player)
+    }
+
+    func setPlayerOfLight(_ player: GameData.Player) {
+        cache.setPlayerOfLight(player)
     }
 }

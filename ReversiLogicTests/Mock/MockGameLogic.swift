@@ -8,7 +8,7 @@ struct MockGameLogicFactory: GameLogicFactoryProtocol {
         self.logic = logic
     }
 
-    func make(cache: GameDataGettable) -> GameLogicProtocol {
+    func make() -> GameLogicProtocol {
         logic
     }
 }
@@ -39,6 +39,8 @@ final class MockGameLogic: GameLogicProtocol {
     @MockResponse<Disk, [Coordinate]>
     var _validMovekForLight = []
 
+    let cache = MockGameDataCache()
+
     func flippedDiskCoordinates(by disk: Disk, at coordinate: Coordinate) -> [Coordinate] {
         __flippedDiskCoordinates.respond(.init(disk: disk, coordinate: coordinate))
     }
@@ -54,6 +56,42 @@ final class MockGameLogic: GameLogicProtocol {
         case .light:
             return __validMovekForLight.respond(disk)
         }
+    }
+}
+
+extension MockGameLogic {
+
+    subscript<T>(dynamicMember keyPath: KeyPath<GameDataGettable, ValueObservable<T>>) -> ValueObservable<T> {
+        cache[keyPath: keyPath]
+    }
+
+    subscript(coordinate: Coordinate) -> Disk? {
+        get { cache[coordinate] }
+        set { cache[coordinate] = newValue }
+    }
+
+    func load(completion: @escaping () -> Void) throws {
+        try cache.load(completion: completion)
+    }
+
+    func save() throws {
+        try cache.save()
+    }
+
+    func reset() {
+        cache.reset()
+    }
+
+    func setStatus(_ status: GameData.Status) {
+        cache.setStatus(status)
+    }
+
+    func setPlayerOfDark(_ player: GameData.Player) {
+        cache.setPlayerOfDark(player)
+    }
+
+    func setPlayerOfLight(_ player: GameData.Player) {
+        cache.setPlayerOfLight(player)
     }
 }
 

@@ -704,7 +704,9 @@ extension ReversiViewModelTests {
         @MockResponse<() -> Void, Void>()
         var async: Void
 
-        let gameDataCache = MockGameDataCache()
+        var gameDataCache: MockGameDataCache {
+            gameLogic.cache
+        }
         let gameLogic = MockGameLogic()
 
         private let messageDiskSize: CGFloat
@@ -714,13 +716,13 @@ extension ReversiViewModelTests {
             messageDiskSize: messageDiskSize,
             asyncAfter: { [weak self] in self?._asyncAfter.respond(.init(time: $0, completion: $1)) },
             async: { [weak self] in self?._async.respond($0)  },
-            cache: gameDataCache,
             logicFactory: MockGameLogicFactory(logic: gameLogic)
         )
 
         init(cells: [[GameData.Cell]], messageDiskSize: CGFloat) {
-            self.gameDataCache.$cells.accept(cells)
             self.messageDiskSize = messageDiskSize
+
+            gameDataCache.$cells.accept(cells)
 
             testTarget.messageDiskSizeConstant
                 .subscribe(onNext: { [weak self] in self?._setMessageDiskSizeConstant.respond($0) })

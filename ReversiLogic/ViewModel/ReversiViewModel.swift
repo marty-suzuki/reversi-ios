@@ -43,33 +43,30 @@ public final class ReversiViewModel {
     private let asyncAfter: AsyncAfter
     private let async: Async
     private let logic: GameLogicProtocol
-    private let cache: GameDataCacheProtocol
     private let disposeBag = DisposeBag()
 
     public init(messageDiskSize: CGFloat,
                 asyncAfter: @escaping AsyncAfter,
                 async: @escaping Async,
-                cache: GameDataCacheProtocol,
                 logicFactory: GameLogicFactoryProtocol) {
-        self.cache = cache
         self.asyncAfter = asyncAfter
         self.async = async
         self.messageDiskSize = messageDiskSize
-        self.logic = logicFactory.make(cache: cache)
+        self.logic = logicFactory.make()
 
-        cache.playerDark
+        logic.playerDark
             .distinctUntilChanged()
             .map { $0.rawValue }
             .bind(to: _playerDarkSelectedIndex)
             .disposed(by: disposeBag)
 
-        cache.playerLight
+        logic.playerLight
             .distinctUntilChanged()
             .map { $0.rawValue }
             .bind(to: _playerLightSelectedIndex)
             .disposed(by: disposeBag)
 
-        cache.status
+        logic.status
             .subscribe(onNext: { [weak self] status in
                 guard let me = self else {
                     return
@@ -112,12 +109,12 @@ public final class ReversiViewModel {
     public func setPlayer(for disk: Disk, with index: Int) {
         switch disk {
         case .dark:
-            cache.setPlayerOfDark(GameData.Player(rawValue: index) ?? .manual)
+            logic.setPlayerOfDark(GameData.Player(rawValue: index) ?? .manual)
         case .light:
-            cache.setPlayerOfLight(GameData.Player(rawValue: index) ?? .manual)
+            logic.setPlayerOfLight(GameData.Player(rawValue: index) ?? .manual)
         }
 
-        try? cache.save()
+        try? logic.save()
 
         if let canceller = playerCancellers[disk] {
             canceller.cancel()
@@ -126,18 +123,18 @@ public final class ReversiViewModel {
         let player: GameData.Player
         switch disk {
         case .dark:
-            player = cache.playerDark.value
+            player = logic.playerDark.value
         case .light:
-            player = cache.playerLight.value
+            player = logic.playerLight.value
         }
 
-        if !isAnimating, cache.status.value == .turn(disk), case .computer = player {
+        if !isAnimating, logic.status.value == .turn(disk), case .computer = player {
             playTurnOfComputer()
         }
     }
 
     public func handle(selectedCoordinate: Coordinate) {
-        guard case let .turn(turn) = cache.status.value else {
+        guard case let .turn(turn) = logic.status.value else {
             return
         }
 
@@ -178,13 +175,13 @@ extension ReversiViewModel {
 
     func waitForPlayer() {
         let player: GameData.Player
-        switch cache.status.value {
+        switch logic.status.value {
         case .gameOver:
             return
         case .turn(.dark):
-            player = cache.playerDark.value
+            player = logic.playerDark.value
         case .turn(.light):
-            player = cache.playerLight.value
+            player = logic.playerLight.value
         }
 
         switch player {
@@ -196,27 +193,27 @@ extension ReversiViewModel {
     }
 
     func setDisk(_ disk: Disk?, at coordinate: Coordinate, animated: Bool, completion: ((Bool) -> Void)?) {
-        cache[coordinate] = disk
+        logic[coordinate] = disk
         let update = UpdateDisk(disk: disk, coordinate: coordinate, animated: animated, completion: completion)
         _updateBoard.accept(update)
     }
 
     func newGame() {
         _resetBoard.accept()
-        cache.reset()
+        logic.reset()
 
         updateCount()
 
-        try? cache.save()
+        try? logic.save()
     }
 
     func loadGame() throws {
-        try cache.load { [weak self] in
+        try? logic.load { [weak self] in
             guard let me = self else {
                 return
             }
 
-            me.cache.cells.value.forEach { rows in
+            me.logic.cells.value.forEach { rows in
                 rows.forEach { cell in
                     let update = UpdateDisk(disk: cell.disk, coordinate: cell.coordinate, animated: false, completion: nil)
                     self?._updateBoard.accept(update)
@@ -234,7 +231,7 @@ extension ReversiViewModel {
 
     func nextTurn() {
         var turn: Disk
-        switch cache.status.value {
+        switch logic.status.value {
         case let .turn(disk):
             turn = disk
         case .gameOver:
@@ -245,9 +242,9 @@ extension ReversiViewModel {
 
         if logic.validMoves(for: turn).isEmpty {
             if logic.validMoves(for: turn.flipped).isEmpty {
-                self.cache.setStatus(.gameOver)
+                self.logic.setStatus(.gameOver)
             } else {
-                self.cache.setStatus(.turn(turn))
+                self.logic.setStatus(.turn(turn))
 
                 let alert = Alert.pass { [weak self] in
                     self?.nextTurn()
@@ -255,14 +252,14 @@ extension ReversiViewModel {
                 _showAlert.accept(alert)
             }
         } else {
-            self.cache.setStatus(.turn(turn))
+            self.logic.setStatus(.turn(turn))
             waitForPlayer()
         }
     }
 
     func playTurnOfComputer() {
         guard
-            case let .turn(turn) = cache.status.value,
+            case let .turn(turn) = logic.status.value,
             let coordinate = logic.validMoves(for: turn).randomElement()
         else {
             preconditionFailure()
@@ -343,7 +340,7 @@ extension ReversiViewModel {
 
         let finally: (ReversiViewModel, Bool) -> Void = { viewModel, finished in
             completion(finished)
-            try? viewModel.cache.save()
+            try? viewModel.logic.save()
             viewModel.updateCount()
         }
 

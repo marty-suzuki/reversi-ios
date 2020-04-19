@@ -6,7 +6,7 @@ public protocol GameDataGettable: AnyObject {
     subscript(coordinate: Coordinate) -> Disk? { get }
 }
 
-public protocol GameDataCacheProtocol: GameDataGettable {
+public protocol GameDataSettable: AnyObject {
     subscript(coordinate: Coordinate) -> Disk? { get set }
     func load(completion: @escaping () -> Void) throws
     func save() throws
@@ -16,12 +16,7 @@ public protocol GameDataCacheProtocol: GameDataGettable {
     func setPlayerOfLight(_ player: GameData.Player)
 }
 
-public enum GameDataCacheFactory {
-    public static func make() -> GameDataCacheProtocol {
-        GameDataCache(loadGame: GameDataIO.loadGame,
-                      saveGame: GameDataIO.save)
-    }
-}
+public protocol GameDataCacheProtocol: GameDataGettable, GameDataSettable {}
 
 final class GameDataCache: GameDataCacheProtocol {
 

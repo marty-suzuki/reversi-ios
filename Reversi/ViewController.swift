@@ -28,7 +28,6 @@ class ViewController: UIViewController {
         messageDiskSize: messageDiskSizeConstraint.constant,
         asyncAfter: { DispatchQueue.main.asyncAfter(deadline: $0, execute: $1) },
         async: { DispatchQueue.main.async(execute: $0) },
-        cache: GameDataCacheFactory.make(),
         logicFactory: GameLogicFactory()
     )
 
