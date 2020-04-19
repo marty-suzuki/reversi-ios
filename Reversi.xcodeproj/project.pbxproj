@@ -25,6 +25,8 @@
 		ED20D553244B80A300F7BA46 /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = ED20D552244B80A300F7BA46 /* RxRelay */; };
 		ED20D555244B80A300F7BA46 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = ED20D554244B80A300F7BA46 /* RxSwift */; };
 		ED20D557244B826600F7BA46 /* PublishWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D556244B826600F7BA46 /* PublishWrapper.swift */; };
+		ED20D56D244C2D6F00F7BA46 /* BehaviorWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D56B244C2D6F00F7BA46 /* BehaviorWrapper.swift */; };
+		ED20D56E244C2D6F00F7BA46 /* ValueObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D56C244C2D6F00F7BA46 /* ValueObservable.swift */; };
 		ED4E71452448DA6D00518585 /* GameDataCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4E71442448DA6D00518585 /* GameDataCacheTests.swift */; };
 		ED6EAC7424436B2C00BAF620 /* ReversiLogic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; };
 		ED6EAC7D24436B2C00BAF620 /* ReversiLogic.h in Headers */ = {isa = PBXBuildFile; fileRef = ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -103,6 +105,8 @@
 		ED20D532244ADCAE00F7BA46 /* MockGameDataCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockGameDataCache.swift; sourceTree = "<group>"; };
 		ED20D534244B276400F7BA46 /* MockGameLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockGameLogic.swift; sourceTree = "<group>"; };
 		ED20D556244B826600F7BA46 /* PublishWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublishWrapper.swift; sourceTree = "<group>"; };
+		ED20D56B244C2D6F00F7BA46 /* BehaviorWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BehaviorWrapper.swift; sourceTree = "<group>"; };
+		ED20D56C244C2D6F00F7BA46 /* ValueObservable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueObservable.swift; sourceTree = "<group>"; };
 		ED4E71442448DA6D00518585 /* GameDataCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDataCacheTests.swift; sourceTree = "<group>"; };
 		ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ReversiLogic.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReversiLogic.h; sourceTree = "<group>"; };
@@ -310,6 +314,8 @@
 		ED8CC36024475EF000CD2CAB /* Extension */ = {
 			isa = PBXGroup;
 			children = (
+				ED20D56B244C2D6F00F7BA46 /* BehaviorWrapper.swift */,
+				ED20D56C244C2D6F00F7BA46 /* ValueObservable.swift */,
 				ED20D556244B826600F7BA46 /* PublishWrapper.swift */,
 				ED8CC36124475F0100CD2CAB /* CollectionExtension.swift */,
 				ED20D52F244AD70A00F7BA46 /* UIAlertControllerExtension.swift */,
@@ -534,6 +540,8 @@
 				EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */,
 				ED6EACA62444BDE100BAF620 /* Canceller.swift in Sources */,
 				ED6EAC9524436C3300BAF620 /* Disk.swift in Sources */,
+				ED20D56D244C2D6F00F7BA46 /* BehaviorWrapper.swift in Sources */,
+				ED20D56E244C2D6F00F7BA46 /* ValueObservable.swift in Sources */,
 				ED20D557244B826600F7BA46 /* PublishWrapper.swift in Sources */,
 				ED20D530244AD70A00F7BA46 /* UIAlertControllerExtension.swift in Sources */,
 				ED6EAC9B24436D9400BAF620 /* GameDataIO.swift in Sources */,
