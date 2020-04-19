@@ -205,8 +205,8 @@ extension GameLogic {
         set { cache[coordinate] = newValue }
     }
 
-    func load(completion: @escaping () -> Void) throws {
-        try cache.load(completion: completion)
+    func load() -> Single<Void> {
+        cache.load()
     }
 
     func save() throws {

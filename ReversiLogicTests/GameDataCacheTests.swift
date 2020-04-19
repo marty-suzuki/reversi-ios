@@ -24,9 +24,9 @@ final class GameDataCacheTests: XCTestCase {
         )
 
         var isCompletionCalled = false
-        try cache.load {
-            isCompletionCalled = true
-        }
+        let disposable = cache.load()
+            .subscribe(onSuccess: { isCompletionCalled = true })
+        defer { disposable.dispose() }
 
         XCTAssertTrue(isCompletionCalled)
         XCTAssertEqual(cache.status.value, expectedStatus)

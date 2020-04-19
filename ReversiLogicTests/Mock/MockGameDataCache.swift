@@ -1,3 +1,4 @@
+import RxSwift
 @testable import ReversiLogic
 
 final class MockGameDataCache: GameDataCacheProtocol {
@@ -55,9 +56,8 @@ final class MockGameDataCache: GameDataCacheProtocol {
         __setStatus.respond(status)
     }
 
-    func load(completion: @escaping () -> Void) throws {
-        __load.respond()
-        completion()
+    func load() -> Single<Void> {
+        .just(__load.respond())
     }
 
     func save() throws {

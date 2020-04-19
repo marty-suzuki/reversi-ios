@@ -44,7 +44,7 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(save.parameters.isEmpty, false)
     }
 
-    func test_loadGame() throws {
+    func test_startGame() throws {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
 
@@ -57,7 +57,7 @@ final class ReversiViewModelTests: XCTestCase {
         cache.$playerLight.accept(expectedPlayerLight)
         cache.$cells.accept([[expectedCell]])
 
-        try viewModel.loadGame()
+        viewModel.startGame()
 
         XCTAssertEqual(cache.status.value, .turn(.dark))
 

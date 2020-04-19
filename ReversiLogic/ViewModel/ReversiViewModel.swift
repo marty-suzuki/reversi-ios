@@ -1,4 +1,5 @@
 import CoreGraphics
+import RxCocoa
 import RxSwift
 
 public final class ReversiViewModel {
@@ -41,6 +42,8 @@ public final class ReversiViewModel {
     private let async: Async
     private let logic: GameLogicProtocol
     private let disposeBag = DisposeBag()
+
+    private let _startGame = PublishRelay<Void>()
 
     public init(messageDiskSize: CGFloat,
                 asyncAfter: @escaping AsyncAfter,
@@ -94,6 +97,28 @@ public final class ReversiViewModel {
                 self?.playTurnOfComputer()
             })
             .disposed(by: disposeBag)
+
+        _startGame
+            .flatMap { [logic] in
+                logic.load()
+            }
+            .subscribe(onNext: { [weak self] in
+                guard let me = self else {
+                    return
+                }
+
+                me.logic.cells.value.forEach { rows in
+                    rows.forEach { cell in
+                        let update = UpdateDisk(disk: cell.disk, coordinate: cell.coordinate, animated: false, completion: nil)
+                        self?._updateBoard.accept(update)
+                    }
+                }
+
+                self?.updateCount()
+            }, onError: { [weak self] _ in
+                self?.newGame()
+            })
+            .disposed(by: disposeBag)
     }
 
     private lazy var callOnceViewDidAppear: Void = {
@@ -105,11 +130,7 @@ public final class ReversiViewModel {
     }
 
     public func startGame() {
-        do {
-            try loadGame()
-        } catch _ {
-            newGame()
-        }
+        _startGame.accept(())
     }
 
     public func setPlayer(for disk: Disk, with index: Int) {
@@ -169,23 +190,6 @@ extension ReversiViewModel {
         updateCount()
 
         try? logic.save()
-    }
-
-    func loadGame() throws {
-        try? logic.load { [weak self] in
-            guard let me = self else {
-                return
-            }
-
-            me.logic.cells.value.forEach { rows in
-                rows.forEach { cell in
-                    let update = UpdateDisk(disk: cell.disk, coordinate: cell.coordinate, animated: false, completion: nil)
-                    self?._updateBoard.accept(update)
-                }
-            }
-
-            self?.updateCount()
-        }
     }
 
     func updateCount() {

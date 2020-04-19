@@ -1,3 +1,5 @@
+import RxSwift
+
 public protocol GameDataGettable: AnyObject {
     var status: ValueObservable<GameData.Status> { get }
     var playerDark: ValueObservable<GameData.Player> { get }
@@ -8,7 +10,7 @@ public protocol GameDataGettable: AnyObject {
 
 public protocol GameDataSettable: AnyObject {
     subscript(coordinate: Coordinate) -> Disk? { get set }
-    func load(completion: @escaping () -> Void) throws
+    func load() -> Single<Void>
     func save() throws
     func reset()
     func setStatus(_ status: GameData.Status)
@@ -78,13 +80,20 @@ final class GameDataCache: GameDataCacheProtocol {
         _status.accept(status)
     }
 
-    func load(completion: @escaping () -> Void) throws {
-        try _loadGame({ try String(contentsOfFile: $0, encoding: .utf8) }) { [weak self] data in
-            self?._status.accept(data.status)
-            self?._playerDark.accept(data.playerDark)
-            self?._playerLight.accept(data.playerLight)
-            self?._cells.accept(data.cells)
-            completion()
+    func load() -> Single<Void> {
+        return Single<Void>.create { [weak self] observer in
+            do {
+                try self?._loadGame({ try String(contentsOfFile: $0, encoding: .utf8) }) { data in
+                    self?._status.accept(data.status)
+                    self?._playerDark.accept(data.playerDark)
+                    self?._playerLight.accept(data.playerLight)
+                    self?._cells.accept(data.cells)
+                    observer(.success(()))
+                }
+            } catch {
+                observer(.error(error))
+            }
+            return Disposables.create()
         }
     }
 
