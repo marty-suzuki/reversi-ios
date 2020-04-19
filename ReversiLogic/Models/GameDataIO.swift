@@ -20,7 +20,7 @@ public enum GameDataIO {
         output += data.playerLight.rawValue.description
         output += "\n"
 
-        data.board.cells.forEach { rows in
+        data.cells.forEach { rows in
             rows.forEach { cell in
                 output += cell.disk.symbol
             }
@@ -73,7 +73,7 @@ public enum GameDataIO {
         let playerLight = try getPlayer()
 
 
-        var cells = GameData.Board.initial().cells
+        var cells = GameData.initial.cells
         do { // board
             guard lines.count == cells.count else {
                 throw FileIOError.read(path: path, cause: nil)
@@ -101,7 +101,7 @@ public enum GameDataIO {
             status: turn.map(GameData.Status.turn) ?? .gameOver,
             playerDark: playerDark,
             playerLight: playerLight,
-            board: .init(cells: cells)
+            cells: cells
         )
         completion(data)
     }

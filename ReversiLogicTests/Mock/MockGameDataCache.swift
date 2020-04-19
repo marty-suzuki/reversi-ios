@@ -5,7 +5,7 @@ final class MockGameDataCache: GameDataCacheProtocol {
     var playerOfCurrentTurn: GameData.Player?
     var status: GameData.Status = .turn(.dark)
     var player: GameData.Player = .manual
-    var cells: [[GameData.Board.Cell]] = []
+    var cells: [[GameData.Cell]] = []
 
     @MockResponse<Void, Void>()
     var _load: Void

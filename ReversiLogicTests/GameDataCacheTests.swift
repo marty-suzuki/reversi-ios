@@ -6,13 +6,13 @@ final class GameDataCacheTests: XCTestCase {
     private var dependency: Dependency!
 
     override func setUp() {
-        self.dependency = Dependency(playerDark: .manual,
-                                     playerLight: .manual,
-                                     board: .initial())
+        self.dependency = Dependency(playerDark: GameData.initial.playerDark,
+                                     playerLight: GameData.initial.playerLight,
+                                     cells: GameData.initial.cells)
     }
 
     func test_load() throws {
-        let expectedCell = GameData.Board.Cell(coordinate: .init(x: 0, y: 0), disk: nil)
+        let expectedCell = GameData.Cell(coordinate: .init(x: 0, y: 0), disk: nil)
         let expectedStatus = GameData.Status.gameOver
         let expectedPlayerDark = GameData.Player.computer
         let expectedPlayerLight = GameData.Player.computer
@@ -22,7 +22,7 @@ final class GameDataCacheTests: XCTestCase {
             status: expectedStatus,
             playerDark: expectedPlayerDark,
             playerLight: expectedPlayerLight,
-            board: .init(cells: [[expectedCell]])
+            cells: [[expectedCell]]
         )
 
         var isCompletionCalled = false
@@ -38,14 +38,14 @@ final class GameDataCacheTests: XCTestCase {
     }
 
     func test_save() throws {
-        let expectedCell = GameData.Board.Cell(coordinate: .init(x: 1, y: 2), disk: .dark)
+        let expectedCell = GameData.Cell(coordinate: .init(x: 1, y: 2), disk: .dark)
         let expectedPlayerDark: GameData.Player = .manual
         let expectedPlayerLight: GameData.Player = .computer
         let expectedStatus: GameData.Status = .turn(.light)
 
         self.dependency = Dependency(playerDark: .manual,
                                      playerLight: .manual,
-                                     board: .init(cells: [[expectedCell]]))
+                                     cells: [[expectedCell]])
         let cache = dependency.testTarget
         cache[.dark] = expectedPlayerDark
         cache[.light] = expectedPlayerLight
@@ -59,14 +59,14 @@ final class GameDataCacheTests: XCTestCase {
         let expected = GameData(status: expectedStatus,
                                 playerDark: expectedPlayerDark,
                                 playerLight: expectedPlayerLight,
-                                board: .init(cells: [[expectedCell]]))
+                                cells: [[expectedCell]])
         XCTAssertEqual(saveGame.parameters, [expected])
     }
 
     func test_rest() {
         self.dependency = Dependency(playerDark: .manual,
                                      playerLight: .manual,
-                                     board: .init(cells: []))
+                                     cells: [])
         let cache = dependency.testTarget
         cache.status = .gameOver
         cache[.dark] = .computer
@@ -74,16 +74,16 @@ final class GameDataCacheTests: XCTestCase {
 
         cache.reset()
 
-        XCTAssertEqual(cache.cells, GameData.Board.initial().cells)
-        XCTAssertEqual(cache.status, .turn(.dark))
-        XCTAssertEqual(cache[.dark], .manual)
-        XCTAssertEqual(cache[.light], .manual)
+        XCTAssertEqual(cache.cells, GameData.initial.cells)
+        XCTAssertEqual(cache.status, GameData.initial.status)
+        XCTAssertEqual(cache[.dark], GameData.initial.playerDark)
+        XCTAssertEqual(cache[.light], GameData.initial.playerLight)
     }
 
     func test_subscript_getPlayer() {
         self.dependency = Dependency(playerDark: .manual,
                                      playerLight: .computer,
-                                     board: .init(cells: []))
+                                     cells: [])
         let cache = dependency.testTarget
         XCTAssertEqual(cache[.dark], .manual)
         XCTAssertEqual(cache[.light], .computer)
@@ -92,7 +92,7 @@ final class GameDataCacheTests: XCTestCase {
     func test_subscript_setPlayer() {
         self.dependency = Dependency(playerDark: .manual,
                                      playerLight: .computer,
-                                     board: .init(cells: []))
+                                     cells: [])
         let cache = dependency.testTarget
         cache[.dark] = .computer
         cache[.light] = .manual
@@ -141,18 +141,18 @@ extension GameDataCacheTests {
 
         private let playerDark: GameData.Player
         private let playerLight: GameData.Player
-        private let cells: [[GameData.Board.Cell]]
+        private let cells: [[GameData.Cell]]
 
         init(playerDark: GameData.Player,
              playerLight: GameData.Player,
-             board: GameData.Board) {
+             cells: [[GameData.Cell]]) {
             self.playerDark = playerDark
             self.playerLight = playerLight
-            self.cells = board.cells
+            self.cells = cells
             self.loadGame = GameData(status: .turn(.dark),
                                      playerDark: playerDark,
                                      playerLight: playerLight,
-                                     board: board)
+                                     cells: cells)
         }
     }
 }

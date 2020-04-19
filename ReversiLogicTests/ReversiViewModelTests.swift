@@ -7,7 +7,8 @@ final class ReversiViewModelTests: XCTestCase {
     private var dependency: Dependency!
 
     override func setUp() {
-        self.dependency = Dependency(board: .initial(), messageDiskSize: 0)
+        self.dependency = Dependency(cells: GameData.initial.cells,
+                                     messageDiskSize: 0)
     }
 
     func test_waitForPlayer_turnがdarkで_playerDarkがmanualの場合() {
@@ -106,7 +107,7 @@ final class ReversiViewModelTests: XCTestCase {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
 
-        let expectedCell = GameData.Board.Cell(coordinate: .init(x: 0, y: 0), disk: nil)
+        let expectedCell = GameData.Cell(coordinate: .init(x: 0, y: 0), disk: nil)
         let expectedPlayerDark = GameData.Player.computer
         let expectedPlayerLight = GameData.Player.computer
 
@@ -243,7 +244,7 @@ final class ReversiViewModelTests: XCTestCase {
 
     func test_updateMessage_trunがnilじゃない場合() {
         let expectedSize = CGFloat(arc4random() % 100)
-        self.dependency = Dependency(board: .initial(), messageDiskSize: expectedSize)
+        self.dependency = Dependency(cells: GameData.initial.cells, messageDiskSize: expectedSize)
 
         let expectedTurn = Disk.light
         let viewModel = dependency.testTarget
@@ -268,7 +269,7 @@ final class ReversiViewModelTests: XCTestCase {
     func test_updateMessage_trunがnilで勝者がいる場合() {
         let expectedDisk = Disk.dark
         let expectedSize = CGFloat(arc4random() % 100)
-        self.dependency = Dependency(board: .init(cells: []),
+        self.dependency = Dependency(cells: [],
                                      messageDiskSize: expectedSize)
 
         let viewModel = dependency.testTarget
@@ -293,15 +294,15 @@ final class ReversiViewModelTests: XCTestCase {
     }
 
     func test_updateMessage_trunがnilで勝者がいない場合() {
-        let cell1 = GameData.Board.Cell(
+        let cell1 = GameData.Cell(
             coordinate: .init(x: 1, y: 2),
             disk: .dark
         )
-        let cell2 = GameData.Board.Cell(
+        let cell2 = GameData.Cell(
             coordinate: .init(x: 2, y: 2),
             disk: .light
         )
-        self.dependency = Dependency(board: .init(cells: [[cell1, cell2]]),
+        self.dependency = Dependency(cells: [[cell1, cell2]],
                                      messageDiskSize: 0)
 
         let viewModel = dependency.testTarget
@@ -736,8 +737,8 @@ extension ReversiViewModelTests {
             logicFactory: MockGameLogicFactory(logic: gameLogic)
         )
 
-        init(board: GameData.Board, messageDiskSize: CGFloat) {
-            self.gameDataCache.cells = board.cells
+        init(cells: [[GameData.Cell]], messageDiskSize: CGFloat) {
+            self.gameDataCache.cells = cells
             self.messageDiskSize = messageDiskSize
 
             testTarget.messageDiskSizeConstant
@@ -821,17 +822,5 @@ extension ReversiViewModelTests.Dependency.SetDisk {
         return lhs.disk == rhs.disk &&
             lhs.coordinate == rhs.coordinate &&
             lhs.animated == rhs.animated
-    }
-}
-
-extension ReversiViewModelTests.Dependency {
-
-    private enum Const {
-        static let initialData = GameData(
-            status: .turn(.dark),
-            playerDark: .manual,
-            playerLight: .manual,
-            board: .initial()
-        )
     }
 }

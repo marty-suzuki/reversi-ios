@@ -1,7 +1,7 @@
 import Foundation
 
 public protocol GameDataCellGettable: AnyObject {
-    var cells: [[GameData.Board.Cell]] { get }
+    var cells: [[GameData.Cell]] { get }
 }
 
 public protocol GemeDataDiskGettable: AnyObject {
@@ -30,10 +30,10 @@ final class GameDataCache: GameDataCacheProtocol {
     private let _loadGame: GameDataIO.LoadGame
     private let _saveGame: GameDataIO.SaveGame
 
-    var status: GameData.Status = .turn(.dark)
+    var status: GameData.Status = GameData.initial.status
     private(set) var playerDark: GameData.Player
     private(set) var playerLight: GameData.Player
-    private(set) var cells: [[GameData.Board.Cell]]
+    private(set) var cells: [[GameData.Cell]]
 
     var playerOfCurrentTurn: GameData.Player? {
         switch status {
@@ -47,9 +47,9 @@ final class GameDataCache: GameDataCacheProtocol {
     init(
         loadGame: @escaping GameDataIO.LoadGame,
         saveGame: @escaping GameDataIO.SaveGame,
-        playerDark: GameData.Player = .manual,
-        playerLight: GameData.Player = .manual,
-        cells: [[GameData.Board.Cell]] = GameData.Board.initial().cells
+        playerDark: GameData.Player = GameData.initial.playerDark,
+        playerLight: GameData.Player = GameData.initial.playerLight,
+        cells: [[GameData.Cell]] = GameData.initial.cells
     ) {
         self._loadGame = loadGame
         self._saveGame = saveGame
@@ -99,7 +99,7 @@ final class GameDataCache: GameDataCacheProtocol {
             self?.status = data.status
             self?.playerDark = data.playerDark
             self?.playerLight = data.playerLight
-            self?.cells = data.board.cells
+            self?.cells = data.cells
             completion()
         }
     }
@@ -108,7 +108,7 @@ final class GameDataCache: GameDataCacheProtocol {
         let data = GameData(status: status,
                             playerDark: playerDark,
                             playerLight: playerLight,
-                            board: .init(cells: cells))
+                            cells: cells)
         try _saveGame(
             data,
             { try $0.write(toFile: $1, atomically: true, encoding: .utf8) }
@@ -116,9 +116,9 @@ final class GameDataCache: GameDataCacheProtocol {
     }
 
     func reset() {
-        self.cells = GameData.Board.initial().cells
-        self.status = .turn(.dark)
-        self.playerDark = .manual
-        self.playerLight = .manual
+        self.cells = GameData.initial.cells
+        self.status = GameData.initial.status
+        self.playerDark = GameData.initial.playerDark
+        self.playerLight = GameData.initial.playerLight
     }
 }

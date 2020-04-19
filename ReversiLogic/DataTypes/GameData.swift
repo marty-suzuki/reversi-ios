@@ -2,16 +2,16 @@ public struct GameData: Equatable {
     public let status: Status
     public let playerDark: Player
     public let playerLight: Player
-    public let board: Board
+    public let cells: [[Cell]]
 
     public init(status: Status,
                 playerDark: Player,
                 playerLight: Player,
-                board: Board) {
+                cells: [[Cell]]) {
         self.status = status
         self.playerDark = playerDark
         self.playerLight = playerLight
-        self.board = board
+        self.cells = cells
     }
 }
 
@@ -26,16 +26,6 @@ extension GameData {
         case computer = 1
     }
 
-    public struct Board: Equatable {
-        public let cells: [[Cell]]
-
-        public init(cells: [[Cell]]) {
-            self.cells = cells
-        }
-    }
-}
-
-extension GameData.Board {
     public struct Cell: Equatable {
         public let coordinate: Coordinate
         public var disk: Disk?
@@ -45,8 +35,11 @@ extension GameData.Board {
             self.disk = disk
         }
     }
+}
 
-    public static func initial() -> GameData.Board {
+extension GameData {
+
+    public static let initial: GameData = {
         let range = (0..<8)
         let disk: [[Disk?]] = [
             range.map { _ in nil },
@@ -65,6 +58,9 @@ extension GameData.Board {
             }
         }
 
-        return GameData.Board(cells: cells)
-    }
+        return GameData(status: .turn(.dark),
+                        playerDark: .manual,
+                        playerLight: .manual,
+                        cells: cells)
+    }()
 }

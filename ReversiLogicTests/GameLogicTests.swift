@@ -16,7 +16,7 @@ final class GameLogicTests: XCTestCase {
 
         dependency.cache.cells = (0..<y).map { y in
             (0..<x).map { x in
-                GameData.Board.Cell(coordinate: .init(x: x, y: y), disk: disk)
+                GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
             }
         }
 
@@ -27,9 +27,9 @@ final class GameLogicTests: XCTestCase {
     func test_sideWithMoreDisks_darkの方が多い() {
         dependency.cache.cells = [
             [
-                GameData.Board.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
-                GameData.Board.Cell(coordinate: .init(x: 1, y: 0), disk: .dark),
-                GameData.Board.Cell(coordinate: .init(x: 2, y: 0), disk: .light)
+                GameData.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
+                GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .dark),
+                GameData.Cell(coordinate: .init(x: 2, y: 0), disk: .light)
             ]
         ]
 
@@ -40,9 +40,9 @@ final class GameLogicTests: XCTestCase {
     func test_sideWithMoreDisks_lightの方が多い() {
         dependency.cache.cells = [
             [
-                GameData.Board.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
-                GameData.Board.Cell(coordinate: .init(x: 1, y: 0), disk: .light),
-                GameData.Board.Cell(coordinate: .init(x: 2, y: 0), disk: .light)
+                GameData.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
+                GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .light),
+                GameData.Cell(coordinate: .init(x: 2, y: 0), disk: .light)
             ]
         ]
 
@@ -53,8 +53,8 @@ final class GameLogicTests: XCTestCase {
     func test_sideWithMoreDisks_darkとlightが同じ数() {
         dependency.cache.cells = [
             [
-                GameData.Board.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
-                GameData.Board.Cell(coordinate: .init(x: 1, y: 0), disk: .light)
+                GameData.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
+                GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .light)
             ]
         ]
 
@@ -71,7 +71,7 @@ final class GameLogicTests: XCTestCase {
         ]
         dependency.cache.cells = board.enumerated().map { y, rows in
             rows.enumerated().map { x, disk in
-                GameData.Board.Cell(coordinate: .init(x: x, y: y), disk: disk)
+                GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
             }
         }
         let logic = dependency.testTarget
@@ -114,7 +114,7 @@ final class GameLogicTests: XCTestCase {
         ]
         dependency.cache.cells = board.enumerated().map { y, rows in
             rows.enumerated().map { x, disk in
-                GameData.Board.Cell(coordinate: .init(x: x, y: y), disk: disk)
+                GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
             }
         }
         let logic = dependency.testTarget
@@ -149,7 +149,7 @@ final class GameLogicTests: XCTestCase {
         ]
         dependency.cache.cells = board.enumerated().map { y, rows in
             rows.enumerated().map { x, disk in
-                GameData.Board.Cell(coordinate: .init(x: x, y: y), disk: disk)
+                GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
             }
         }
 

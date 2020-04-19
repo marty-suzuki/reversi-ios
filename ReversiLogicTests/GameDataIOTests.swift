@@ -6,7 +6,7 @@ class GameDataIOTests: XCTestCase {
     func test_save() throws {
         var response: String?
         try GameDataIO.save(
-            data: Const.initialData,
+            data: GameData.initial,
             writeToFile:  { output, _ in response = output }
         )
 
@@ -20,7 +20,7 @@ class GameDataIOTests: XCTestCase {
             completion: { gameData = $0 }
         )
 
-        XCTAssertEqual(gameData, Const.initialData)
+        XCTAssertEqual(gameData, GameData.initial)
     }
 }
 
@@ -42,12 +42,5 @@ extension GameDataIOTests {
         --------
 
         """
-
-        static let initialData = GameData(
-            status: .turn(.dark),
-            playerDark: .manual,
-            playerLight: .manual,
-            board: .initial()
-        )
     }
 }
