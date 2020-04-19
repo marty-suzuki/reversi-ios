@@ -1,10 +1,18 @@
 @testable import ReversiLogic
 
 final class MockGameDataCache: GameDataCacheProtocol {
-    
+
+    @MockBehaviorWrapeer(value: .manual)
+    private(set) var playerDark: ValueObservable<GameData.Player>
+
+    @MockBehaviorWrapeer(value: .manual)
+    private(set) var playerLight: ValueObservable<GameData.Player>
+
     var playerOfCurrentTurn: GameData.Player?
+
+    @CountableProperty
     var status: GameData.Status = .turn(.dark)
-    var player: GameData.Player = .manual
+
     var cells: [[GameData.Cell]] = []
 
     @MockResponse<Void, Void>()
@@ -22,16 +30,10 @@ final class MockGameDataCache: GameDataCacheProtocol {
     @MockResponse<(Coordinate, Disk?), Void>()
     var _setDisk: Void
 
-    @MockResponse<Disk, GameData.Player>
-    var _getPlayerDark = .manual
-
-    @MockResponse<SetPlayer, Void>()
+    @MockResponse<GameData.Player, Void>()
     var _setPalyerDark: Void
 
-    @MockResponse<Disk, GameData.Player>
-    var _getPlayerLight = .manual
-
-    @MockResponse<SetPlayer, Void>()
+    @MockResponse<GameData.Player, Void>()
     var _setPalyerLight: Void
 
     subscript(coordinate: Coordinate) -> Disk? {
@@ -39,20 +41,12 @@ final class MockGameDataCache: GameDataCacheProtocol {
         set { __setDisk.respond((coordinate, newValue)) }
     }
 
-    subscript(disk: Disk) -> GameData.Player {
-        get {
-            switch disk {
-            case .dark: return __getPlayerDark.respond(disk)
-            case .light: return __getPlayerLight.respond(disk)
-            }
-        }
-        set {
-            let response = SetPlayer(disk: disk, player: newValue)
-            switch disk {
-            case .dark: __setPalyerDark.respond(response)
-            case .light: __setPalyerLight.respond(response)
-            }
-        }
+    func setPlayerOfDark(_ player: GameData.Player) {
+        __setPalyerDark.respond(player)
+    }
+
+    func setPlayerOfLight(_ player: GameData.Player) {
+        __setPalyerLight.respond(player)
     }
 
     func load(completion: @escaping () -> Void) throws {

@@ -44,6 +44,7 @@ public final class ReversiViewModel {
     private let async: Async
     private let logic: GameLogicProtocol
     private let cache: GameDataCacheProtocol
+    private let disposeBag = DisposeBag()
 
     public init(messageDiskSize: CGFloat,
                 asyncAfter: @escaping AsyncAfter,
@@ -55,6 +56,18 @@ public final class ReversiViewModel {
         self.async = async
         self.messageDiskSize = messageDiskSize
         self.logic = logicFactory.make(cache: cache)
+
+        cache.playerDark
+            .distinctUntilChanged()
+            .map { $0.rawValue }
+            .bind(to: _playerDarkSelectedIndex)
+            .disposed(by: disposeBag)
+
+        cache.playerLight
+            .distinctUntilChanged()
+            .map { $0.rawValue }
+            .bind(to: _playerLightSelectedIndex)
+            .disposed(by: disposeBag)
     }
 
     public func viewDidAppear() {
@@ -74,7 +87,12 @@ public final class ReversiViewModel {
     }
 
     public func setPlayer(for disk: Disk, with index: Int) {
-        cache[disk] = GameData.Player(rawValue: index) ?? .manual
+        switch disk {
+        case .dark:
+            cache.setPlayerOfDark(GameData.Player(rawValue: index) ?? .manual)
+        case .light:
+            cache.setPlayerOfLight(GameData.Player(rawValue: index) ?? .manual)
+        }
 
         try? cache.save()
 
@@ -82,7 +100,15 @@ public final class ReversiViewModel {
             canceller.cancel()
         }
 
-        if !isAnimating, cache.status == .turn(disk), case .computer = cache[disk] {
+        let player: GameData.Player
+        switch disk {
+        case .dark:
+            player = cache.playerDark.value
+        case .light:
+            player = cache.playerLight.value
+        }
+
+        if !isAnimating, cache.status == .turn(disk), case .computer = player {
             playTurnOfComputer()
         }
     }
@@ -132,8 +158,10 @@ extension ReversiViewModel {
         switch cache.status {
         case .gameOver:
             return
-        case let .turn(disk):
-            player = cache[disk]
+        case .turn(.dark):
+            player = cache.playerDark.value
+        case .turn(.light):
+            player = cache.playerLight.value
         }
 
         switch player {
@@ -154,9 +182,6 @@ extension ReversiViewModel {
         _resetBoard.accept()
         cache.reset()
 
-        _playerDarkSelectedIndex.accept(cache[.dark].rawValue)
-        _playerLightSelectedIndex.accept(cache[.light].rawValue)
-
         updateMessage()
         updateCount()
 
@@ -168,9 +193,6 @@ extension ReversiViewModel {
             guard let me = self else {
                 return
             }
-
-            self?._playerDarkSelectedIndex.accept(me.cache[.dark].rawValue)
-            self?._playerLightSelectedIndex.accept(me.cache[.light].rawValue)
 
             me.cache.cells.forEach { rows in
                 rows.forEach { cell in

@@ -16,7 +16,7 @@ final class ReversiViewModelTests: XCTestCase {
         let cache = dependency.gameDataCache
         let turn = Disk.dark
         cache.status = .turn(turn)
-        cache._getPlayerDark = .manual
+        cache.$playerDark.accept(.manual)
 
         viewModel.waitForPlayer()
 
@@ -32,7 +32,7 @@ final class ReversiViewModelTests: XCTestCase {
         let cache = dependency.gameDataCache
         let turn = Disk.light
         cache.status = .turn(turn)
-        cache._getPlayerLight = .computer
+        cache.$playerLight.accept(.computer)
         let logic = dependency.gameLogic
         logic._validMovekForLight = [Coordinate(x: 0, y: 0)]
 
@@ -49,8 +49,8 @@ final class ReversiViewModelTests: XCTestCase {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         cache.status = .gameOver
-        cache._getPlayerDark = .computer
-        cache._getPlayerLight = .computer
+        cache.$playerDark.accept(.computer)
+        cache.$playerLight.accept(.computer)
 
         viewModel.waitForPlayer()
 
@@ -64,7 +64,7 @@ final class ReversiViewModelTests: XCTestCase {
     func test_viewDidAppear_waitForPlayerが2回呼ばれることはない() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
-        cache._getPlayerDark = .computer
+        cache.$playerDark.accept(.manual)
         let turn = Disk.dark
         cache.status = .turn(turn)
         let logic = dependency.gameLogic
@@ -72,11 +72,11 @@ final class ReversiViewModelTests: XCTestCase {
 
         viewModel.viewDidAppear()
 
-        let getPlayerDark = cache.$_getPlayerDark
-        XCTAssertEqual(getPlayerDark.calledCount, 1)
+        let status = cache.$status
+        XCTAssertEqual(status.getterCalledCount, 1)
 
         viewModel.viewDidAppear()
-        XCTAssertEqual(getPlayerDark.calledCount, 1)
+        XCTAssertEqual(status.getterCalledCount, 1)
     }
 
     func test_newGame() {
@@ -91,14 +91,6 @@ final class ReversiViewModelTests: XCTestCase {
         let cacheReset = cache.$_reset
         XCTAssertEqual(cacheReset.calledCount, 1)
 
-        let setPlayerDarkSelectedIndex = dependency.$setPlayerDarkSelectedIndex
-        XCTAssertEqual(setPlayerDarkSelectedIndex.calledCount, 1)
-        XCTAssertEqual(setPlayerDarkSelectedIndex.parameters, [GameData.Player.manual.rawValue])
-
-        let setPlayerLightSelectedIndex = dependency.$setPlayerLightSelectedIndex
-        XCTAssertEqual(setPlayerLightSelectedIndex.calledCount, 1)
-        XCTAssertEqual(setPlayerLightSelectedIndex.parameters, [GameData.Player.manual.rawValue])
-
         let save = cache.$_save
         XCTAssertEqual(save.parameters.isEmpty, false)
     }
@@ -112,8 +104,8 @@ final class ReversiViewModelTests: XCTestCase {
         let expectedPlayerLight = GameData.Player.computer
 
         cache.status = .turn(.dark)
-        cache._getPlayerDark = expectedPlayerDark
-        cache._getPlayerLight = expectedPlayerLight
+        cache.$playerDark.accept(expectedPlayerDark)
+        cache.$playerLight.accept(expectedPlayerLight)
         cache.cells = [[expectedCell]]
 
         try viewModel.loadGame()
@@ -141,30 +133,26 @@ final class ReversiViewModelTests: XCTestCase {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         let disk = Disk.dark
-        cache._getPlayerDark = .manual
+        cache.$playerDark.accept(.manual)
 
         viewModel.setPlayer(for: disk, with: 1)
-        let first = MockGameDataCache.SetPlayer(disk: disk, player: .computer)
-        XCTAssertEqual(cache.$_setPalyerDark.parameters, [first])
+        XCTAssertEqual(cache.$_setPalyerDark.parameters, [.computer])
 
         viewModel.setPlayer(for: disk, with: 0)
-        let second = MockGameDataCache.SetPlayer(disk: disk, player: .manual)
-        XCTAssertEqual(cache.$_setPalyerDark.parameters, [first, second])
+        XCTAssertEqual(cache.$_setPalyerDark.parameters, [.computer, .manual])
     }
 
     func test_setPlayer_playerLightに値が反映される() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         let disk = Disk.light
-        cache._getPlayerLight = .manual
+        cache.$playerLight.accept(.manual)
 
         viewModel.setPlayer(for: disk, with: 1)
-        let first = MockGameDataCache.SetPlayer(disk: disk, player: .computer)
-        XCTAssertEqual(cache.$_setPalyerLight.parameters, [first])
+        XCTAssertEqual(cache.$_setPalyerLight.parameters, [.computer])
 
         viewModel.setPlayer(for: disk, with: 0)
-        let second = MockGameDataCache.SetPlayer(disk: disk, player: .manual)
-        XCTAssertEqual(cache.$_setPalyerLight.parameters, [first, second])
+        XCTAssertEqual(cache.$_setPalyerLight.parameters, [.computer, .manual])
     }
 
     func test_setPlayer_isAnimatingがfalseで_diskと現在のplayerが一致していて_playerがcomputerの場合() {
@@ -176,7 +164,7 @@ final class ReversiViewModelTests: XCTestCase {
         logic._validMovekForLight = [Coordinate(x: 0, y: 0)]
 
         viewModel.animationCanceller = nil  // isAnimating = false
-        cache._getPlayerLight = .computer
+        cache.$playerLight.accept(.computer)
 
         viewModel.setPlayer(for: disk, with: 1)
 
@@ -196,7 +184,7 @@ final class ReversiViewModelTests: XCTestCase {
         logic._validMovekForLight = [Coordinate(x: 0, y: 0)]
 
         viewModel.animationCanceller = Canceller({}) // isAnimating = true
-        cache._getPlayerLight = .computer
+        cache.$playerLight.accept(.computer)
 
         viewModel.setPlayer(for: disk, with: 1)
 
@@ -213,7 +201,7 @@ final class ReversiViewModelTests: XCTestCase {
         cache.status = .turn(.light)
 
         viewModel.animationCanceller = nil // isAnimating = false
-        cache._getPlayerLight = .computer
+        cache.$playerLight.accept(.computer)
 
         viewModel.setPlayer(for: .dark, with: 1)
 
@@ -231,7 +219,7 @@ final class ReversiViewModelTests: XCTestCase {
         cache.status = .turn(disk)
 
         viewModel.animationCanceller = nil // isAnimating = false
-        cache._getPlayerLight = .manual
+        cache.$playerLight.accept(.manual)
 
         viewModel.setPlayer(for: disk, with: 0)
 
@@ -436,7 +424,7 @@ final class ReversiViewModelTests: XCTestCase {
         let disk = Disk.dark
         cache.status = .turn(disk)
         cache.playerOfCurrentTurn = .manual
-        cache._getPlayerDark = .manual
+        cache.$playerDark.accept(.manual)
 
         viewModel.animationCanceller = nil
 

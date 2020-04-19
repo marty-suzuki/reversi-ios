@@ -6,9 +6,7 @@ final class GameDataCacheTests: XCTestCase {
     private var dependency: Dependency!
 
     override func setUp() {
-        self.dependency = Dependency(playerDark: GameData.initial.playerDark,
-                                     playerLight: GameData.initial.playerLight,
-                                     cells: GameData.initial.cells)
+        self.dependency = Dependency(cells: GameData.initial.cells)
     }
 
     func test_load() throws {
@@ -32,8 +30,8 @@ final class GameDataCacheTests: XCTestCase {
 
         XCTAssertTrue(isCompletionCalled)
         XCTAssertEqual(cache.status, expectedStatus)
-        XCTAssertEqual(cache[.dark], expectedPlayerDark)
-        XCTAssertEqual(cache[.light], expectedPlayerLight)
+        XCTAssertEqual(cache.playerDark.value, expectedPlayerDark)
+        XCTAssertEqual(cache.playerLight.value, expectedPlayerLight)
         XCTAssertEqual(cache.cells, [[expectedCell]])
     }
 
@@ -43,12 +41,10 @@ final class GameDataCacheTests: XCTestCase {
         let expectedPlayerLight: GameData.Player = .computer
         let expectedStatus: GameData.Status = .turn(.light)
 
-        self.dependency = Dependency(playerDark: .manual,
-                                     playerLight: .manual,
-                                     cells: [[expectedCell]])
+        self.dependency = Dependency(cells: [[expectedCell]])
         let cache = dependency.testTarget
-        cache[.dark] = expectedPlayerDark
-        cache[.light] = expectedPlayerLight
+        cache.setPlayerOfDark(expectedPlayerDark)
+        cache.setPlayerOfLight(expectedPlayerLight)
         cache.status = expectedStatus
 
         try cache.save()
@@ -64,40 +60,18 @@ final class GameDataCacheTests: XCTestCase {
     }
 
     func test_rest() {
-        self.dependency = Dependency(playerDark: .manual,
-                                     playerLight: .manual,
-                                     cells: [])
+        self.dependency = Dependency(cells: [])
         let cache = dependency.testTarget
         cache.status = .gameOver
-        cache[.dark] = .computer
-        cache[.light] = .computer
+        cache.setPlayerOfDark(.computer)
+        cache.setPlayerOfLight(.computer)
 
         cache.reset()
 
         XCTAssertEqual(cache.cells, GameData.initial.cells)
         XCTAssertEqual(cache.status, GameData.initial.status)
-        XCTAssertEqual(cache[.dark], GameData.initial.playerDark)
-        XCTAssertEqual(cache[.light], GameData.initial.playerLight)
-    }
-
-    func test_subscript_getPlayer() {
-        self.dependency = Dependency(playerDark: .manual,
-                                     playerLight: .computer,
-                                     cells: [])
-        let cache = dependency.testTarget
-        XCTAssertEqual(cache[.dark], .manual)
-        XCTAssertEqual(cache[.light], .computer)
-    }
-
-    func test_subscript_setPlayer() {
-        self.dependency = Dependency(playerDark: .manual,
-                                     playerLight: .computer,
-                                     cells: [])
-        let cache = dependency.testTarget
-        cache[.dark] = .computer
-        cache[.light] = .manual
-        XCTAssertEqual(cache.playerDark, .computer)
-        XCTAssertEqual(cache.playerLight, .manual)
+        XCTAssertEqual(cache.playerDark.value, GameData.initial.playerDark)
+        XCTAssertEqual(cache.playerLight.value, GameData.initial.playerLight)
     }
 
     func test_playerOfCurrentTurn() {
@@ -107,11 +81,11 @@ final class GameDataCacheTests: XCTestCase {
         XCTAssertNil(cache.playerOfCurrentTurn)
 
         cache.status = .turn(.dark)
-        cache[.dark] = .computer
+        cache.setPlayerOfDark(.computer)
         XCTAssertEqual(cache.playerOfCurrentTurn, .computer)
 
         cache.status = .turn(.light)
-        cache[.light] = .computer
+        cache.setPlayerOfLight(.computer)
         XCTAssertEqual(cache.playerOfCurrentTurn, .computer)
     }
 }
@@ -134,24 +108,16 @@ extension GameDataCacheTests {
                 completion(me._loadGame.respond())
             },
             saveGame: { [weak self] data, _ in self?._saveGame.respond(data) },
-            playerDark: playerDark,
-            playerLight: playerLight,
             cells: cells
         )
 
-        private let playerDark: GameData.Player
-        private let playerLight: GameData.Player
         private let cells: [[GameData.Cell]]
 
-        init(playerDark: GameData.Player,
-             playerLight: GameData.Player,
-             cells: [[GameData.Cell]]) {
-            self.playerDark = playerDark
-            self.playerLight = playerLight
+        init(cells: [[GameData.Cell]]) {
             self.cells = cells
             self.loadGame = GameData(status: .turn(.dark),
-                                     playerDark: playerDark,
-                                     playerLight: playerLight,
+                                     playerDark: GameData.initial.playerDark,
+                                     playerLight: GameData.initial.playerLight,
                                      cells: cells)
         }
     }

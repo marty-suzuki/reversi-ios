@@ -25,3 +25,17 @@ extension PublishWrapper where Element == Void {
         accept(())
     }
 }
+
+extension ObservableType {
+
+    public func bind(to relay: PublishWrapper<Element>) -> Disposable {
+        subscribe { event in
+            switch event {
+            case let .next(value):
+                relay.accept(value)
+            case .completed, .error:
+                return
+            }
+        }
+    }
+}
