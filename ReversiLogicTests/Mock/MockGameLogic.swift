@@ -8,21 +8,24 @@ struct MockGameLogicFactory: GameLogicFactoryProtocol {
         self.logic = logic
     }
 
-    func make(cache: GameDataCellGettable & GemeDataDiskGettable) -> GameLogicProtocol {
+    func make(cache: GameDataGettable) -> GameLogicProtocol {
         logic
     }
 }
 
 final class MockGameLogic: GameLogicProtocol {
 
-    @MockResponse<Disk, Int>
-    var _countOfDark = 0
+    @MockBehaviorWrapeer(value: 0)
+    private(set) var countOfDark: ValueObservable<Int>
 
-    @MockResponse<Disk, Int>
-    var _countOfLight = 0
+    @MockBehaviorWrapeer(value: 0)
+    private(set) var countOfLight: ValueObservable<Int>
 
-    @MockResponse<Void, Disk?>
-    var _sideWithMoreDisks = nil
+    @MockBehaviorWrapeer(value: nil)
+    private(set) var playerOfCurrentTurn: ValueObservable<GameData.Player?>
+
+    @MockBehaviorWrapeer(value: nil)
+    private(set) var sideWithMoreDisks: ValueObservable<Disk?>
 
     @MockResponse<FlippedDiskCoordinates, [Coordinate]>
     var _flippedDiskCoordinates = []
@@ -35,19 +38,6 @@ final class MockGameLogic: GameLogicProtocol {
 
     @MockResponse<Disk, [Coordinate]>
     var _validMovekForLight = []
-
-    func count(of disk: Disk) -> Int {
-        switch disk {
-        case .dark:
-            return __countOfDark.respond(disk)
-        case .light:
-            return __countOfLight.respond(disk)
-        }
-    }
-
-    func sideWithMoreDisks() -> Disk? {
-        __sideWithMoreDisks.respond()
-    }
 
     func flippedDiskCoordinates(by disk: Disk, at coordinate: Coordinate) -> [Coordinate] {
         __flippedDiskCoordinates.respond(.init(disk: disk, coordinate: coordinate))

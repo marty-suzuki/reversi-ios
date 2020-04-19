@@ -18,3 +18,17 @@ public struct BehaviorWrapper<Element> {
         relay.accept(value)
     }
 }
+
+extension ObservableType {
+
+    public func bind(to relay: BehaviorWrapper<Element>) -> Disposable {
+        subscribe { event in
+            switch event {
+            case let .next(value):
+                relay.accept(value)
+            case .completed, .error:
+                return
+            }
+        }
+    }
+}

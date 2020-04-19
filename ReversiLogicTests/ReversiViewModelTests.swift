@@ -106,7 +106,7 @@ final class ReversiViewModelTests: XCTestCase {
         cache.$status.accept(.turn(.dark))
         cache.$playerDark.accept(expectedPlayerDark)
         cache.$playerLight.accept(expectedPlayerLight)
-        cache.cells = [[expectedCell]]
+        cache.$cells.accept([[expectedCell]])
 
         try viewModel.loadGame()
 
@@ -258,7 +258,7 @@ final class ReversiViewModelTests: XCTestCase {
                                      messageDiskSize: expectedSize)
 
         let logic = dependency.gameLogic
-        logic._sideWithMoreDisks = expectedDisk
+        logic.$sideWithMoreDisks.accept(expectedDisk)
         let cache = dependency.gameDataCache
         cache.$status.accept(.gameOver)
 
@@ -288,7 +288,7 @@ final class ReversiViewModelTests: XCTestCase {
                                      messageDiskSize: 0)
 
         let logic = dependency.gameLogic
-        logic._sideWithMoreDisks = nil
+        logic.$sideWithMoreDisks.accept(nil)
         let cache = dependency.gameDataCache
         cache.$status.accept(.gameOver)
 
@@ -309,8 +309,8 @@ final class ReversiViewModelTests: XCTestCase {
         let lightCount = Int(arc4random() % 100)
         let viewModel = dependency.testTarget
         let logic = dependency.gameLogic
-        logic._countOfDark = darkCount
-        logic._countOfLight = lightCount
+        logic.$countOfDark.accept(darkCount)
+        logic.$countOfLight.accept(lightCount)
 
         viewModel.updateCount()
 
@@ -413,10 +413,11 @@ final class ReversiViewModelTests: XCTestCase {
     func test_handleSelectedCoordinate() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
+        let logic = dependency.gameLogic
 
         let disk = Disk.dark
         cache.$status.accept(.turn(disk))
-        cache.playerOfCurrentTurn = .manual
+        logic.$playerOfCurrentTurn.accept(.manual)
         cache.$playerDark.accept(.manual)
 
         viewModel.animationCanceller = nil
@@ -424,7 +425,6 @@ final class ReversiViewModelTests: XCTestCase {
         let coordinate = Coordinate(x: 0, y: 0)
         viewModel.handle(selectedCoordinate: coordinate)
 
-        let logic = dependency.gameLogic
         let flippedDiskCoordinates = logic.$_flippedDiskCoordinates
         let expected = MockGameLogic.FlippedDiskCoordinates(
             disk: disk,
@@ -719,7 +719,7 @@ extension ReversiViewModelTests {
         )
 
         init(cells: [[GameData.Cell]], messageDiskSize: CGFloat) {
-            self.gameDataCache.cells = cells
+            self.gameDataCache.$cells.accept(cells)
             self.messageDiskSize = messageDiskSize
 
             testTarget.messageDiskSizeConstant

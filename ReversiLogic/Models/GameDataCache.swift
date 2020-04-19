@@ -1,18 +1,12 @@
-import Foundation
-
-public protocol GameDataCellGettable: AnyObject {
-    var cells: [[GameData.Cell]] { get }
-}
-
-public protocol GemeDataDiskGettable: AnyObject {
-     subscript(coordinate: Coordinate) -> Disk? { get }
-}
-
-public protocol GameDataCacheProtocol: GameDataCellGettable, GemeDataDiskGettable {
+public protocol GameDataGettable: AnyObject {
     var status: ValueObservable<GameData.Status> { get }
-    var playerOfCurrentTurn: GameData.Player? { get }
     var playerDark: ValueObservable<GameData.Player> { get }
     var playerLight: ValueObservable<GameData.Player> { get }
+    var cells: ValueObservable<[[GameData.Cell]]> { get }
+    subscript(coordinate: Coordinate) -> Disk? { get }
+}
+
+public protocol GameDataCacheProtocol: GameDataGettable {
     subscript(coordinate: Coordinate) -> Disk? { get set }
     func load(completion: @escaping () -> Void) throws
     func save() throws
@@ -43,33 +37,21 @@ final class GameDataCache: GameDataCacheProtocol {
     @BehaviorWrapper(value: GameData.initial.playerLight)
     private(set) var playerLight: ValueObservable<GameData.Player>
 
-    private(set) var cells: [[GameData.Cell]]
+    @BehaviorWrapper(value: [])
+    private(set) var cells: ValueObservable<[[GameData.Cell]]>
 
-    var playerOfCurrentTurn: GameData.Player? {
-        switch status.value {
-        case .gameOver:
-            return nil
-        case .turn(.dark):
-            return playerDark.value
-        case .turn(.light):
-            return playerLight.value
-        }
-    }
-
-    init(
-        loadGame: @escaping GameDataIO.LoadGame,
+    init(loadGame: @escaping GameDataIO.LoadGame,
         saveGame: @escaping GameDataIO.SaveGame,
-        cells: [[GameData.Cell]] = GameData.initial.cells
-    ) {
+        cells: [[GameData.Cell]] = GameData.initial.cells) {
         self._loadGame = loadGame
         self._saveGame = saveGame
-        self.cells = cells
+        self._cells.accept(cells)
     }
 
     subscript(coordinate: Coordinate) -> Disk? {
         get {
             guard
-                let cell = cells[safe: coordinate.y]?[safe: coordinate.x],
+                let cell = cells.value[safe: coordinate.y]?[safe: coordinate.x],
                 cell.coordinate == coordinate
             else {
                 return nil
@@ -78,12 +60,14 @@ final class GameDataCache: GameDataCacheProtocol {
         }
         set {
             guard
-                let cell = cells[safe: coordinate.y]?[safe: coordinate.x],
+                let cell = cells.value[safe: coordinate.y]?[safe: coordinate.x],
                 cell.coordinate == coordinate
             else {
                 return
             }
+            var cells = self.cells.value
             cells[coordinate.y][coordinate.x].disk = newValue
+            self._cells.accept(cells)
         }
     }
 
@@ -104,7 +88,7 @@ final class GameDataCache: GameDataCacheProtocol {
             self?._status.accept(data.status)
             self?._playerDark.accept(data.playerDark)
             self?._playerLight.accept(data.playerLight)
-            self?.cells = data.cells
+            self?._cells.accept(data.cells)
             completion()
         }
     }
@@ -113,7 +97,7 @@ final class GameDataCache: GameDataCacheProtocol {
         let data = GameData(status: status.value,
                             playerDark: playerDark.value,
                             playerLight: playerLight.value,
-                            cells: cells)
+                            cells: cells.value)
         try _saveGame(
             data,
             { try $0.write(toFile: $1, atomically: true, encoding: .utf8) }
@@ -121,7 +105,7 @@ final class GameDataCache: GameDataCacheProtocol {
     }
 
     func reset() {
-        self.cells = GameData.initial.cells
+        self._cells.accept(GameData.initial.cells)
         self._status.accept(GameData.initial.status)
         self._playerDark.accept(GameData.initial.playerDark)
         self._playerLight.accept(GameData.initial.playerLight)

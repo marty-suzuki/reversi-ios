@@ -8,12 +8,11 @@ final class MockGameDataCache: GameDataCacheProtocol {
     @MockBehaviorWrapeer(value: .manual)
     private(set) var playerLight: ValueObservable<GameData.Player>
 
-    var playerOfCurrentTurn: GameData.Player?
-
     @MockBehaviorWrapeer(value: .turn(.dark))
-    var status: ValueObservable<GameData.Status>
+    private(set) var status: ValueObservable<GameData.Status>
 
-    var cells: [[GameData.Cell]] = []
+    @MockBehaviorWrapeer(value: [])
+    private(set) var cells: ValueObservable<[[GameData.Cell]]>
 
     @MockResponse<Void, Void>()
     var _load: Void

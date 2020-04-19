@@ -1,19 +1,23 @@
+import RxSwift
+
 public protocol GameLogicFactoryProtocol {
-    func make(cache: GameDataCellGettable & GemeDataDiskGettable) -> GameLogicProtocol
+    func make(cache: GameDataGettable) -> GameLogicProtocol
 }
 
 public struct GameLogicFactory: GameLogicFactoryProtocol {
 
     public init() {}
 
-    public func make(cache: GameDataCellGettable & GemeDataDiskGettable) -> GameLogicProtocol {
+    public func make(cache: GameDataGettable) -> GameLogicProtocol {
         GameLogic(cache: cache)
     }
 }
 
 public protocol GameLogicProtocol: AnyObject {
-    func count(of disk: Disk) -> Int
-    func sideWithMoreDisks() -> Disk?
+    var countOfDark: ValueObservable<Int> { get }
+    var countOfLight: ValueObservable<Int> { get }
+    var playerOfCurrentTurn:  ValueObservable<GameData.Player?> { get }
+    var sideWithMoreDisks: ValueObservable<Disk?> { get }
     func flippedDiskCoordinates(by disk: Disk,
                                 at coordinate: Coordinate) -> [Coordinate]
     func validMoves(for disk: Disk) -> [Coordinate]
@@ -21,32 +25,67 @@ public protocol GameLogicProtocol: AnyObject {
 
 final class GameLogic: GameLogicProtocol {
 
-    private let cache: GameDataCellGettable & GemeDataDiskGettable
+    @BehaviorWrapper(value: 0)
+    private(set) var countOfDark: ValueObservable<Int>
 
-    init(cache: GameDataCellGettable & GemeDataDiskGettable) {
+    @BehaviorWrapper(value: 0)
+    private(set) var countOfLight: ValueObservable<Int>
+
+    @BehaviorWrapper(value: nil)
+    private(set) var playerOfCurrentTurn: ValueObservable<GameData.Player?>
+
+    @BehaviorWrapper(value: nil)
+    private(set) var sideWithMoreDisks: ValueObservable<Disk?>
+
+    private let cache: GameDataGettable
+    private let disposeBag = DisposeBag()
+
+    init(cache: GameDataGettable) {
         self.cache = cache
-    }
 
-    func count(of disk: Disk) -> Int {
-        cache.cells.reduce(0) { result, rows in
-            rows.reduce(result) { result, cell in
-                if cell.disk == disk {
-                    return result + 1
-                } else {
-                    return result
+        let countOf: (Disk, [[GameData.Cell]]) -> Int = { disk, cells in
+            cells.reduce(0) { result, rows in
+                rows.reduce(result) { result, cell in
+                    if cell.disk == disk {
+                        return result + 1
+                    } else {
+                        return result
+                    }
                 }
             }
         }
-    }
 
-    func sideWithMoreDisks() -> Disk? {
-        let darkCount = count(of: .dark)
-        let lightCount = count(of: .light)
-        if darkCount == lightCount {
-            return nil
-        } else {
-            return darkCount > lightCount ? .dark : .light
-        }
+        cache.cells
+            .map { countOf(.dark, $0) }
+            .bind(to: _countOfDark)
+            .disposed(by: disposeBag)
+
+        cache.cells
+            .map { countOf(.light, $0) }
+            .bind(to: _countOfLight)
+            .disposed(by: disposeBag)
+
+        Observable.combineLatest(cache.status, cache.playerDark, cache.playerLight)
+            .map { status, dark, light -> GameData.Player? in
+                switch status {
+                case .gameOver:  return nil
+                case .turn(.dark): return dark
+                case .turn(.light): return light
+                }
+            }
+            .bind(to: _playerOfCurrentTurn)
+            .disposed(by: disposeBag)
+
+        Observable.combineLatest(countOfDark, countOfLight)
+            .map { darkCount, lightCount -> Disk? in
+                if darkCount == lightCount {
+                    return nil
+                } else {
+                    return darkCount > lightCount ? .dark : .light
+                }
+            }
+            .bind(to: _sideWithMoreDisks)
+            .disposed(by: disposeBag)
     }
 
     func flippedDiskCoordinates(by disk: Disk,
@@ -62,7 +101,7 @@ final class GameLogic: GameLogicProtocol {
             (x: -1, y:  1),
         ]
 
-        guard cache.cells[safe: coordinate.y]?[safe: coordinate.x]?.disk == nil else {
+        guard cache.cells.value[safe: coordinate.y]?[safe: coordinate.x]?.disk == nil else {
             return []
         }
 
@@ -77,7 +116,7 @@ final class GameLogic: GameLogicProtocol {
                 x += direction.x
                 y += direction.y
 
-                switch (disk, cache.cells[safe: y]?[safe: x]?.disk) { // Uses tuples to make patterns exhaustive
+                switch (disk, cache.cells.value[safe: y]?[safe: x]?.disk) { // Uses tuples to make patterns exhaustive
                 case (.dark, .dark?), (.light, .light?):
                     diskCoordinates.append(contentsOf: diskCoordinatesInLine)
                     break flipping
@@ -97,7 +136,7 @@ final class GameLogic: GameLogicProtocol {
     }
 
     func validMoves(for disk: Disk) -> [Coordinate] {
-        cache.cells.reduce([Coordinate]()) { result, rows in
+        cache.cells.value.reduce([Coordinate]()) { result, rows in
             rows.reduce(result) { result, cell in
                 if canPlace(disk: disk, at: cell.coordinate) {
                     return result + [cell.coordinate]

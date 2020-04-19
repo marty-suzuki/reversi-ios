@@ -80,7 +80,7 @@ public final class ReversiViewModel {
                     me._messageDisk.accept(side)
                     me._messageText.accept("'s turn")
                 case .gameOver:
-                    if let winner = me.logic.sideWithMoreDisks() {
+                    if let winner = me.logic.sideWithMoreDisks.value {
                         me._messageDiskSizeConstant.accept(messageDiskSize)
                         me._messageDisk.accept(winner)
                         me._messageText.accept(" won")
@@ -145,7 +145,7 @@ public final class ReversiViewModel {
             return
         }
 
-        guard case .manual = cache.playerOfCurrentTurn else {
+        guard case .manual = logic.playerOfCurrentTurn.value else {
             return
         }
 
@@ -216,7 +216,7 @@ extension ReversiViewModel {
                 return
             }
 
-            me.cache.cells.forEach { rows in
+            me.cache.cells.value.forEach { rows in
                 rows.forEach { cell in
                     let update = UpdateDisk(disk: cell.disk, coordinate: cell.coordinate, animated: false, completion: nil)
                     self?._updateBoard.accept(update)
@@ -228,8 +228,8 @@ extension ReversiViewModel {
     }
 
     func updateCount() {
-        _playerDarkCount.accept("\(logic.count(of: .dark))")
-        _playerLightCount.accept("\(logic.count(of: .light))")
+        _playerDarkCount.accept("\(logic.countOfDark.value)")
+        _playerLightCount.accept("\(logic.countOfLight.value)")
     }
 
     func nextTurn() {

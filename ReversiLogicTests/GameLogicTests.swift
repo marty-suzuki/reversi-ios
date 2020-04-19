@@ -9,56 +9,87 @@ final class GameLogicTests: XCTestCase {
         self.dependency = Dependency()
     }
 
-    func test_count() {
+    func test_countOfDark() {
         let disk = Disk.dark
         let y = 2
         let x = 3
 
-        dependency.cache.cells = (0..<y).map { y in
+        dependency.cache.$cells.accept((0..<y).map { y in
             (0..<x).map { x in
                 GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
             }
-        }
+        })
 
-        let count = dependency.testTarget.count(of: .dark)
+        let count = dependency.testTarget.countOfDark.value
         XCTAssertEqual(count, x * y)
     }
 
+    func test_countOfLight() {
+        let disk = Disk.light
+        let y = 2
+        let x = 3
+
+        dependency.cache.$cells.accept((0..<y).map { y in
+            (0..<x).map { x in
+                GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
+            }
+        })
+
+        let count = dependency.testTarget.countOfLight.value
+        XCTAssertEqual(count, x * y)
+    }
+
+    func test_playerOfCurrentTurn() {
+        let logic = dependency.testTarget
+        let cache = dependency.cache
+
+        cache.$status.accept(.gameOver)
+        XCTAssertNil(logic.playerOfCurrentTurn.value)
+
+        cache.$status.accept(.turn(.dark))
+        cache.$playerDark.accept(.computer)
+        XCTAssertEqual(logic.playerOfCurrentTurn.value, .computer)
+
+        cache.$status.accept(.turn(.light))
+        cache.$playerLight.accept(.computer)
+        XCTAssertEqual(logic.playerOfCurrentTurn.value, .computer)
+    }
+
     func test_sideWithMoreDisks_darkの方が多い() {
-        dependency.cache.cells = [
+        dependency.cache.$cells.accept([
             [
                 GameData.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
                 GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .dark),
                 GameData.Cell(coordinate: .init(x: 2, y: 0), disk: .light)
             ]
-        ]
+        ])
 
-        let result = dependency.testTarget.sideWithMoreDisks()
+        let result = dependency.testTarget.sideWithMoreDisks.value
         XCTAssertEqual(result, .dark)
     }
 
     func test_sideWithMoreDisks_lightの方が多い() {
-        dependency.cache.cells = [
+        dependency.cache.$cells.accept([
             [
                 GameData.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
                 GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .light),
                 GameData.Cell(coordinate: .init(x: 2, y: 0), disk: .light)
             ]
-        ]
+        ])
 
-        let result = dependency.testTarget.sideWithMoreDisks()
+        let result = dependency.testTarget.sideWithMoreDisks.value
         XCTAssertEqual(result, .light)
     }
 
     func test_sideWithMoreDisks_darkとlightが同じ数() {
-        dependency.cache.cells = [
+        dependency.cache.$cells.accept([
             [
                 GameData.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
                 GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .light)
             ]
-        ]
+        ])
 
-        let result = dependency.testTarget.sideWithMoreDisks()
+        let result = dependency.testTarget.sideWithMoreDisks.value
         XCTAssertNil(result)
     }
 
@@ -69,11 +100,11 @@ final class GameLogicTests: XCTestCase {
             [nil, .light, .dark, .dark, nil],
             [nil, .light, nil,   nil,   nil]
         ]
-        dependency.cache.cells = board.enumerated().map { y, rows in
+        dependency.cache.$cells.accept(board.enumerated().map { y, rows in
             rows.enumerated().map { x, disk in
                 GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
             }
-        }
+        })
         let logic = dependency.testTarget
 
         // case1
@@ -112,11 +143,11 @@ final class GameLogicTests: XCTestCase {
             [nil, .light, .dark, .dark, nil],
             [nil, .light, nil,   nil,   nil]
         ]
-        dependency.cache.cells = board.enumerated().map { y, rows in
+        dependency.cache.$cells.accept(board.enumerated().map { y, rows in
             rows.enumerated().map { x, disk in
                 GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
             }
-        }
+        })
         let logic = dependency.testTarget
 
         // case1
@@ -147,11 +178,11 @@ final class GameLogicTests: XCTestCase {
             [nil, .light, .dark, .dark, nil],
             [nil, .light, nil,   nil,   nil]
         ]
-        dependency.cache.cells = board.enumerated().map { y, rows in
+        dependency.cache.$cells.accept(board.enumerated().map { y, rows in
             rows.enumerated().map { x, disk in
                 GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
             }
-        }
+        })
 
         let coordinates = dependency.testTarget.validMoves(for: .dark)
 

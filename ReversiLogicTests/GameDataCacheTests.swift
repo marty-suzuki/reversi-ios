@@ -32,7 +32,7 @@ final class GameDataCacheTests: XCTestCase {
         XCTAssertEqual(cache.status.value, expectedStatus)
         XCTAssertEqual(cache.playerDark.value, expectedPlayerDark)
         XCTAssertEqual(cache.playerLight.value, expectedPlayerLight)
-        XCTAssertEqual(cache.cells, [[expectedCell]])
+        XCTAssertEqual(cache.cells.value, [[expectedCell]])
     }
 
     func test_save() throws {
@@ -68,25 +68,10 @@ final class GameDataCacheTests: XCTestCase {
 
         cache.reset()
 
-        XCTAssertEqual(cache.cells, GameData.initial.cells)
+        XCTAssertEqual(cache.cells.value, GameData.initial.cells)
         XCTAssertEqual(cache.status.value, GameData.initial.status)
         XCTAssertEqual(cache.playerDark.value, GameData.initial.playerDark)
         XCTAssertEqual(cache.playerLight.value, GameData.initial.playerLight)
-    }
-
-    func test_playerOfCurrentTurn() {
-        let cache = dependency.testTarget
-
-        cache.setStatus(.gameOver)
-        XCTAssertNil(cache.playerOfCurrentTurn)
-
-        cache.setStatus(.turn(.dark))
-        cache.setPlayerOfDark(.computer)
-        XCTAssertEqual(cache.playerOfCurrentTurn, .computer)
-
-        cache.setStatus(.turn(.light))
-        cache.setPlayerOfLight(.computer)
-        XCTAssertEqual(cache.playerOfCurrentTurn, .computer)
     }
 }
 
@@ -108,13 +93,10 @@ extension GameDataCacheTests {
                 completion(me._loadGame.respond())
             },
             saveGame: { [weak self] data, _ in self?._saveGame.respond(data) },
-            cells: cells
+            cells: loadGame.cells
         )
 
-        private let cells: [[GameData.Cell]]
-
         init(cells: [[GameData.Cell]]) {
-            self.cells = cells
             self.loadGame = GameData(status: .turn(.dark),
                                      playerDark: GameData.initial.playerDark,
                                      playerLight: GameData.initial.playerLight,
