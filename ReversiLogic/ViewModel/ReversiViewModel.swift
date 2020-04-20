@@ -88,12 +88,13 @@ public final class ReversiViewModel {
             .disposed(by: disposeBag)
 
         logic.playTurnOfComputer
-            .subscribe(onNext: { [weak self] in
+            .flatMap { [weak self] _ -> Maybe<Void> in
                 guard let me = self, !me.isAnimating else {
-                    return
+                    return .empty()
                 }
-                self?.playTurnOfComputer()
-            })
+                return me.playTurnOfComputer().asMaybe()
+            }
+            .subscribe()
             .disposed(by: disposeBag)
 
         logic.gameLoaded
@@ -217,7 +218,7 @@ extension ReversiViewModel {
         }
     }
 
-    func playTurnOfComputer() {
+    func playTurnOfComputer() -> Single<Void> {
         guard
             case let .turn(turn) = logic.status.value,
             let coordinate = logic.validMoves(for: turn).randomElement()
@@ -243,22 +244,24 @@ extension ReversiViewModel {
             me.logic.playerCancellers[turn] = nil
         }
         let canceller = Canceller(cleanUp)
-        _ = Observable.just(())
+        let single = Single.just(())
             .delay(.seconds(2), scheduler: mainScheduler)
-            .flatMap { canceller.isCancelled ? Observable.empty() : .just(()) }
-            .do(onNext: { cleanUp() })
-            .flatMap { [weak self] _ -> Observable<Bool> in
+            .flatMap { canceller.isCancelled ? Single.error(Error.animationCancellerCancelled) : .just(()) }
+            .do(onSuccess: { cleanUp() })
+            .flatMap { [weak self] _ -> Single<Void> in
                 guard let me = self else {
-                    return .empty()
+                    return .error(Error.selfReleased)
                 }
                 return me.placeDisk(turn, at: coordinate, animated: true)
-                    .asObservable()
+                    .map { _ in }
             }
-            .subscribe(onNext: { [weak self] _ in
+            .do(onSuccess: { [weak self] in
                 self?.nextTurn()
             })
 
         logic.playerCancellers[turn] = canceller
+
+        return single
     }
 }
 

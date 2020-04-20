@@ -216,7 +216,11 @@ final class ReversiViewModelTests: XCTestCase {
         logic._validMovekForLight = [coordinate]
         logic._flippedDiskCoordinates = [coordinate]
 
-        viewModel.playTurnOfComputer()
+        let called = BehaviorRelay<Void?>(value: nil)
+        let disposable = viewModel.playTurnOfComputer()
+            .asObservable()
+            .bind(to: called)
+        defer { disposable.dispose() }
 
         let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
         XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
