@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 50;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -21,9 +21,6 @@
 		ED20D530244AD70A00F7BA46 /* UIAlertControllerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D52F244AD70A00F7BA46 /* UIAlertControllerExtension.swift */; };
 		ED20D533244ADCAE00F7BA46 /* MockGameDataCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D532244ADCAE00F7BA46 /* MockGameDataCache.swift */; };
 		ED20D535244B276400F7BA46 /* MockGameLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D534244B276400F7BA46 /* MockGameLogic.swift */; };
-		ED20D551244B80A300F7BA46 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = ED20D550244B80A300F7BA46 /* RxCocoa */; };
-		ED20D553244B80A300F7BA46 /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = ED20D552244B80A300F7BA46 /* RxRelay */; };
-		ED20D555244B80A300F7BA46 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = ED20D554244B80A300F7BA46 /* RxSwift */; };
 		ED20D557244B826600F7BA46 /* PublishWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D556244B826600F7BA46 /* PublishWrapper.swift */; };
 		ED20D56D244C2D6F00F7BA46 /* BehaviorWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D56B244C2D6F00F7BA46 /* BehaviorWrapper.swift */; };
 		ED20D56E244C2D6F00F7BA46 /* ValueObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D56C244C2D6F00F7BA46 /* ValueObservable.swift */; };
@@ -156,9 +153,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ED20D555244B80A300F7BA46 /* RxSwift in Frameworks */,
-				ED20D553244B80A300F7BA46 /* RxRelay in Frameworks */,
-				ED20D551244B80A300F7BA46 /* RxCocoa in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -361,9 +355,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				ED20D54B244B809400F7BA46 /* PBXTargetDependency */,
-				ED20D54D244B809400F7BA46 /* PBXTargetDependency */,
-				ED20D54F244B809400F7BA46 /* PBXTargetDependency */,
 				ED6EAC7F24436B2C00BAF620 /* PBXTargetDependency */,
 			);
 			name = Reversi;
@@ -406,9 +397,6 @@
 			);
 			name = ReversiLogic;
 			packageProductDependencies = (
-				ED20D550244B80A300F7BA46 /* RxCocoa */,
-				ED20D552244B80A300F7BA46 /* RxRelay */,
-				ED20D554244B80A300F7BA46 /* RxSwift */,
 			);
 			productName = ReversiLogic;
 			productReference = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */;
@@ -425,7 +413,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				ED20D564244BFED800F7BA46 /* PBXTargetDependency */,
 				ED6EAC7624436B2C00BAF620 /* PBXTargetDependency */,
 			);
 			name = ReversiLogicTests;
@@ -471,7 +458,6 @@
 			);
 			mainGroup = D642BDA723A9FE4500396732;
 			packageReferences = (
-				ED20D536244B7C5E00F7BA46 /* XCRemoteSwiftPackageReference "RxSwift" */,
 			);
 			productRefGroup = D642BDB123A9FE4500396732 /* Products */;
 			projectDirPath = "";
@@ -587,22 +573,6 @@
 			isa = PBXTargetDependency;
 			target = D642BDAF23A9FE4500396732 /* Reversi */;
 			targetProxy = D642BDC723A9FE4700396732 /* PBXContainerItemProxy */;
-		};
-		ED20D54B244B809400F7BA46 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = ED20D54A244B809400F7BA46 /* RxCocoa */;
-		};
-		ED20D54D244B809400F7BA46 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = ED20D54C244B809400F7BA46 /* RxRelay */;
-		};
-		ED20D54F244B809400F7BA46 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = ED20D54E244B809400F7BA46 /* RxSwift */;
-		};
-		ED20D564244BFED800F7BA46 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = ED20D563244BFED800F7BA46 /* RxTest */;
 		};
 		ED6EAC7624436B2C00BAF620 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -968,55 +938,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		ED20D536244B7C5E00F7BA46 /* XCRemoteSwiftPackageReference "RxSwift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ReactiveX/RxSwift";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.1.1;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		ED20D54A244B809400F7BA46 /* RxCocoa */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = ED20D536244B7C5E00F7BA46 /* XCRemoteSwiftPackageReference "RxSwift" */;
-			productName = RxCocoa;
-		};
-		ED20D54C244B809400F7BA46 /* RxRelay */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = ED20D536244B7C5E00F7BA46 /* XCRemoteSwiftPackageReference "RxSwift" */;
-			productName = RxRelay;
-		};
-		ED20D54E244B809400F7BA46 /* RxSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = ED20D536244B7C5E00F7BA46 /* XCRemoteSwiftPackageReference "RxSwift" */;
-			productName = RxSwift;
-		};
-		ED20D550244B80A300F7BA46 /* RxCocoa */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = ED20D536244B7C5E00F7BA46 /* XCRemoteSwiftPackageReference "RxSwift" */;
-			productName = RxCocoa;
-		};
-		ED20D552244B80A300F7BA46 /* RxRelay */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = ED20D536244B7C5E00F7BA46 /* XCRemoteSwiftPackageReference "RxSwift" */;
-			productName = RxRelay;
-		};
-		ED20D554244B80A300F7BA46 /* RxSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = ED20D536244B7C5E00F7BA46 /* XCRemoteSwiftPackageReference "RxSwift" */;
-			productName = RxSwift;
-		};
-		ED20D563244BFED800F7BA46 /* RxTest */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = ED20D536244B7C5E00F7BA46 /* XCRemoteSwiftPackageReference "RxSwift" */;
-			productName = RxTest;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D642BDA823A9FE4500396732 /* Project object */;
 }
