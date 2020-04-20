@@ -22,6 +22,9 @@ final class MockGameLogic: GameLogicProtocol {
     @MockPublishWrapper
     private(set) var newGameBegan: Observable<Void>
 
+    @MockPublishWrapper
+     private(set) var handleDiskWithCoordinate: Observable<(Disk, Coordinate)>
+
     @CountableProperty
     var playerCancellers: [Disk : Canceller] = [:]
 
@@ -64,6 +67,9 @@ final class MockGameLogic: GameLogicProtocol {
     @MockResponse<Void, Void>()
     var _startGame: Void
 
+    @MockResponse<Coordinate, Void>()
+    var _handleSelectedCoordinate: Void
+
     let cache = MockGameDataCache()
 
     func flippedDiskCoordinates(by disk: Disk, at coordinate: Coordinate) -> [Coordinate] {
@@ -97,6 +103,10 @@ final class MockGameLogic: GameLogicProtocol {
 
     func newGame() {
         __newGame.respond()
+    }
+
+    func handle(selectedCoordinate: Coordinate) {
+        __handleSelectedCoordinate.respond(selectedCoordinate)
     }
 }
 

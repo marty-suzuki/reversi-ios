@@ -11,6 +11,7 @@ public protocol GameLogicProtocol: GameDataSettable {
     var playTurnOfComputer: Observable<Void> { get }
     var gameLoaded: Observable<Void> { get }
     var newGameBegan: Observable<Void> { get }
+    var handleDiskWithCoordinate: Observable<(Disk, Coordinate)> { get }
     func flippedDiskCoordinates(by disk: Disk,
                                 at coordinate: Coordinate) -> [Coordinate]
     func validMoves(for disk: Disk) -> [Coordinate]
@@ -19,6 +20,7 @@ public protocol GameLogicProtocol: GameDataSettable {
     func startGame()
     func newGame()
     func setDisk(_ disk: Disk?, at coordinate: Coordinate)
+    func handle(selectedCoordinate: Coordinate)
 
     subscript<T>(dynamicMember keyPath: KeyPath<GameDataGettable, ValueObservable<T>>) -> ValueObservable<T> { get }
 }
@@ -47,6 +49,9 @@ final class GameLogic: GameLogicProtocol {
 
     @PublishWrapper
     private(set) var newGameBegan: Observable<Void>
+
+    @PublishWrapper
+    private(set) var handleDiskWithCoordinate: Observable<(Disk, Coordinate)>
 
     private let cache: GameDataCacheProtocol
     private let disposeBag = DisposeBag()
@@ -236,6 +241,16 @@ final class GameLogic: GameLogicProtocol {
 
     func newGame() {
         _newGame.accept(())
+    }
+
+    func handle(selectedCoordinate: Coordinate) {
+        guard
+            case let .turn(turn) = cache.status.value,
+            case .manual = playerOfCurrentTurn.value
+        else {
+            return
+        }
+        _handleDiskWithCoordinate.accept((turn, selectedCoordinate))
     }
 }
 

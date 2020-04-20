@@ -372,6 +372,62 @@ extension GameLogicTests {
 
         XCTAssertNotNil(gameLoaded.value)
     }
+
+    func test_handleSelectedCoordinate_statusがturnで_playerがmanualの場合() {
+        let logic = dependency.testTarget
+        let cache = dependency.cache
+
+        let disk = Disk.dark
+        cache.$status.accept(.turn(disk))
+        cache.$playerDark.accept(.manual)
+
+        let diskWithCoordinate = BehaviorRelay<(Disk, Coordinate)?>(value: nil)
+        let disposable = logic.handleDiskWithCoordinate
+            .bind(to: diskWithCoordinate)
+        defer { disposable.dispose() }
+
+        let coordinate = Coordinate(x: 0, y: 0)
+        logic.handle(selectedCoordinate: coordinate)
+
+        XCTAssertEqual(diskWithCoordinate.value?.0, disk)
+        XCTAssertEqual(diskWithCoordinate.value?.1, coordinate)
+    }
+
+    func test_handleSelectedCoordinate_statusがgameOverの場合() {
+        let logic = dependency.testTarget
+        let cache = dependency.cache
+
+        cache.$status.accept(.gameOver)
+
+        let diskWithCoordinate = BehaviorRelay<(Disk, Coordinate)?>(value: nil)
+        let disposable = logic.handleDiskWithCoordinate
+            .bind(to: diskWithCoordinate)
+        defer { disposable.dispose() }
+
+        let coordinate = Coordinate(x: 0, y: 0)
+        logic.handle(selectedCoordinate: coordinate)
+
+        XCTAssertNil(diskWithCoordinate.value)
+    }
+
+    func test_handleSelectedCoordinate_statusがturnで_playerがcomputerの場合() {
+        let logic = dependency.testTarget
+        let cache = dependency.cache
+
+        let disk = Disk.dark
+        cache.$status.accept(.turn(disk))
+        cache.$playerDark.accept(.computer)
+
+        let diskWithCoordinate = BehaviorRelay<(Disk, Coordinate)?>(value: nil)
+        let disposable = logic.handleDiskWithCoordinate
+            .bind(to: diskWithCoordinate)
+        defer { disposable.dispose() }
+
+        let coordinate = Coordinate(x: 0, y: 0)
+        logic.handle(selectedCoordinate: coordinate)
+
+        XCTAssertNil(diskWithCoordinate.value)
+    }
 }
 
 extension GameLogicTests {

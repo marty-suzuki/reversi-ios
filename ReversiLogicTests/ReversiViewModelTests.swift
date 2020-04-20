@@ -248,7 +248,7 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(showAlert.parameters, [.reset(okHandler: {})])
     }
 
-    func test_handleSelectedCoordinate() {
+    func test_handleDiskWithCoordinate() {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         let logic = dependency.gameLogic
@@ -261,7 +261,7 @@ final class ReversiViewModelTests: XCTestCase {
         viewModel.animationCanceller = nil
 
         let coordinate = Coordinate(x: 0, y: 0)
-        viewModel.handle(selectedCoordinate: coordinate)
+        logic.$handleDiskWithCoordinate.accept((disk, coordinate))
 
         let flippedDiskCoordinates = logic.$_flippedDiskCoordinates
         let expected = MockGameLogic.FlippedDiskCoordinates(

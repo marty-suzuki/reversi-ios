@@ -115,6 +115,20 @@ public final class ReversiViewModel {
                 self?.updateCount()
             })
             .disposed(by: disposeBag)
+
+        logic.handleDiskWithCoordinate
+            .flatMap { [weak self] disk, coordinate -> Observable<Bool> in
+                guard let me = self, !me.isAnimating else {
+                    return .empty()
+                }
+                return me.placeDisk(disk, at: coordinate, animated: true)
+                    .asObservable()
+                    .catchError { _ in .empty() }
+            }
+            .subscribe(onNext: { [weak self] _ in
+                self?.nextTurn()
+            })
+            .disposed(by: disposeBag)
     }
 
     private lazy var callOnceViewDidAppear: Void = {
@@ -134,23 +148,7 @@ public final class ReversiViewModel {
     }
 
     public func handle(selectedCoordinate: Coordinate) {
-        guard case let .turn(turn) = logic.status.value else {
-            return
-        }
-
-        if isAnimating {
-            return
-        }
-
-        guard case .manual = logic.playerOfCurrentTurn.value else {
-            return
-        }
-
-        // try? because doing nothing when an error occurs
-        _ = placeDisk(turn, at: selectedCoordinate, animated: true)
-            .subscribe(onSuccess: { [weak self] _ in
-                self?.nextTurn()
-            })
+        logic.handle(selectedCoordinate: selectedCoordinate)
     }
 
     public func handleReset() {
