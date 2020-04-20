@@ -1,3 +1,5 @@
+import RxSwift
+
 public protocol GameLogicFactoryProtocol {
     func make() -> GameLogicProtocol
 }
@@ -9,6 +11,6 @@ public struct GameLogicFactory: GameLogicFactoryProtocol {
     public func make() -> GameLogicProtocol {
         let cache = GameDataCache(loadGame: GameDataIO.loadGame,
                                   saveGame: GameDataIO.save)
-        return GameLogic(cache: cache)
+        return GameLogic(cache: cache, mainScheduler: MainScheduler.instance)
     }
 }

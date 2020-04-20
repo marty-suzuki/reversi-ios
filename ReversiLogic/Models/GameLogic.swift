@@ -3,15 +3,20 @@ import RxSwift
 
 @dynamicMemberLookup
 public protocol GameLogicProtocol: GameDataSettable {
+    var isDiskPlacing: Bool { get }
+    var placeDiskCanceller: Canceller? { get set }
+
     var playerCancellers: [Disk: Canceller] { get set }
     var countOfDark: ValueObservable<Int> { get }
     var countOfLight: ValueObservable<Int> { get }
     var playerOfCurrentTurn:  ValueObservable<GameData.Player?> { get }
     var sideWithMoreDisks: ValueObservable<Disk?> { get }
-    var playTurnOfComputer: Observable<Void> { get }
     var gameLoaded: Observable<Void> { get }
     var newGameBegan: Observable<Void> { get }
     var handleDiskWithCoordinate: Observable<(Disk, Coordinate)> { get }
+    var willTurnDiskOfComputer: Observable<Disk> { get}
+    var didTurnDiskOfComputer: Observable<Disk> { get }
+
     func flippedDiskCoordinates(by disk: Disk,
                                 at coordinate: Coordinate) -> [Coordinate]
     func validMoves(for disk: Disk) -> [Coordinate]
@@ -25,9 +30,18 @@ public protocol GameLogicProtocol: GameDataSettable {
     subscript<T>(dynamicMember keyPath: KeyPath<GameDataGettable, ValueObservable<T>>) -> ValueObservable<T> { get }
 }
 
+extension GameLogicProtocol {
+
+    var isDiskPlacing: Bool {
+        placeDiskCanceller != nil
+    }
+}
+
 final class GameLogic: GameLogicProtocol {
 
     var playerCancellers: [Disk: Canceller] = [:]
+
+    var placeDiskCanceller: Canceller?
 
     @BehaviorWrapper(value: 0)
     private(set) var countOfDark: ValueObservable<Int>
@@ -42,9 +56,6 @@ final class GameLogic: GameLogicProtocol {
     private(set) var sideWithMoreDisks: ValueObservable<Disk?>
 
     @PublishWrapper
-    private(set) var playTurnOfComputer: Observable<Void>
-
-    @PublishWrapper
     private(set) var gameLoaded: Observable<Void>
 
     @PublishWrapper
@@ -53,14 +64,27 @@ final class GameLogic: GameLogicProtocol {
     @PublishWrapper
     private(set) var handleDiskWithCoordinate: Observable<(Disk, Coordinate)>
 
+    @PublishWrapper
+    private(set) var willTurnDiskOfComputer: Observable<Disk>
+
+    @PublishWrapper
+    private(set) var didTurnDiskOfComputer: Observable<Disk>
+
+    @PublishWrapper
+    private(set) var placeDiskWithCoordinate: Observable<(Disk, Coordinate)>
+
     private let cache: GameDataCacheProtocol
+    private let mainScheduler: SchedulerType
     private let disposeBag = DisposeBag()
 
     private let _startGame = PublishRelay<Void>()
     private let _newGame = PublishRelay<Void>()
+    private let _readyComputerDisk = PublishRelay<(Disk, Coordinate, Canceller)>()
 
-    init(cache: GameDataCacheProtocol) {
+    init(cache: GameDataCacheProtocol,
+         mainScheduler: SchedulerType) {
         self.cache = cache
+        self.mainScheduler = mainScheduler
 
         let countOf: (Disk, [[GameData.Cell]]) -> Int = { disk, cells in
             cells.reduce(0) { result, rows in
@@ -123,6 +147,26 @@ final class GameLogic: GameLogicProtocol {
                 self?._newGameBegan.accept()
                 try? cache.save()
             })
+            .disposed(by: disposeBag)
+
+        _readyComputerDisk
+            .flatMap { [weak self] disk, coordinate, canceller -> Single<(Disk, Coordinate)> in
+                guard let me = self else {
+                    return .error(Error.selfReleased)
+                }
+                return Single.just(())
+                    .delay(.seconds(2), scheduler: me.mainScheduler)
+                    .flatMap { _ -> Single<(Disk, Coordinate)> in
+                        if canceller.isCancelled {
+                            return .error(Error.turnOfComputerCancelled)
+                        }
+                        return .just((disk, coordinate))
+                    }
+                    .do(onSuccess: { [weak canceller] _ in
+                        canceller?.cancel()
+                    })
+            }
+            .bind(to: _handleDiskWithCoordinate)
             .disposed(by: disposeBag)
     }
 
@@ -204,7 +248,7 @@ final class GameLogic: GameLogicProtocol {
         case .manual:
             break
         case .computer:
-            _playTurnOfComputer.accept()
+            playTurnOfComputer()
         }
     }
 
@@ -230,8 +274,8 @@ final class GameLogic: GameLogicProtocol {
             player = cache.playerLight.value
         }
 
-        if cache.status.value == .turn(disk), case .computer = player {
-            _playTurnOfComputer.accept()
+        if !isDiskPlacing, cache.status.value == .turn(disk), case .computer = player {
+            playTurnOfComputer()
         }
     }
 
@@ -245,6 +289,7 @@ final class GameLogic: GameLogicProtocol {
 
     func handle(selectedCoordinate: Coordinate) {
         guard
+            !isDiskPlacing,
             case let .turn(turn) = cache.status.value,
             case .manual = playerOfCurrentTurn.value
         else {
@@ -252,9 +297,35 @@ final class GameLogic: GameLogicProtocol {
         }
         _handleDiskWithCoordinate.accept((turn, selectedCoordinate))
     }
+
+    func playTurnOfComputer() {
+        guard
+            case let .turn(disk) = cache.status.value,
+            let coordinate = validMoves(for: disk).randomElement()
+        else {
+            preconditionFailure()
+        }
+
+        _willTurnDiskOfComputer.accept(disk)
+
+        let cleanUp: () -> Void = { [weak self] in
+            guard let me = self else { return }
+            me._didTurnDiskOfComputer.accept(disk)
+            me.playerCancellers[disk] = nil
+        }
+        let canceller = Canceller(cleanUp)
+        playerCancellers[disk] = canceller
+
+        _readyComputerDisk.accept((disk, coordinate, canceller))
+    }
 }
 
 extension GameLogic {
+
+    enum Error: Swift.Error {
+        case turnOfComputerCancelled
+        case selfReleased
+    }
 
     func save() throws {
         try cache.save()
@@ -262,14 +333,6 @@ extension GameLogic {
 
     func setStatus(_ status: GameData.Status) {
         cache.setStatus(status)
-    }
-
-    func setPlayerOfDark(_ player: GameData.Player) {
-        cache.setPlayerOfDark(player)
-    }
-
-    func setPlayerOfLight(_ player: GameData.Player) {
-        cache.setPlayerOfLight(player)
     }
 
     func setDisk(_ disk: Disk?, at coordinate: Coordinate) {

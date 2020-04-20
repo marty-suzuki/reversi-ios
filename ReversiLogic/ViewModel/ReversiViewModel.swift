@@ -4,11 +4,6 @@ import RxSwift
 
 public final class ReversiViewModel {
 
-    public var animationCanceller: Canceller?
-    public var isAnimating: Bool {
-        animationCanceller != nil
-    }
-
     private let messageDiskSize: CGFloat
 
     @PublishWrapper
@@ -106,40 +101,33 @@ public final class ReversiViewModel {
             })
             .disposed(by: disposeBag)
 
-        do {
-            let placeDiskTrigger1 = logic.playTurnOfComputer
-                .flatMap { [weak self] _ -> Observable<(Disk, Coordinate, Bool)> in
-                    guard let me = self, !me.isAnimating else {
-                        return .empty()
-                    }
-                    return me.playTurnOfComputer().asObservable()
-                        .map { ($0, $1, true) }
+        logic.handleDiskWithCoordinate
+            .flatMap { [weak self] disk, coordinate -> Observable<Bool> in
+                guard let me = self else {
+                    return .empty()
                 }
+                return me.placeDisk(disk, at: coordinate, animated: true)
+                    .asObservable()
+                    .catchError { _ in .empty() }
+            }
+            .subscribe(onNext: { [weak self] _ in
+                self?.nextTurn()
+                try? self?.logic.save()
+                self?.updateCount()
+            })
+            .disposed(by: disposeBag)
 
-            let placeDiskTrigger2 = logic.handleDiskWithCoordinate
-                .flatMap { [weak self] disk, coordinate -> Observable<(Disk, Coordinate, Bool)> in
-                    guard let me = self, !me.isAnimating else {
-                        return .empty()
-                    }
-                    return .just((disk, coordinate, true))
+        Observable.merge(logic.willTurnDiskOfComputer.map { ($0, true) },
+                         logic.didTurnDiskOfComputer.map { ($0, false) })
+            .subscribe(onNext: { [weak self] disk, isAnimating in
+                switch disk {
+                case .dark:
+                    self?._isPlayerDarkAnimating.accept(isAnimating)
+                case .light:
+                    self?._isPlayerLightAnimating.accept(isAnimating)
                 }
-
-            Observable.merge(placeDiskTrigger1, placeDiskTrigger2)
-                .flatMap { [weak self] disk, coordinate, animated -> Observable<Bool> in
-                    guard let me = self else {
-                        return .empty()
-                    }
-                    return me.placeDisk(disk, at: coordinate, animated: animated)
-                        .asObservable()
-                        .catchError { _ in .empty() }
-                }
-                .subscribe(onNext: { [weak self] _ in
-                    self?.nextTurn()
-                    try? self?.logic.save()
-                    self?.updateCount()
-                })
-                .disposed(by: disposeBag)
-        }
+            })
+            .disposed(by: disposeBag)
     }
 
     private lazy var callOnceViewDidAppear: Void = {
@@ -166,8 +154,8 @@ public final class ReversiViewModel {
         let alert = Alert.reset { [weak self] in
             guard let me = self else { return }
 
-            me.animationCanceller?.cancel()
-            me.animationCanceller = nil
+            me.logic.placeDiskCanceller?.cancel()
+            me.logic.placeDiskCanceller = nil
 
             for side in Disk.allCases {
                 me.logic.playerCancellers[side]?.cancel()
@@ -226,45 +214,6 @@ extension ReversiViewModel {
             logic.waitForPlayer()
         }
     }
-
-    func playTurnOfComputer() -> Single<(Disk, Coordinate)> {
-        guard
-            case let .turn(turn) = logic.status.value,
-            let coordinate = logic.validMoves(for: turn).randomElement()
-        else {
-            preconditionFailure()
-        }
-
-        switch turn {
-        case .dark:
-            _isPlayerDarkAnimating.accept(true)
-        case .light:
-            _isPlayerLightAnimating.accept(true)
-        }
-
-        let cleanUp: () -> Void = { [weak self] in
-            guard let me = self else { return }
-            switch turn {
-            case .dark:
-                me._isPlayerDarkAnimating.accept(false)
-            case .light:
-                me._isPlayerLightAnimating.accept(false)
-            }
-            me.logic.playerCancellers[turn] = nil
-        }
-        let canceller = Canceller(cleanUp)
-        logic.playerCancellers[turn] = canceller
-
-        return Single.just(())
-            .delay(.seconds(2), scheduler: mainScheduler)
-            .flatMap { _ -> Single<(Disk, Coordinate)> in
-                if canceller.isCancelled {
-                    return .error(Error.animationCancellerCancelled)
-                }
-                return .just((turn, coordinate))
-            }
-            .do(onSuccess: { _ in cleanUp() })
-    }
 }
 
 extension ReversiViewModel {
@@ -274,7 +223,7 @@ extension ReversiViewModel {
             return .just(true)
         }
 
-        guard let animationCanceller = self.animationCanceller else {
+        guard let placeDiskCanceller = logic.placeDiskCanceller else {
             return .error(Error.animationCancellerReleased)
         }
 
@@ -283,7 +232,7 @@ extension ReversiViewModel {
                 guard let me = self else {
                     return .error(Error.selfReleased)
                 }
-                if animationCanceller.isCancelled {
+                if placeDiskCanceller.isCancelled {
                     return .error(Error.animationCancellerCancelled)
                 }
                 if finished {
@@ -310,15 +259,15 @@ extension ReversiViewModel {
 
         if isAnimated {
             let cleanUp: () -> Void = { [weak self] in
-                self?.animationCanceller = nil
+                self?.logic.placeDiskCanceller = nil
             }
-            animationCanceller = Canceller(cleanUp)
+            logic.placeDiskCanceller = Canceller(cleanUp)
             return animateSettingDisks(at: [coordinate] + diskCoordinates, to: disk)
                 .flatMap { [weak self] finished in
                     guard let me = self else {
                         return .error(Error.selfReleased)
                     }
-                    guard  let canceller = me.animationCanceller else {
+                    guard  let canceller = me.logic.placeDiskCanceller else {
                         return .error(Error.animationCancellerReleased)
                     }
 
