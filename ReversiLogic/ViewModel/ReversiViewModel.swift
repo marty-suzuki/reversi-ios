@@ -3,8 +3,6 @@ import RxCocoa
 import RxSwift
 
 public final class ReversiViewModel {
-    public typealias AsyncAfter = (DispatchTime, @escaping () -> Void) -> Void
-    public typealias Async = (@escaping () -> Void) -> Void
 
     public var animationCanceller: Canceller?
     public var isAnimating: Bool {
@@ -38,19 +36,19 @@ public final class ReversiViewModel {
     @PublishWrapper
     public private(set) var updateBoard: Observable<UpdateDisk>
 
-    private let asyncAfter: AsyncAfter
-    private let async: Async
+    private let mainAsyncScheduler: SchedulerType
+    private let mainScheduler: SchedulerType
     private let logic: GameLogicProtocol
     private let disposeBag = DisposeBag()
 
     private let _startGame = PublishRelay<Void>()
 
     public init(messageDiskSize: CGFloat,
-                asyncAfter: @escaping AsyncAfter,
-                async: @escaping Async,
+                mainAsyncScheduler: SchedulerType,
+                mainScheduler: SchedulerType,
                 logicFactory: GameLogicFactoryProtocol) {
-        self.asyncAfter = asyncAfter
-        self.async = async
+        self.mainAsyncScheduler = mainAsyncScheduler
+        self.mainScheduler = mainScheduler
         self.messageDiskSize = messageDiskSize
         self.logic = logicFactory.make()
 
@@ -148,9 +146,10 @@ public final class ReversiViewModel {
         }
 
         // try? because doing nothing when an error occurs
-        try? placeDisk(turn, at: selectedCoordinate, animated: true) { [weak self] _ in
-            self?.nextTurn()
-        }
+        _ = placeDisk(turn, at: selectedCoordinate, animated: true)
+            .subscribe(onSuccess: { [weak self] _ in
+                self?.nextTurn()
+            })
     }
 
     public func handleReset() {
@@ -174,10 +173,15 @@ public final class ReversiViewModel {
 
 extension ReversiViewModel {
 
-    func setDisk(_ disk: Disk?, at coordinate: Coordinate, animated: Bool, completion: ((Bool) -> Void)?) {
-        logic.setDisk(disk, at: coordinate)
-        let update = UpdateDisk(disk: disk, coordinate: coordinate, animated: animated, completion: completion)
-        _updateBoard.accept(update)
+    func setDisk(_ disk: Disk?, at coordinate: Coordinate, animated: Bool) -> Single<Bool> {
+        Single<Bool>.create { [weak self] observer in
+            self?.logic.setDisk(disk, at: coordinate)
+            let update = UpdateDisk(disk: disk, coordinate: coordinate, animated: animated) {
+                observer(.success($0))
+            }
+            self?._updateBoard.accept(update)
+            return Disposables.create()
+        }
     }
 
     func updateCount() {
@@ -239,15 +243,20 @@ extension ReversiViewModel {
             me.logic.playerCancellers[turn] = nil
         }
         let canceller = Canceller(cleanUp)
-        asyncAfter(.now() + 2.0) { [weak self] in
-            guard let self = self else { return }
-            if canceller.isCancelled { return }
-            cleanUp()
-
-            try? self.placeDisk(turn, at: coordinate, animated: true) { [weak self] _ in
-                self?.nextTurn()
+        _ = Observable.just(())
+            .delay(.seconds(2), scheduler: mainScheduler)
+            .flatMap { canceller.isCancelled ? Observable.empty() : .just(()) }
+            .do(onNext: { cleanUp() })
+            .flatMap { [weak self] _ -> Observable<Bool> in
+                guard let me = self else {
+                    return .empty()
+                }
+                return me.placeDisk(turn, at: coordinate, animated: true)
+                    .asObservable()
             }
-        }
+            .subscribe(onNext: { [weak self] _ in
+                self?.nextTurn()
+            })
 
         logic.playerCancellers[turn] = canceller
     }
@@ -255,29 +264,32 @@ extension ReversiViewModel {
 
 extension ReversiViewModel {
 
-    func animateSettingDisks(at coordinates: [Coordinate],
-                             to disk: Disk,
-                             completion: @escaping (Bool) -> Void) {
+    func animateSettingDisks(at coordinates: [Coordinate], to disk: Disk) -> Single<Bool> {
         guard let coordinate = coordinates.first else {
-            completion(true)
-            return
+            return .just(true)
         }
 
         guard let animationCanceller = self.animationCanceller else {
-            return
+            return .error(Error.animationCancellerReleased)
         }
-        setDisk(disk, at: coordinate, animated: true) { [weak self] finished in
-            guard let self = self else { return }
-            if animationCanceller.isCancelled { return }
-            if finished {
-                self.animateSettingDisks(at: Array(coordinates.dropFirst()), to: disk, completion: completion)
-            } else {
-                for coordinate in coordinates {
-                    self.setDisk(disk, at: coordinate, animated: false, completion: nil)
+
+        return setDisk(disk, at: coordinate, animated: true)
+            .flatMap { [weak self] finished in
+                guard let me = self else {
+                    return .error(Error.selfReleased)
                 }
-                completion(false)
+                if animationCanceller.isCancelled {
+                    return .error(Error.animationCancellerCancelled)
+                }
+                if finished {
+                    return me.animateSettingDisks(at: Array(coordinates.dropFirst()), to: disk)
+                } else {
+                    let observables = coordinates.map { me.setDisk(disk, at: $0, animated: false).asObservable() }
+                    return Observable.zip(observables)
+                        .map { _ in false }
+                        .asSingle()
+                }
             }
-        }
     }
 
     /// - Parameter completion: A closure to be executed when the animation sequence ends.
@@ -285,51 +297,57 @@ extension ReversiViewModel {
     ///     whether or not the animations actually finished before the completion handler was called.
     ///     If `animated` is `false`,  this closure is performed at the beginning of the next run loop cycle. This parameter may be `nil`.
     /// - Throws: `DiskPlacementError` if the `disk` cannot be placed at (`x`, `y`).
-    func placeDisk(_ disk: Disk,
-                   at coordinate: Coordinate,
-                   animated isAnimated: Bool,
-                   completion: @escaping (Bool) -> Void) throws {
+    func placeDisk(_ disk: Disk, at coordinate: Coordinate, animated isAnimated: Bool) -> Single<Bool> {
         let diskCoordinates = logic.flippedDiskCoordinates(by: disk, at: coordinate)
         if diskCoordinates.isEmpty {
-            throw DiskPlacementError(disk: disk, x: coordinate.x, y: coordinate.y)
+            return .error(Error.diskPlacement(disk: disk, coordinate: coordinate))
         }
 
-        let finally: (ReversiViewModel, Bool) -> Void = { viewModel, finished in
-            completion(finished)
-            try? viewModel.logic.save()
-            viewModel.updateCount()
-        }
-
+        let single: Single<Bool>
         if isAnimated {
             let cleanUp: () -> Void = { [weak self] in
                 self?.animationCanceller = nil
             }
             animationCanceller = Canceller(cleanUp)
-            animateSettingDisks(at: [coordinate] + diskCoordinates, to: disk) { [weak self] finished in
-                guard let me = self else { return }
-                guard let canceller = me.animationCanceller else { return }
-                if canceller.isCancelled { return }
-                cleanUp()
+            single = animateSettingDisks(at: [coordinate] + diskCoordinates, to: disk)
+                .flatMap { [weak self] finished in
+                    guard let me = self else {
+                        return .error(Error.selfReleased)
+                    }
+                    guard  let canceller = me.animationCanceller else {
+                        return .error(Error.animationCancellerReleased)
+                    }
 
-                finally(me, finished)
-            }
-        } else {
-            async { [weak self] in
-                guard let me = self else { return }
-                me.setDisk(disk, at: coordinate, animated: false, completion: nil)
-                for coordinate in diskCoordinates {
-                    me.setDisk(disk, at: coordinate, animated: false, completion: nil)
+                    if canceller.isCancelled {
+                        return .error(Error.animationCancellerCancelled)
+                    }
+
+                    return .just(finished)
                 }
-
-                finally(me, true)
-            }
+                .do(onSuccess: { _ in
+                    cleanUp()
+                })
+        } else {
+            let coordinates = [coordinate] + diskCoordinates
+            let observables = coordinates.map { setDisk(disk, at: $0, animated: false).asObservable() }
+            single = Observable.just(())
+                .observeOn(mainAsyncScheduler)
+                .flatMap { Observable.zip(observables) }
+                .map { _ in true }
+                .asSingle()
         }
+        return single
+            .do(afterSuccess: { [weak self] _ in
+                try? self?.logic.save()
+                self?.updateCount()
+            })
     }
 
-    struct DiskPlacementError: Error {
-        let disk: Disk
-        let x: Int
-        let y: Int
+    enum Error: Swift.Error, Equatable {
+        case diskPlacement(disk: Disk, coordinate: Coordinate)
+        case selfReleased
+        case animationCancellerReleased
+        case animationCancellerCancelled
     }
 
     public struct UpdateDisk {
@@ -338,4 +356,7 @@ extension ReversiViewModel {
         public let animated: Bool
         public let completion: ((Bool) -> Void)?
     }
+
+    @available(*, unavailable)
+    private enum MainScheduler {}
 }

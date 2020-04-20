@@ -26,8 +26,8 @@ class ViewController: UIViewController {
 
     private lazy var viewModel = ReversiViewModel(
         messageDiskSize: messageDiskSizeConstraint.constant,
-        asyncAfter: { DispatchQueue.main.asyncAfter(deadline: $0, execute: $1) },
-        async: { DispatchQueue.main.async(execute: $0) },
+        mainAsyncScheduler: MainScheduler.asyncInstance,
+        mainScheduler: MainScheduler.instance,
         logicFactory: GameLogicFactory()
     )
 

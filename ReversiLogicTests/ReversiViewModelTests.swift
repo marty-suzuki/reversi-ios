@@ -1,4 +1,6 @@
+import RxRelay
 import RxSwift
+import RxTest
 import XCTest
 @testable import ReversiLogic
 
@@ -205,6 +207,7 @@ final class ReversiViewModelTests: XCTestCase {
     func test_playTurnOfComputer() throws {
         let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
+        let scheduler = dependency.testScheduler
         let disk = Disk.light
         cache.$status.accept(.turn(disk))
 
@@ -221,13 +224,9 @@ final class ReversiViewModelTests: XCTestCase {
         let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
         XCTAssertEqual(isPlayerLightAnimating.calledCount, 1)
 
-        let asyncAfter = dependency.$asyncAfter
-        XCTAssertEqual(asyncAfter.calledCount, 1)
-
         XCTAssertNotNil(logic.playerCancellers[disk])
 
-        let completion = try XCTUnwrap(asyncAfter.parameters.first?.completion)
-        completion()
+        scheduler.advanceTo(scheduler.clock + 200)
 
         XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
         XCTAssertEqual(isPlayerLightAnimating.calledCount, 2)
@@ -277,12 +276,13 @@ extension ReversiViewModelTests {
     func test_animateSettingDisks_coordinatesが0件の場合() {
         let viewModel = dependency.testTarget
 
-        var isFinished: Bool?
-        viewModel.animateSettingDisks(at: [], to: .dark) {
-            isFinished = $0
-        }
+        let isFinished = BehaviorRelay<Bool?>(value: nil)
+        let disposable = viewModel.animateSettingDisks(at: [], to: .dark)
+            .asObservable()
+            .bind(to: isFinished)
+        defer { disposable.dispose() }
 
-        XCTAssertEqual(isFinished, true)
+        XCTAssertEqual(isFinished.value, true)
     }
 
     func test_animateSettingDisks_animationCancellerがnilの場合() {
@@ -292,12 +292,15 @@ extension ReversiViewModelTests {
         let disk = Disk.dark
         viewModel.animationCanceller = nil
 
-        var isFinished: Bool?
-        viewModel.animateSettingDisks(at: coordinates, to: disk) {
-            isFinished = $0
-        }
+        let error = BehaviorRelay<ReversiViewModel.Error?>(value: nil)
+        let disposable = viewModel.animateSettingDisks(at: coordinates, to: disk)
+            .asObservable()
+            .flatMap { _ in Observable<ReversiViewModel.Error?>.empty() }
+            .catchError { Observable.just($0 as? ReversiViewModel.Error) }
+            .bind(to: error)
+        defer { disposable.dispose() }
 
-        XCTAssertNil(isFinished)
+        XCTAssertEqual(error.value, .animationCancellerReleased)
     }
 
     func test_animateSettingDisks_animationCancellerを途中でキャンセルした場合() throws {
@@ -307,10 +310,13 @@ extension ReversiViewModelTests {
         let disk = Disk.dark
         viewModel.animationCanceller = Canceller({})
 
-        var isFinished: Bool?
-        viewModel.animateSettingDisks(at: coordinates, to: disk) {
-            isFinished = $0
-        }
+        let error = BehaviorRelay<ReversiViewModel.Error?>(value: nil)
+        let disposable = viewModel.animateSettingDisks(at: coordinates, to: disk)
+            .asObservable()
+            .flatMap { _ in Observable<ReversiViewModel.Error?>.empty() }
+            .catchError { Observable.just($0 as? ReversiViewModel.Error) }
+            .bind(to: error)
+        defer { disposable.dispose() }
 
         let expected = Dependency.SetDisk(disk: disk,
                                           coordinate: .init(x: 0, y: 0),
@@ -325,7 +331,7 @@ extension ReversiViewModelTests {
         viewModel.animationCanceller?.cancel()
         paramater.completion?(false)
 
-        XCTAssertNil(isFinished)
+        XCTAssertEqual(error.value, .animationCancellerCancelled)
     }
 
     func test_animateSettingDisks_setDiskのfinishedがfalseの場合() throws {
@@ -335,26 +341,30 @@ extension ReversiViewModelTests {
         let disk = Disk.dark
         viewModel.animationCanceller = Canceller({})
 
-        var isFinished: Bool?
-        viewModel.animateSettingDisks(at: coordinates, to: disk) {
-            isFinished = $0
-        }
+        let isFinished = BehaviorRelay<Bool?>(value: nil)
+        let disposable = viewModel.animateSettingDisks(at: coordinates, to: disk)
+            .asObservable()
+            .bind(to: isFinished)
+        defer { disposable.dispose() }
 
         let expected = Dependency.SetDisk(disk: disk,
                                           coordinate: .init(x: 0, y: 0),
                                           animated: true,
                                           completion: nil)
 
+        let updateBoard = dependency.$updateBoard
         do {
-            let paramater = try XCTUnwrap(dependency.$updateBoard.parameters.first)
+            let paramater = try XCTUnwrap(updateBoard.parameters.first)
 
             XCTAssertEqual(paramater, expected)
-            XCTAssertEqual(dependency.$updateBoard.calledCount, 1)
+            XCTAssertEqual(updateBoard.calledCount, 1)
 
             paramater.completion?(false)
         }
 
         do {
+            updateBoard.parameters.forEach { $0.completion?(false) }
+
             let expected1 = Dependency.SetDisk(disk: disk,
                                                coordinate: .init(x: 0, y: 0),
                                                animated: false,
@@ -365,11 +375,11 @@ extension ReversiViewModelTests {
                                                animated: false,
                                                completion: nil)
 
-            XCTAssertEqual(dependency.$updateBoard.parameters, [expected, expected1, expected2])
-            XCTAssertEqual(dependency.$updateBoard.calledCount, 3)
+            XCTAssertEqual(updateBoard.parameters, [expected, expected1, expected2])
+            XCTAssertEqual(updateBoard.calledCount, 3)
         }
 
-        XCTAssertEqual(isFinished, false)
+        XCTAssertEqual(isFinished.value, false)
     }
 
     func test_animateSettingDisks_setDiskのfinishedがtrueの場合() throws {
@@ -379,10 +389,11 @@ extension ReversiViewModelTests {
         let disk = Disk.dark
         viewModel.animationCanceller = Canceller({})
 
-        var isFinished: Bool?
-        viewModel.animateSettingDisks(at: coordinates, to: disk) {
-            isFinished = $0
-        }
+        let isFinished = BehaviorRelay<Bool?>(value: nil)
+        let disposable = viewModel.animateSettingDisks(at: coordinates, to: disk)
+            .asObservable()
+            .bind(to: isFinished)
+        defer { disposable.dispose() }
 
         do {
             let paramater = try XCTUnwrap(dependency.$updateBoard.parameters.last)
@@ -412,7 +423,7 @@ extension ReversiViewModelTests {
             paramater.completion?(true)
         }
 
-        XCTAssertEqual(isFinished, true)
+        XCTAssertEqual(isFinished.value, true)
     }
 }
 
@@ -423,32 +434,33 @@ extension ReversiViewModelTests {
     func test_placeDisk_animatedがfalseの場合() throws {
         let viewModel = dependency.testTarget
         let logic = dependency.gameLogic
+        let scheduler = dependency.testScheduler
 
         let coordinate = Coordinate(x: 0, y: 1)
         let disk = Disk.dark
 
         logic._flippedDiskCoordinates = [coordinate]
 
-        var isFinished: Bool?
-        try viewModel.placeDisk(disk,
-                                at: coordinate,
-                                animated: false,
-                                completion: { isFinished = $0 })
+        let isFinished = BehaviorRelay<Bool?>(value: nil)
+        let disposable = viewModel.placeDisk(disk, at: coordinate, animated: false)
+            .asObservable()
+            .bind(to: isFinished)
+        defer { disposable.dispose() }
 
-        let async = dependency.$async
-        XCTAssertEqual(async.calledCount, 1)
-        let completion = try XCTUnwrap(async.parameters.last)
-        completion()
+        scheduler.advanceTo(scheduler.clock + 200)
+
+        let updateBoard = dependency.$updateBoard
+        updateBoard.parameters.forEach { $0.completion?(false) }
 
         let expected = Dependency.SetDisk(disk: disk,
                                           coordinate: coordinate,
                                           animated: false,
                                           completion: nil)
-        let updateBoard = dependency.$updateBoard
+
         XCTAssertEqual(updateBoard.calledCount, 2)
         XCTAssertEqual(updateBoard.parameters, [expected, expected])
 
-        XCTAssertEqual(isFinished, true)
+        XCTAssertEqual(isFinished.value, true)
     }
 
     func test_placeDisk_animatedがtrueの場合() throws {
@@ -460,11 +472,11 @@ extension ReversiViewModelTests {
 
         logic._flippedDiskCoordinates = [coordinate]
 
-        var isFinished: Bool?
-        try viewModel.placeDisk(disk,
-                                at: coordinate,
-                                animated: true,
-                                completion: { isFinished = $0 })
+        let isFinished = BehaviorRelay<Bool?>(value: nil)
+        let disposable = viewModel.placeDisk(disk, at: coordinate, animated: true)
+            .asObservable()
+            .bind(to: isFinished)
+        defer { disposable.dispose() }
 
         let updateBoard = dependency.$updateBoard
         let expected = Dependency.SetDisk(disk: disk,
@@ -481,6 +493,8 @@ extension ReversiViewModelTests {
         }
 
         do {
+            updateBoard.parameters.forEach { $0.completion?(false) }
+
             let expected2 = Dependency.SetDisk(disk: disk,
                                                coordinate: coordinate,
                                                animated: false,
@@ -489,7 +503,7 @@ extension ReversiViewModelTests {
             XCTAssertEqual(updateBoard.parameters, [expected, expected2, expected2])
         }
 
-        XCTAssertEqual(isFinished, false)
+        XCTAssertEqual(isFinished.value, false)
     }
 }
 
@@ -533,24 +547,19 @@ extension ReversiViewModelTests {
         @MockResponse<Void, Void>()
         var reset: Void
 
-        @MockResponse<AsyncAfter, Void>()
-        var asyncAfter: Void
-
-        @MockResponse<() -> Void, Void>()
-        var async: Void
-
         var gameDataCache: MockGameDataCache {
             gameLogic.cache
         }
         let gameLogic = MockGameLogic()
 
+        let testScheduler = TestScheduler(initialClock: 0)
         private let messageDiskSize: CGFloat
         private let disposeBag = DisposeBag()
 
         private(set) lazy var testTarget = ReversiViewModel(
             messageDiskSize: messageDiskSize,
-            asyncAfter: { [weak self] in self?._asyncAfter.respond(.init(time: $0, completion: $1)) },
-            async: { [weak self] in self?._async.respond($0)  },
+            mainAsyncScheduler: testScheduler,
+            mainScheduler: testScheduler,
             logicFactory: MockGameLogicFactory(logic: gameLogic)
         )
 
