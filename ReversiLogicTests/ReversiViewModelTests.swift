@@ -23,10 +23,10 @@ final class ReversiViewModelTests: XCTestCase {
         logic._validMovekForDark = [Coordinate(x: 0, y: 0)]
         let waitForPlayer = logic.$_waitForPlayer
 
-        viewModel.viewDidAppear()
+        viewModel.input.viewDidAppear(())
         XCTAssertEqual(waitForPlayer.calledCount, 1)
 
-        viewModel.viewDidAppear()
+        viewModel.input.viewDidAppear(())
         XCTAssertEqual(waitForPlayer.calledCount, 1)
     }
 
@@ -107,12 +107,11 @@ final class ReversiViewModelTests: XCTestCase {
     func test_updateCount() {
         let darkCount = Int(arc4random() % 100)
         let lightCount = Int(arc4random() % 100)
-        let viewModel = dependency.testTarget
         let logic = dependency.gameLogic
         logic.$countOfDark.accept(darkCount)
         logic.$countOfLight.accept(lightCount)
 
-        viewModel.updateCount()
+        dependency.state.updateCount.accept(())
 
         let setPlayerDarkCount = dependency.$setPlayerDarkCount
         XCTAssertEqual(setPlayerDarkCount.calledCount, 1)
@@ -123,20 +122,18 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(setPlayerLightCount.parameters, ["\(lightCount)"])
     }
     func test_nextTurn_statusがlightのときに_darkの有効な配置がある場合() {
-        let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         cache.$status.accept(.turn(.light))
 
         let logic = dependency.gameLogic
         logic._validMovekForDark = [Coordinate(x: 0, y: 0)]
 
-        viewModel.nextTurn()
+        dependency.state.nextTurn.accept(())
 
         XCTAssertEqual(cache.$_setStatus.parameters, [.turn(.dark)])
     }
 
     func test_nextTurn_statusがlightのときに_darkの有効な配置はないが_lightの有効な配置がある場合() {
-        let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         cache.$status.accept(.turn(.light))
 
@@ -144,7 +141,7 @@ final class ReversiViewModelTests: XCTestCase {
         logic._validMovekForDark = []
         logic._validMovekForLight = [Coordinate(x: 0, y: 0)]
 
-        viewModel.nextTurn()
+        dependency.state.nextTurn.accept(())
 
         XCTAssertEqual(cache.$_setStatus.parameters, [.turn(.dark)])
 
@@ -154,7 +151,6 @@ final class ReversiViewModelTests: XCTestCase {
     }
 
     func test_nextTurn_statuがlightのときに_darkもlightの有効な配置はない場合() {
-        let viewModel = dependency.testTarget
         let cache = dependency.gameDataCache
         cache.$status.accept(.turn(.light))
 
@@ -162,7 +158,7 @@ final class ReversiViewModelTests: XCTestCase {
         logic._validMovekForDark = []
         logic._validMovekForLight = []
 
-        viewModel.nextTurn()
+        dependency.state.nextTurn.accept(())
 
         XCTAssertEqual(cache.$_setStatus.parameters, [.gameOver])
     }
@@ -170,7 +166,7 @@ final class ReversiViewModelTests: XCTestCase {
     func test_handleReset() {
         let viewModel = dependency.testTarget
 
-        viewModel.handleReset()
+        viewModel.input.handleReset(())
 
         let showAlert = dependency.$showAlert
         XCTAssertEqual(showAlert.calledCount, 1)
@@ -183,10 +179,11 @@ final class ReversiViewModelTests: XCTestCase {
 extension ReversiViewModelTests {
 
     func test_animateSettingDisks_coordinatesが0件の場合() {
-        let viewModel = dependency.testTarget
+        let logic = dependency.gameLogic
+        let state = dependency.state
 
         let isFinished = BehaviorRelay<Bool?>(value: nil)
-        let disposable = viewModel.animateSettingDisks(at: [], to: .dark)
+        let disposable = ReversiViewModel.animateSettingDisks(at: [], to: .dark, logic: logic, state: state)
             .asObservable()
             .bind(to: isFinished)
         defer { disposable.dispose() }
@@ -195,14 +192,14 @@ extension ReversiViewModelTests {
     }
 
     func test_animateSettingDisks_animationCancellerがnilの場合() {
-        let viewModel = dependency.testTarget
         let logic = dependency.gameLogic
+        let state = dependency.state
         let coordinates = [Coordinate(x: 0, y: 0), Coordinate(x: 1, y: 1)]
         let disk = Disk.dark
         logic.placeDiskCanceller = nil
 
         let error = BehaviorRelay<ReversiViewModel.Error?>(value: nil)
-        let disposable = viewModel.animateSettingDisks(at: coordinates, to: disk)
+        let disposable = ReversiViewModel.animateSettingDisks(at: coordinates, to: disk, logic: logic, state: state)
             .asObservable()
             .flatMap { _ in Observable<ReversiViewModel.Error?>.empty() }
             .catchError { Observable.just($0 as? ReversiViewModel.Error) }
@@ -213,14 +210,14 @@ extension ReversiViewModelTests {
     }
 
     func test_animateSettingDisks_animationCancellerを途中でキャンセルした場合() throws {
-        let viewModel = dependency.testTarget
         let logic = dependency.gameLogic
+        let state = dependency.state
         let coordinates = [Coordinate(x: 0, y: 0), Coordinate(x: 1, y: 1)]
         let disk = Disk.dark
         logic.placeDiskCanceller = Canceller({})
 
         let error = BehaviorRelay<ReversiViewModel.Error?>(value: nil)
-        let disposable = viewModel.animateSettingDisks(at: coordinates, to: disk)
+        let disposable = ReversiViewModel.animateSettingDisks(at: coordinates, to: disk, logic: logic, state: state)
             .asObservable()
             .flatMap { _ in Observable<ReversiViewModel.Error?>.empty() }
             .catchError { Observable.just($0 as? ReversiViewModel.Error) }
@@ -244,14 +241,14 @@ extension ReversiViewModelTests {
     }
 
     func test_animateSettingDisks_setDiskのfinishedがfalseの場合() throws {
-        let viewModel = dependency.testTarget
         let logic = dependency.gameLogic
+        let state = dependency.state
         let coordinates = [Coordinate(x: 0, y: 0), Coordinate(x: 1, y: 1)]
         let disk = Disk.dark
         logic.placeDiskCanceller = Canceller({})
 
         let isFinished = BehaviorRelay<Bool?>(value: nil)
-        let disposable = viewModel.animateSettingDisks(at: coordinates, to: disk)
+        let disposable = ReversiViewModel.animateSettingDisks(at: coordinates, to: disk, logic: logic, state: state)
             .asObservable()
             .bind(to: isFinished)
         defer { disposable.dispose() }
@@ -292,14 +289,14 @@ extension ReversiViewModelTests {
     }
 
     func test_animateSettingDisks_setDiskのfinishedがtrueの場合() throws {
-        let viewModel = dependency.testTarget
         let logic = dependency.gameLogic
+        let state = dependency.state
         let coordinates = [Coordinate(x: 0, y: 0), Coordinate(x: 1, y: 1)]
         let disk = Disk.dark
         logic.placeDiskCanceller = Canceller({})
 
         let isFinished = BehaviorRelay<Bool?>(value: nil)
-        let disposable = viewModel.animateSettingDisks(at: coordinates, to: disk)
+        let disposable = ReversiViewModel.animateSettingDisks(at: coordinates, to: disk, logic: logic, state: state)
             .asObservable()
             .bind(to: isFinished)
         defer { disposable.dispose() }
@@ -341,8 +338,9 @@ extension ReversiViewModelTests {
 extension ReversiViewModelTests {
 
     func test_placeDisk_animatedがfalseの場合() throws {
-        let viewModel = dependency.testTarget
         let logic = dependency.gameLogic
+        let state = dependency.state
+        let extra = dependency.extra
         let scheduler = dependency.testScheduler
 
         let coordinate = Coordinate(x: 0, y: 1)
@@ -351,7 +349,7 @@ extension ReversiViewModelTests {
         logic._flippedDiskCoordinates = [coordinate]
 
         let isFinished = BehaviorRelay<Bool?>(value: nil)
-        let disposable = viewModel.placeDisk(disk, at: coordinate, animated: false)
+        let disposable = ReversiViewModel.placeDisk(disk, at: coordinate, animated: false, logic: logic, state: state, extra: extra)
             .asObservable()
             .bind(to: isFinished)
         defer { disposable.dispose() }
@@ -373,16 +371,16 @@ extension ReversiViewModelTests {
     }
 
     func test_placeDisk_animatedがtrueの場合() throws {
-        let viewModel = dependency.testTarget
         let logic = dependency.gameLogic
-
+        let state = dependency.state
+        let extra = dependency.extra
         let coordinate = Coordinate(x: 0, y: 1)
         let disk = Disk.dark
 
         logic._flippedDiskCoordinates = [coordinate]
 
         let isFinished = BehaviorRelay<Bool?>(value: nil)
-        let disposable = viewModel.placeDisk(disk, at: coordinate, animated: true)
+        let disposable = ReversiViewModel.placeDisk(disk, at: coordinate, animated: true, logic: logic, state: state, extra: extra)
             .asObservable()
             .bind(to: isFinished)
         defer { disposable.dispose() }
@@ -419,7 +417,6 @@ extension ReversiViewModelTests {
 extension ReversiViewModelTests {
 
     fileprivate final class Dependency {
-
         @MockResponse<Alert, Void>()
         var showAlert: Void
 
@@ -460,16 +457,22 @@ extension ReversiViewModelTests {
             gameLogic.cache
         }
         let gameLogic = MockGameLogic()
-
+        let state = ReversiViewModel.State()
         let testScheduler = TestScheduler(initialClock: 0)
+        private(set) lazy var extra = ReversiViewModel.Extra(
+            messageDiskSize: messageDiskSize,
+            mainAsyncScheduler: testScheduler,
+            mainScheduler: testScheduler,
+            logic: gameLogic
+        )
+
         private let messageDiskSize: CGFloat
         private let disposeBag = DisposeBag()
 
         private(set) lazy var testTarget = ReversiViewModel(
-            messageDiskSize: messageDiskSize,
-            mainAsyncScheduler: testScheduler,
-            mainScheduler: testScheduler,
-            logicFactory: MockGameLogicFactory(logic: gameLogic)
+            input: ReversiViewModel.Input(),
+            state: state,
+            extra: extra
         )
 
         init(cells: [[GameData.Cell]], messageDiskSize: CGFloat) {
@@ -477,51 +480,51 @@ extension ReversiViewModelTests {
 
             gameDataCache.$cells.accept(cells)
 
-            testTarget.messageDiskSizeConstant
+            testTarget.output.messageDiskSizeConstant
                 .subscribe(onNext: { [weak self] in self?._setMessageDiskSizeConstant.respond($0) })
                 .disposed(by: disposeBag)
 
-            testTarget.messageDisk
+            testTarget.output.messageDisk
                 .subscribe(onNext: { [weak self] in self?._setMessageDisk.respond($0) })
                 .disposed(by: disposeBag)
 
-            testTarget.messageText
+            testTarget.output.messageText
                 .subscribe(onNext: { [weak self] in self?._setMessageText.respond($0) })
                 .disposed(by: disposeBag)
 
-            testTarget.resetBoard
+            testTarget.output.resetBoard
                 .subscribe(onNext: { [weak self] in self?._reset.respond() })
                 .disposed(by: disposeBag)
 
-            testTarget.showAlert
+            testTarget.output.showAlert
                 .subscribe(onNext: { [weak self] in self?._showAlert.respond($0) })
                 .disposed(by: disposeBag)
 
-            testTarget.playerDarkCount
+            testTarget.output.playerDarkCount
                 .subscribe(onNext: { [weak self] in self?._setPlayerDarkCount.respond($0) })
                 .disposed(by: disposeBag)
 
-            testTarget.playerLightCount
+            testTarget.output.playerLightCount
                 .subscribe(onNext: { [weak self] in self?._setPlayerLightCount.respond($0) })
                 .disposed(by: disposeBag)
 
-            testTarget.playerDarkSelectedIndex
+            testTarget.output.playerDarkSelectedIndex
                 .subscribe(onNext: { [weak self] in self?._setPlayerDarkSelectedIndex.respond($0) })
                 .disposed(by: disposeBag)
 
-            testTarget.playerLightSelectedIndex
+            testTarget.output.playerLightSelectedIndex
                 .subscribe(onNext: { [weak self] in self?._setPlayerLightSelectedIndex.respond($0) })
                 .disposed(by: disposeBag)
 
-            testTarget.isPlayerDarkAnimating
+            testTarget.output.isPlayerDarkAnimating
                 .subscribe(onNext: { [weak self] in self?._isPlayerDarkAnimating.respond($0) })
                 .disposed(by: disposeBag)
 
-            testTarget.isPlayerLightAnimating
+            testTarget.output.isPlayerLightAnimating
                 .subscribe(onNext: { [weak self] in self?._isPlayerLightAnimating.respond($0) })
                 .disposed(by: disposeBag)
 
-            testTarget.updateBoard
+            testTarget.output.updateBoard
                 .subscribe(onNext: { [weak self] value in
                     guard let me = self else {
                         return
