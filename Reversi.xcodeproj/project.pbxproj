@@ -56,6 +56,9 @@
 		EDBC5A94244F488F006D3865 /* Unio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDBC5A93244F488F006D3865 /* Unio.framework */; };
 		EDBC5A95244F488F006D3865 /* Unio.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = EDBC5A93244F488F006D3865 /* Unio.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		EDBC5A96244F48BE006D3865 /* Unio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDBC5A93244F488F006D3865 /* Unio.framework */; };
+		EDBC5A99244F5EEF006D3865 /* GameStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBC5A98244F5EEF006D3865 /* GameStore.swift */; };
+		EDBC5A9B244F5EFC006D3865 /* GameDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBC5A9A244F5EFC006D3865 /* GameDispatcher.swift */; };
+		EDBC5A9D244F5F09006D3865 /* GameActionCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBC5A9C244F5F09006D3865 /* GameActionCreator.swift */; };
 		EDCC2A542448B324009E69F7 /* GameLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A532448B324009E69F7 /* GameLogic.swift */; };
 		EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A552448B3E9009E69F7 /* Coordinate.swift */; };
 		EDCC2A582448B5D0009E69F7 /* GameLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */; };
@@ -150,6 +153,9 @@
 		ED9AEF7B244C39F8004A068C /* MockBehaviorWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockBehaviorWrapper.swift; sourceTree = "<group>"; };
 		ED9AEF7D244C4223004A068C /* CountableProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountableProperty.swift; sourceTree = "<group>"; };
 		EDBC5A93244F488F006D3865 /* Unio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Unio.framework; path = Carthage/Build/iOS/Unio.framework; sourceTree = "<group>"; };
+		EDBC5A98244F5EEF006D3865 /* GameStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStore.swift; sourceTree = "<group>"; };
+		EDBC5A9A244F5EFC006D3865 /* GameDispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDispatcher.swift; sourceTree = "<group>"; };
+		EDBC5A9C244F5F09006D3865 /* GameActionCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameActionCreator.swift; sourceTree = "<group>"; };
 		EDCC2A532448B324009E69F7 /* GameLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLogic.swift; sourceTree = "<group>"; };
 		EDCC2A552448B3E9009E69F7 /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
 		EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLogicTests.swift; sourceTree = "<group>"; };
@@ -291,6 +297,7 @@
 		ED6EAC6C24436B2B00BAF620 /* ReversiLogic */ = {
 			isa = PBXGroup;
 			children = (
+				EDBC5A97244F5EDA006D3865 /* Flux */,
 				ED20D52C244AD60C00F7BA46 /* ViewDataModels */,
 				ED8CC36024475EF000CD2CAB /* Extension */,
 				ED6EACA22444B1D100BAF620 /* ViewModel */,
@@ -367,6 +374,16 @@
 				ED20D52F244AD70A00F7BA46 /* UIAlertControllerExtension.swift */,
 			);
 			path = Extension;
+			sourceTree = "<group>";
+		};
+		EDBC5A97244F5EDA006D3865 /* Flux */ = {
+			isa = PBXGroup;
+			children = (
+				EDBC5A98244F5EEF006D3865 /* GameStore.swift */,
+				EDBC5A9A244F5EFC006D3865 /* GameDispatcher.swift */,
+				EDBC5A9C244F5F09006D3865 /* GameActionCreator.swift */,
+			);
+			path = Flux;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -603,13 +620,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				EDF8F038244CC87E00C2CF0B /* GameLogicFactory.swift in Sources */,
+				EDBC5A99244F5EEF006D3865 /* GameStore.swift in Sources */,
 				ED6EACA12443838900BAF620 /* GameData.swift in Sources */,
 				ED8CC36424478D5B00CD2CAB /* GameDataCache.swift in Sources */,
+				EDBC5A9B244F5EFC006D3865 /* GameDispatcher.swift in Sources */,
 				EDCC2A542448B324009E69F7 /* GameLogic.swift in Sources */,
 				ED6EACA42444B1E900BAF620 /* ReversiViewModel.swift in Sources */,
 				EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */,
 				ED6EACA62444BDE100BAF620 /* Canceller.swift in Sources */,
 				ED6EAC9524436C3300BAF620 /* Disk.swift in Sources */,
+				EDBC5A9D244F5F09006D3865 /* GameActionCreator.swift in Sources */,
 				ED20D56D244C2D6F00F7BA46 /* BehaviorWrapper.swift in Sources */,
 				ED20D56E244C2D6F00F7BA46 /* ValueObservable.swift in Sources */,
 				ED20D557244B826600F7BA46 /* PublishWrapper.swift in Sources */,

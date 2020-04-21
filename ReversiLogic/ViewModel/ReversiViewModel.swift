@@ -116,7 +116,7 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel> {
             }
             .subscribe(onNext: { _ in
                 state.nextTurn.accept(())
-                try? logic.save()
+                logic.save()
                 state.updateCount.accept(())
             })
             .disposed(by: disposeBag)
