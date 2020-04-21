@@ -53,6 +53,9 @@
 		ED8CC36424478D5B00CD2CAB /* GameDataCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED8CC36324478D5B00CD2CAB /* GameDataCache.swift */; };
 		ED9AEF7C244C39F8004A068C /* MockBehaviorWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9AEF7B244C39F8004A068C /* MockBehaviorWrapper.swift */; };
 		ED9AEF7E244C4223004A068C /* CountableProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9AEF7D244C4223004A068C /* CountableProperty.swift */; };
+		EDBC5A94244F488F006D3865 /* Unio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDBC5A93244F488F006D3865 /* Unio.framework */; };
+		EDBC5A95244F488F006D3865 /* Unio.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = EDBC5A93244F488F006D3865 /* Unio.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		EDBC5A96244F48BE006D3865 /* Unio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDBC5A93244F488F006D3865 /* Unio.framework */; };
 		EDCC2A542448B324009E69F7 /* GameLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A532448B324009E69F7 /* GameLogic.swift */; };
 		EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A552448B3E9009E69F7 /* Coordinate.swift */; };
 		EDCC2A582448B5D0009E69F7 /* GameLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */; };
@@ -91,6 +94,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				EDBC5A95244F488F006D3865 /* Unio.framework in Embed Frameworks */,
 				ED3D8EEC244DF95F00DBF850 /* RxSwift.framework in Embed Frameworks */,
 				ED3D8EE8244DF95F00DBF850 /* RxCocoa.framework in Embed Frameworks */,
 				ED6EAC8124436B2C00BAF620 /* ReversiLogic.framework in Embed Frameworks */,
@@ -145,6 +149,7 @@
 		ED8CC36324478D5B00CD2CAB /* GameDataCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDataCache.swift; sourceTree = "<group>"; };
 		ED9AEF7B244C39F8004A068C /* MockBehaviorWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockBehaviorWrapper.swift; sourceTree = "<group>"; };
 		ED9AEF7D244C4223004A068C /* CountableProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountableProperty.swift; sourceTree = "<group>"; };
+		EDBC5A93244F488F006D3865 /* Unio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Unio.framework; path = Carthage/Build/iOS/Unio.framework; sourceTree = "<group>"; };
 		EDCC2A532448B324009E69F7 /* GameLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLogic.swift; sourceTree = "<group>"; };
 		EDCC2A552448B3E9009E69F7 /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
 		EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLogicTests.swift; sourceTree = "<group>"; };
@@ -157,6 +162,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EDBC5A94244F488F006D3865 /* Unio.framework in Frameworks */,
 				ED3D8EEB244DF95F00DBF850 /* RxSwift.framework in Frameworks */,
 				ED3D8EE7244DF95F00DBF850 /* RxCocoa.framework in Frameworks */,
 				ED6EAC8024436B2C00BAF620 /* ReversiLogic.framework in Frameworks */,
@@ -185,6 +191,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EDBC5A96244F48BE006D3865 /* Unio.framework in Frameworks */,
 				ED3D8EF4244DF9B000DBF850 /* RxTest.framework in Frameworks */,
 				ED3D8EF0244DF9B000DBF850 /* RxRelay.framework in Frameworks */,
 				ED3D8EF1244DF9B000DBF850 /* RxSwift.framework in Frameworks */,
@@ -272,6 +279,7 @@
 		ED20D541244B7ECC00F7BA46 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				EDBC5A93244F488F006D3865 /* Unio.framework */,
 				ED3D8EF3244DF9B000DBF850 /* RxTest.framework */,
 				ED3D8EE4244DF95F00DBF850 /* RxCocoa.framework */,
 				ED3D8EE5244DF95F00DBF850 /* RxRelay.framework */,
@@ -551,6 +559,7 @@
 				"$(SRCROOT)/Carthage/Build/iOS/RxRelay.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/RxSwift.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/RxTest.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/Unio.framework",
 			);
 			outputFileListPaths = (
 			);
@@ -559,6 +568,7 @@
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RxRelay.framework",
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RxSwift.framework",
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RxTest.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Unio.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

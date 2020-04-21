@@ -1,3 +1,6 @@
 [submodule "Carthage/Checkouts/RxSwift"]
 	path = Carthage/Checkouts/RxSwift
 	url = https://github.com/ReactiveX/RxSwift.git
+[submodule "Carthage/Checkouts/Unio"]
+	path = Carthage/Checkouts/Unio
+	url = https://github.com/cats-oss/Unio.git
