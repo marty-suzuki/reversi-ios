@@ -1,5 +1,6 @@
 import RxCocoa
 import RxSwift
+import RxTest
 import XCTest
 @testable import ReversiLogic
 
@@ -236,21 +237,33 @@ extension GameLogicTests {
 
         viewModel.waitForPlayer()
 
-        let playTurnOfComputer = dependency.$playTurnOfComputer
-        XCTAssertEqual(playTurnOfComputer.calledCount, 0)
+        let handleDiskWithCoordinate = dependency.$handleDiskWithCoordinate
+        XCTAssertEqual(handleDiskWithCoordinate.calledCount, 0)
     }
 
     func test_waitForPlayer_turnがlightで_playerLightがcomputerの場合() {
-        let viewModel = dependency.testTarget
+        let logic = dependency.testTarget
         let cache = dependency.cache
         let turn = Disk.light
         cache.$status.accept(.turn(turn))
         cache.$playerLight.accept(.computer)
+        let disk = Disk.light
+        cache.$status.accept(.turn(disk))
+        cache.$cells.accept([
+            [
+                GameData.Cell(coordinate: .init(x: 0, y: 0), disk: nil),
+                GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .dark),
+                GameData.Cell(coordinate: .init(x: 2, y: 0), disk: .light)
+            ]
+        ])
 
-        viewModel.waitForPlayer()
+        logic.waitForPlayer()
 
-        let playTurnOfComputer = dependency.$playTurnOfComputer
-        XCTAssertEqual(playTurnOfComputer.calledCount, 1)
+        let scheduler = dependency.testScheduler
+        scheduler.advanceTo(scheduler.clock + 200)
+
+        let handleDiskWithCoordinate = dependency.$handleDiskWithCoordinate
+        XCTAssertEqual(handleDiskWithCoordinate.calledCount, 1)
     }
 
     func test_waitForPlayer_statusがgameOverの場合() {
@@ -262,8 +275,8 @@ extension GameLogicTests {
 
         viewModel.waitForPlayer()
 
-        let playTurnOfComputer = dependency.$playTurnOfComputer
-        XCTAssertEqual(playTurnOfComputer.calledCount, 0)
+        let handleDiskWithCoordinate = dependency.$handleDiskWithCoordinate
+        XCTAssertEqual(handleDiskWithCoordinate.calledCount, 0)
     }
 }
 
@@ -303,11 +316,21 @@ extension GameLogicTests {
         let disk = Disk.light
         cache.$status.accept(.turn(disk))
         cache.$playerLight.accept(.computer)
+        cache.$cells.accept([
+            [
+                GameData.Cell(coordinate: .init(x: 0, y: 0), disk: nil),
+                GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .dark),
+                GameData.Cell(coordinate: .init(x: 2, y: 0), disk: .light)
+            ]
+        ])
 
         logic.setPlayer(for: disk, with: 1)
 
-        let playTurnOfComputer = dependency.$playTurnOfComputer
-        XCTAssertEqual(playTurnOfComputer.calledCount, 1)
+        let scheduler = dependency.testScheduler
+        scheduler.advanceTo(scheduler.clock + 200)
+
+        let handleDiskWithCoordinate = dependency.$handleDiskWithCoordinate
+        XCTAssertEqual(handleDiskWithCoordinate.calledCount, 1)
     }
 
     func test_setPlayer_diskと現在のplayerが不一致で_playerがcomputerの場合() {
@@ -318,8 +341,8 @@ extension GameLogicTests {
 
         logic.setPlayer(for: .dark, with: 1)
 
-        let playTurnOfComputer = dependency.$playTurnOfComputer
-        XCTAssertEqual(playTurnOfComputer.calledCount, 0)
+        let handleDiskWithCoordinate = dependency.$handleDiskWithCoordinate
+        XCTAssertEqual(handleDiskWithCoordinate.calledCount, 0)
     }
 
     func test_setPlayer_diskと現在のplayerが一致していて_playerがmanualの場合() {
@@ -331,8 +354,8 @@ extension GameLogicTests {
 
         logic.setPlayer(for: disk, with: 0)
 
-        let playTurnOfComputer = dependency.$playTurnOfComputer
-        XCTAssertEqual(playTurnOfComputer.calledCount, 0)
+        let handleDiskWithCoordinate = dependency.$handleDiskWithCoordinate
+        XCTAssertEqual(handleDiskWithCoordinate.calledCount, 0)
     }
 }
 
@@ -430,22 +453,79 @@ extension GameLogicTests {
     }
 }
 
+// - MARK:
+
+extension GameLogicTests {
+
+    func test_playTurnOfComputer() throws {
+        let logic = dependency.testTarget
+        let cache = dependency.cache
+        let scheduler = dependency.testScheduler
+        let disk = Disk.light
+        cache.$status.accept(.turn(disk))
+        cache.$cells.accept([
+            [
+                GameData.Cell(coordinate: .init(x: 0, y: 0), disk: nil),
+                GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .dark),
+                GameData.Cell(coordinate: .init(x: 2, y: 0), disk: .light)
+            ]
+        ])
+
+        let willTurnDiskOfComputer = BehaviorRelay<Disk?>(value: nil)
+        let disposable = logic.willTurnDiskOfComputer
+            .bind(to: willTurnDiskOfComputer)
+        defer { disposable.dispose() }
+
+        let didTurnDiskOfComputer = BehaviorRelay<Disk?>(value: nil)
+        let disposable2 = logic.didTurnDiskOfComputer
+            .bind(to: didTurnDiskOfComputer)
+        defer { disposable2.dispose() }
+
+        logic.playTurnOfComputer()
+
+        XCTAssertNotNil(logic.playerCancellers[disk])
+
+        scheduler.advanceTo(scheduler.clock + 200)
+
+        XCTAssertEqual(willTurnDiskOfComputer.value, disk)
+        XCTAssertEqual(didTurnDiskOfComputer.value, disk)
+
+        XCTAssertNil(logic.playerCancellers[disk])
+
+        let handleDiskWithCoordinate = dependency.$handleDiskWithCoordinate
+        XCTAssertEqual(handleDiskWithCoordinate.parameters,
+                       [Dependency.DiskCoordinate(disk: disk, coordinate: .init(x: 0, y: 0))])
+    }
+}
+
 extension GameLogicTests {
 
     private final class Dependency {
 
-        @MockResponse<Void, Void>()
-        var playTurnOfComputer: Void
+        @MockResponse<DiskCoordinate, Void>()
+        var handleDiskWithCoordinate: Void
 
-        private(set) lazy var testTarget = GameLogic(cache: cache)
+        private(set) lazy var testTarget = GameLogic(
+            cache: cache,
+            mainScheduler: testScheduler
+        )
+
         let cache = MockGameDataCache()
+        let testScheduler = TestScheduler(initialClock: 0)
 
         private let disposeBag = DisposeBag()
 
         init() {
-            testTarget.playTurnOfComputer
-                .subscribe(onNext: { [weak self] in self?._playTurnOfComputer.respond() })
+            testTarget.handleDiskWithCoordinate
+                .subscribe(onNext: { [weak self] in
+                    self?._handleDiskWithCoordinate.respond(.init(disk: $0, coordinate: $1))
+                })
                 .disposed(by: disposeBag)
+        }
+
+        struct DiskCoordinate: Equatable {
+            let disk: Disk
+            let coordinate: Coordinate
         }
     }
 }

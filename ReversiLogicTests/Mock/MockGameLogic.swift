@@ -17,6 +17,12 @@ struct MockGameLogicFactory: GameLogicFactoryProtocol {
 final class MockGameLogic: GameLogicProtocol {
 
     @MockPublishWrapper
+    private(set) var willTurnDiskOfComputer: Observable<Disk>
+
+    @MockPublishWrapper
+    private(set) var didTurnDiskOfComputer: Observable<Disk>
+
+    @MockPublishWrapper
     private(set) var gameLoaded: Observable<Void>
 
     @MockPublishWrapper
@@ -27,6 +33,9 @@ final class MockGameLogic: GameLogicProtocol {
 
     @CountableProperty
     var playerCancellers: [Disk : Canceller] = [:]
+
+    @CountableProperty
+    var placeDiskCanceller: Canceller?
 
     @MockPublishWrapper
     private(set) var playTurnOfComputer: Observable<Void>
@@ -122,14 +131,6 @@ extension MockGameLogic {
 
     func setStatus(_ status: GameData.Status) {
         cache.setStatus(status)
-    }
-
-    func setPlayerOfDark(_ player: GameData.Player) {
-        cache.setPlayerOfDark(player)
-    }
-
-    func setPlayerOfLight(_ player: GameData.Player) {
-        cache.setPlayerOfLight(player)
     }
 
     func setDisk(_ disk: Disk?, at coordinate: Coordinate) {

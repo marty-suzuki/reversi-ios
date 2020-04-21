@@ -167,79 +167,6 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(cache.$_setStatus.parameters, [.gameOver])
     }
 
-    func test_logic_playTurnOfComputer_isAnimatingがtrueの場合() {
-        let viewModel = dependency.testTarget
-        let logic = dependency.gameLogic
-        let cache = dependency.gameDataCache
-        let disk = Disk.light
-        cache.$status.accept(.turn(disk))
-        viewModel.animationCanceller = Canceller({})
-
-        logic.$playTurnOfComputer.accept(())
-
-        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
-        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
-
-        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
-        XCTAssertEqual(isPlayerLightAnimating.calledCount, 0)
-    }
-
-    func test_logic_playTurnOfComputer_isAnimatingがfalseの場合() {
-        let viewModel = dependency.testTarget
-        let logic = dependency.gameLogic
-        let cache = dependency.gameDataCache
-        let disk = Disk.light
-        cache.$status.accept(.turn(disk))
-        viewModel.animationCanceller = nil
-        let coordinate = Coordinate(x: 0, y: 0)
-        logic._validMovekForLight = [coordinate]
-        logic._flippedDiskCoordinates = [coordinate]
-
-        logic.$playTurnOfComputer.accept(())
-
-        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
-        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
-
-        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
-        XCTAssertEqual(isPlayerLightAnimating.calledCount, 1)
-    }
-
-    func test_playTurnOfComputer() throws {
-        let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-        let scheduler = dependency.testScheduler
-        let disk = Disk.light
-        cache.$status.accept(.turn(disk))
-
-        let coordinate = Coordinate(x: 0, y: 0)
-        let logic = dependency.gameLogic
-        logic._validMovekForLight = [coordinate]
-        logic._flippedDiskCoordinates = [coordinate]
-
-        let diskWithCoordinate = BehaviorRelay<(Disk, Coordinate)?>(value: nil)
-        let disposable = viewModel.playTurnOfComputer()
-            .asObservable()
-            .bind(to: diskWithCoordinate)
-        defer { disposable.dispose() }
-
-        let isPlayerDarkAnimating = dependency.$isPlayerDarkAnimating
-        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
-
-        let isPlayerLightAnimating = dependency.$isPlayerLightAnimating
-        XCTAssertEqual(isPlayerLightAnimating.calledCount, 1)
-
-        XCTAssertNotNil(logic.playerCancellers[disk])
-
-        scheduler.advanceTo(scheduler.clock + 200)
-
-        XCTAssertEqual(isPlayerDarkAnimating.calledCount, 0)
-        XCTAssertEqual(isPlayerLightAnimating.calledCount, 2)
-
-        XCTAssertNil(logic.playerCancellers[disk])
-        XCTAssertEqual(diskWithCoordinate.value?.0, disk)
-        XCTAssertEqual(diskWithCoordinate.value?.1, coordinate)
-    }
-
     func test_handleReset() {
         let viewModel = dependency.testTarget
 
@@ -248,30 +175,6 @@ final class ReversiViewModelTests: XCTestCase {
         let showAlert = dependency.$showAlert
         XCTAssertEqual(showAlert.calledCount, 1)
         XCTAssertEqual(showAlert.parameters, [.reset(okHandler: {})])
-    }
-
-    func test_handleDiskWithCoordinate() {
-        let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-        let logic = dependency.gameLogic
-
-        let disk = Disk.dark
-        cache.$status.accept(.turn(disk))
-        logic.$playerOfCurrentTurn.accept(.manual)
-        cache.$playerDark.accept(.manual)
-
-        viewModel.animationCanceller = nil
-
-        let coordinate = Coordinate(x: 0, y: 0)
-        logic.$handleDiskWithCoordinate.accept((disk, coordinate))
-
-        let flippedDiskCoordinates = logic.$_flippedDiskCoordinates
-        let expected = MockGameLogic.FlippedDiskCoordinates(
-            disk: disk,
-            coordinate: coordinate
-        )
-        XCTAssertEqual(flippedDiskCoordinates.calledCount, 1)
-        XCTAssertEqual(flippedDiskCoordinates.parameters, [expected])
     }
 }
 
@@ -293,10 +196,10 @@ extension ReversiViewModelTests {
 
     func test_animateSettingDisks_animationCancellerがnilの場合() {
         let viewModel = dependency.testTarget
-
+        let logic = dependency.gameLogic
         let coordinates = [Coordinate(x: 0, y: 0), Coordinate(x: 1, y: 1)]
         let disk = Disk.dark
-        viewModel.animationCanceller = nil
+        logic.placeDiskCanceller = nil
 
         let error = BehaviorRelay<ReversiViewModel.Error?>(value: nil)
         let disposable = viewModel.animateSettingDisks(at: coordinates, to: disk)
@@ -311,10 +214,10 @@ extension ReversiViewModelTests {
 
     func test_animateSettingDisks_animationCancellerを途中でキャンセルした場合() throws {
         let viewModel = dependency.testTarget
-
+        let logic = dependency.gameLogic
         let coordinates = [Coordinate(x: 0, y: 0), Coordinate(x: 1, y: 1)]
         let disk = Disk.dark
-        viewModel.animationCanceller = Canceller({})
+        logic.placeDiskCanceller = Canceller({})
 
         let error = BehaviorRelay<ReversiViewModel.Error?>(value: nil)
         let disposable = viewModel.animateSettingDisks(at: coordinates, to: disk)
@@ -334,7 +237,7 @@ extension ReversiViewModelTests {
         XCTAssertEqual(paramater, expected)
         XCTAssertEqual(dependency.$updateBoard.calledCount, 1)
 
-        viewModel.animationCanceller?.cancel()
+        logic.placeDiskCanceller?.cancel()
         paramater.completion?(false)
 
         XCTAssertEqual(error.value, .animationCancellerCancelled)
@@ -342,10 +245,10 @@ extension ReversiViewModelTests {
 
     func test_animateSettingDisks_setDiskのfinishedがfalseの場合() throws {
         let viewModel = dependency.testTarget
-
+        let logic = dependency.gameLogic
         let coordinates = [Coordinate(x: 0, y: 0), Coordinate(x: 1, y: 1)]
         let disk = Disk.dark
-        viewModel.animationCanceller = Canceller({})
+        logic.placeDiskCanceller = Canceller({})
 
         let isFinished = BehaviorRelay<Bool?>(value: nil)
         let disposable = viewModel.animateSettingDisks(at: coordinates, to: disk)
@@ -390,10 +293,10 @@ extension ReversiViewModelTests {
 
     func test_animateSettingDisks_setDiskのfinishedがtrueの場合() throws {
         let viewModel = dependency.testTarget
-
+        let logic = dependency.gameLogic
         let coordinates = [Coordinate(x: 0, y: 0), Coordinate(x: 1, y: 1)]
         let disk = Disk.dark
-        viewModel.animationCanceller = Canceller({})
+        logic.placeDiskCanceller = Canceller({})
 
         let isFinished = BehaviorRelay<Bool?>(value: nil)
         let disposable = viewModel.animateSettingDisks(at: coordinates, to: disk)
