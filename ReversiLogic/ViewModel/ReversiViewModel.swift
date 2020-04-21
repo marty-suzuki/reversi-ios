@@ -1,224 +1,243 @@
 import CoreGraphics
 import RxCocoa
 import RxSwift
+import Unio
 
-public final class ReversiViewModel {
+public final class ReversiViewModel: UnioStream<ReversiViewModel> {
 
-    private let messageDiskSize: CGFloat
+    public struct Input: InputType {
+        public let startGame = PublishRelay<Void>()
+        public let viewDidAppear = PublishRelay<Void>()
+        public let handleReset = PublishRelay<Void>()
+        public let handleSelectedCoordinate = PublishRelay<Coordinate>()
+        public let setPlayerWithDiskAndIndex = PublishRelay<(Disk, Int)>()
+    }
 
-    @PublishWrapper
-    public private(set) var messageDisk: Observable<Disk>
-    @PublishWrapper
-    public private(set) var messageDiskSizeConstant: Observable<CGFloat>
-    @PublishWrapper
-    public private(set) var messageText: Observable<String>
-    @PublishWrapper
-    public private(set) var showAlert: Observable<Alert>
-    @PublishWrapper
-    public private(set) var isPlayerDarkAnimating: Observable<Bool>
-    @PublishWrapper
-    public private(set) var isPlayerLightAnimating: Observable<Bool>
-    @PublishWrapper
-    public private(set) var playerDarkCount: Observable<String>
-    @PublishWrapper
-    public private(set) var playerLightCount: Observable<String>
-    @PublishWrapper
-    public private(set) var playerDarkSelectedIndex: Observable<Int>
-    @PublishWrapper
-    public private(set) var playerLightSelectedIndex: Observable<Int>
-    @PublishWrapper
-    public private(set) var resetBoard: Observable<Void>
-    @PublishWrapper
-    public private(set) var updateBoard: Observable<UpdateDisk>
+    public struct Output: OutputType {
+        public let messageDisk: Observable<Disk>
+        public let messageDiskSizeConstant: Observable<CGFloat>
+        public let messageText: Observable<String>
+        public let showAlert: Observable<Alert>
+        public let isPlayerDarkAnimating: Observable<Bool>
+        public let isPlayerLightAnimating: Observable<Bool>
+        public let playerDarkCount: Observable<String>
+        public let playerLightCount: Observable<String>
+        public let playerDarkSelectedIndex: Observable<Int>
+        public let playerLightSelectedIndex: Observable<Int>
+        public let resetBoard: Observable<Void>
+        public let updateBoard: Observable<UpdateDisk>
+    }
 
-    private let mainAsyncScheduler: SchedulerType
-    private let mainScheduler: SchedulerType
-    private let logic: GameLogicProtocol
-    private let disposeBag = DisposeBag()
+    public struct State: StateType {
+        let messageDisk = PublishRelay<Disk>()
+        let messageDiskSizeConstant = PublishRelay<CGFloat>()
+        let messageText = PublishRelay<String>()
+        let showAlert = PublishRelay<Alert>()
+        let isPlayerDarkAnimating = PublishRelay<Bool>()
+        let isPlayerLightAnimating = PublishRelay<Bool>()
+        let playerDarkCount = PublishRelay<String>()
+        let playerLightCount = PublishRelay<String>()
+        let resetBoard = PublishRelay<Void>()
+        let updateBoard = PublishRelay<UpdateDisk>()
+        let updateCount = PublishRelay<Void>()
+        let nextTurn = PublishRelay<Void>()
+    }
 
-    private let _startGame = PublishRelay<Void>()
+    public struct Extra: ExtraType {
+        let messageDiskSize: CGFloat
+        let mainAsyncScheduler: SchedulerType
+        let mainScheduler: SchedulerType
+        let logic: GameLogicProtocol
+    }
 
-    public init(messageDiskSize: CGFloat,
-                mainAsyncScheduler: SchedulerType,
-                mainScheduler: SchedulerType,
-                logicFactory: GameLogicFactoryProtocol) {
-        self.mainAsyncScheduler = mainAsyncScheduler
-        self.mainScheduler = mainScheduler
-        self.messageDiskSize = messageDiskSize
-        self.logic = logicFactory.make()
+    public convenience init(messageDiskSize: CGFloat,
+                            mainAsyncScheduler: SchedulerType,
+                            mainScheduler: SchedulerType,
+                            logicFactory: GameLogicFactoryProtocol) {
+        self.init(input: Input(),
+                  state: State(),
+                  extra: Extra(messageDiskSize: messageDiskSize,
+                               mainAsyncScheduler: mainAsyncScheduler,
+                               mainScheduler: mainScheduler,
+                               logic: logicFactory.make()))
+    }
 
-        logic.playerDark
-            .distinctUntilChanged()
-            .map { $0.rawValue }
-            .bind(to: _playerDarkSelectedIndex)
-            .disposed(by: disposeBag)
-
-        logic.playerLight
-            .distinctUntilChanged()
-            .map { $0.rawValue }
-            .bind(to: _playerLightSelectedIndex)
-            .disposed(by: disposeBag)
+    public static func bind(from dependency: Dependency<Input, State, Extra>, disposeBag: DisposeBag) -> Output {
+        let input = dependency.inputObservables
+        let extra = dependency.extra
+        let state = dependency.state
+        let logic = extra.logic
+        let messageDiskSize = extra.messageDiskSize
 
         logic.status
-            .subscribe(onNext: { [weak self] status in
-                guard let me = self else {
-                    return
-                }
+            .subscribe(onNext: { status in
                 switch status {
                 case let .turn(side):
-                    me._messageDiskSizeConstant.accept(messageDiskSize)
-                    me._messageDisk.accept(side)
-                    me._messageText.accept("'s turn")
+                    state.messageDiskSizeConstant.accept(messageDiskSize)
+                    state.messageDisk.accept(side)
+                    state.messageText.accept("'s turn")
                 case .gameOver:
-                    if let winner = me.logic.sideWithMoreDisks.value {
-                        me._messageDiskSizeConstant.accept(messageDiskSize)
-                        me._messageDisk.accept(winner)
-                        me._messageText.accept(" won")
+                    if let winner = logic.sideWithMoreDisks.value {
+                        state.messageDiskSizeConstant.accept(messageDiskSize)
+                        state.messageDisk.accept(winner)
+                        state.messageText.accept(" won")
                     } else {
-                        me._messageDiskSizeConstant.accept(0)
-                        me._messageText.accept("Tied")
+                        state.messageDiskSizeConstant.accept(0)
+                        state.messageText.accept("Tied")
                     }
                 }
             })
             .disposed(by: disposeBag)
 
         logic.gameLoaded
-            .subscribe(onNext: { [weak self] in
-                self?.logic.cells.value.forEach { rows in
+            .subscribe(onNext: {
+                logic.cells.value.forEach { rows in
                     rows.forEach { cell in
                         let update = UpdateDisk(disk: cell.disk, coordinate: cell.coordinate, animated: false, completion: nil)
-                        self?._updateBoard.accept(update)
+                        state.updateBoard.accept(update)
                     }
                 }
-                self?.updateCount()
+                state.updateCount.accept(())
             })
             .disposed(by: disposeBag)
 
         logic.newGameBegan
-            .subscribe(onNext: { [weak self] in
-                self?._resetBoard.accept()
-                self?.updateCount()
+            .subscribe(onNext: {
+                state.resetBoard.accept(())
+                state.updateCount.accept(())
             })
             .disposed(by: disposeBag)
 
         logic.handleDiskWithCoordinate
-            .flatMap { [weak self] disk, coordinate -> Observable<Bool> in
-                guard let me = self else {
-                    return .empty()
-                }
-                return me.placeDisk(disk, at: coordinate, animated: true)
+            .flatMap { disk, coordinate -> Observable<Bool> in
+                return placeDisk(disk, at: coordinate, animated: true, logic: logic, state: state, extra: extra)
                     .asObservable()
                     .catchError { _ in .empty() }
             }
-            .subscribe(onNext: { [weak self] _ in
-                self?.nextTurn()
-                try? self?.logic.save()
-                self?.updateCount()
+            .subscribe(onNext: { _ in
+                state.nextTurn.accept(())
+                try? logic.save()
+                state.updateCount.accept(())
             })
             .disposed(by: disposeBag)
 
         Observable.merge(logic.willTurnDiskOfComputer.map { ($0, true) },
                          logic.didTurnDiskOfComputer.map { ($0, false) })
-            .subscribe(onNext: { [weak self] disk, isAnimating in
+            .subscribe(onNext: { disk, isAnimating in
                 switch disk {
-                case .dark:
-                    self?._isPlayerDarkAnimating.accept(isAnimating)
-                case .light:
-                    self?._isPlayerLightAnimating.accept(isAnimating)
+                case .dark: state.isPlayerDarkAnimating.accept(isAnimating)
+                case .light: state.isPlayerLightAnimating.accept(isAnimating)
                 }
             })
             .disposed(by: disposeBag)
-    }
 
-    private lazy var callOnceViewDidAppear: Void = {
-        logic.waitForPlayer()
-    }()
+        input.handleReset
+            .map { _ -> Alert in
+                Alert.reset {
+                    logic.placeDiskCanceller?.cancel()
+                    logic.placeDiskCanceller = nil
 
-    public func viewDidAppear() {
-        _ = callOnceViewDidAppear
-    }
+                    for side in Disk.allCases {
+                        logic.playerCancellers[side]?.cancel()
+                        logic.playerCancellers.removeValue(forKey: side)
+                    }
 
-    public func startGame() {
-        logic.startGame()
-    }
-
-    public func setPlayer(for disk: Disk, with index: Int) {
-        logic.setPlayer(for: disk, with: index)
-    }
-
-    public func handle(selectedCoordinate: Coordinate) {
-        logic.handle(selectedCoordinate: selectedCoordinate)
-    }
-
-    public func handleReset() {
-        let alert = Alert.reset { [weak self] in
-            guard let me = self else { return }
-
-            me.logic.placeDiskCanceller?.cancel()
-            me.logic.placeDiskCanceller = nil
-
-            for side in Disk.allCases {
-                me.logic.playerCancellers[side]?.cancel()
-                me.logic.playerCancellers.removeValue(forKey: side)
+                    logic.newGame()
+                    logic.waitForPlayer()
+                }
             }
+            .bind(to: state.showAlert)
+            .disposed(by: disposeBag)
 
-            me.logic.newGame()
-            me.logic.waitForPlayer()
-        }
-        _showAlert.accept(alert)
+        input.handleSelectedCoordinate
+            .subscribe(onNext: { logic.handle(selectedCoordinate: $0) })
+            .disposed(by: disposeBag)
+
+        input.setPlayerWithDiskAndIndex
+            .subscribe(onNext: { logic.setPlayer(for: $0, with: $1) })
+            .disposed(by: disposeBag)
+
+        input.startGame
+            .subscribe(onNext: { logic.startGame() })
+            .disposed(by: disposeBag)
+
+        input.viewDidAppear.take(1)
+            .subscribe(onNext: { logic.waitForPlayer() })
+            .disposed(by: disposeBag)
+
+        state.updateCount
+            .subscribe(onNext: {
+                state.playerDarkCount.accept("\(logic.countOfDark.value)")
+                state.playerLightCount.accept("\(logic.countOfLight.value)")
+            })
+            .disposed(by: disposeBag)
+
+        state.nextTurn
+            .subscribe(onNext: {
+                var turn: Disk
+                switch logic.status.value {
+                case let .turn(disk):
+                    turn = disk
+                case .gameOver:
+                    return
+                }
+
+                turn.flip()
+
+                if logic.validMoves(for: turn).isEmpty {
+                    if logic.validMoves(for: turn.flipped).isEmpty {
+                        logic.setStatus(.gameOver)
+                    } else {
+                        logic.setStatus(.turn(turn))
+
+                        let alert = Alert.pass {
+                            state.nextTurn.accept(())
+                        }
+                        state.showAlert.accept(alert)
+                    }
+                } else {
+                    logic.setStatus(.turn(turn))
+                    logic.waitForPlayer()
+                }
+            })
+            .disposed(by: disposeBag)
+
+        return Output(messageDisk: state.messageDisk.asObservable(),
+                      messageDiskSizeConstant: state.messageDiskSizeConstant.asObservable(),
+                      messageText: state.messageText.asObservable(),
+                      showAlert: state.showAlert.asObservable(),
+                      isPlayerDarkAnimating: state.isPlayerDarkAnimating.asObservable(),
+                      isPlayerLightAnimating: state.isPlayerLightAnimating.asObservable(),
+                      playerDarkCount: state.playerDarkCount.asObservable(),
+                      playerLightCount: state.playerLightCount.asObservable(),
+                      playerDarkSelectedIndex: logic.playerDark.distinctUntilChanged().map { $0.rawValue },
+                      playerLightSelectedIndex: logic.playerLight.distinctUntilChanged().map { $0.rawValue },
+                      resetBoard: state.resetBoard.asObservable(),
+                      updateBoard: state.updateBoard.asObservable())
     }
 }
 
 extension ReversiViewModel {
 
-    func setDisk(_ disk: Disk?, at coordinate: Coordinate, animated: Bool) -> Single<Bool> {
-        Single<Bool>.create { [weak self] observer in
-            self?.logic.setDisk(disk, at: coordinate)
+    static func setDisk(_ disk: Disk?,
+                        at coordinate: Coordinate,
+                        animated: Bool,
+                        logic: GameLogicProtocol,
+                        state: State) -> Single<Bool> {
+        Single<Bool>.create { observer in
+            logic.setDisk(disk, at: coordinate)
             let update = UpdateDisk(disk: disk, coordinate: coordinate, animated: animated) {
                 observer(.success($0))
             }
-            self?._updateBoard.accept(update)
+            state.updateBoard.accept(update)
             return Disposables.create()
         }
     }
 
-    func updateCount() {
-        _playerDarkCount.accept("\(logic.countOfDark.value)")
-        _playerLightCount.accept("\(logic.countOfLight.value)")
-    }
-
-    func nextTurn() {
-        var turn: Disk
-        switch logic.status.value {
-        case let .turn(disk):
-            turn = disk
-        case .gameOver:
-            return
-        }
-
-        turn.flip()
-
-        if logic.validMoves(for: turn).isEmpty {
-            if logic.validMoves(for: turn.flipped).isEmpty {
-                self.logic.setStatus(.gameOver)
-            } else {
-                self.logic.setStatus(.turn(turn))
-
-                let alert = Alert.pass { [weak self] in
-                    self?.nextTurn()
-                }
-                _showAlert.accept(alert)
-            }
-        } else {
-            logic.setStatus(.turn(turn))
-            logic.waitForPlayer()
-        }
-    }
-}
-
-extension ReversiViewModel {
-
-    func animateSettingDisks(at coordinates: [Coordinate], to disk: Disk) -> Single<Bool> {
+    static func animateSettingDisks(at coordinates: [Coordinate],
+                                    to disk: Disk,
+                                    logic:  GameLogicProtocol,
+                                    state: State) -> Single<Bool> {
         guard let coordinate = coordinates.first else {
             return .just(true)
         }
@@ -227,18 +246,15 @@ extension ReversiViewModel {
             return .error(Error.animationCancellerReleased)
         }
 
-        return setDisk(disk, at: coordinate, animated: true)
-            .flatMap { [weak self] finished in
-                guard let me = self else {
-                    return .error(Error.selfReleased)
-                }
+        return setDisk(disk, at: coordinate, animated: true, logic: logic, state: state)
+            .flatMap { finished in
                 if placeDiskCanceller.isCancelled {
                     return .error(Error.animationCancellerCancelled)
                 }
                 if finished {
-                    return me.animateSettingDisks(at: Array(coordinates.dropFirst()), to: disk)
+                    return animateSettingDisks(at: Array(coordinates.dropFirst()), to: disk, logic: logic, state: state)
                 } else {
-                    let observables = coordinates.map { me.setDisk(disk, at: $0, animated: false).asObservable() }
+                    let observables = coordinates.map { setDisk(disk, at: $0, animated: false, logic: logic, state: state).asObservable() }
                     return Observable.zip(observables)
                         .map { _ in false }
                         .asSingle()
@@ -251,23 +267,25 @@ extension ReversiViewModel {
     ///     whether or not the animations actually finished before the completion handler was called.
     ///     If `animated` is `false`,  this closure is performed at the beginning of the next run loop cycle. This parameter may be `nil`.
     /// - Throws: `DiskPlacementError` if the `disk` cannot be placed at (`x`, `y`).
-    func placeDisk(_ disk: Disk, at coordinate: Coordinate, animated isAnimated: Bool) -> Single<Bool> {
+    static func placeDisk(_ disk: Disk,
+                          at coordinate: Coordinate,
+                          animated isAnimated: Bool,
+                          logic:  GameLogicProtocol,
+                          state: State,
+                          extra: Extra) -> Single<Bool> {
         let diskCoordinates = logic.flippedDiskCoordinates(by: disk, at: coordinate)
         if diskCoordinates.isEmpty {
             return .error(Error.diskPlacement(disk: disk, coordinate: coordinate))
         }
 
         if isAnimated {
-            let cleanUp: () -> Void = { [weak self] in
-                self?.logic.placeDiskCanceller = nil
+            let cleanUp: () -> Void = {
+                logic.placeDiskCanceller = nil
             }
             logic.placeDiskCanceller = Canceller(cleanUp)
-            return animateSettingDisks(at: [coordinate] + diskCoordinates, to: disk)
-                .flatMap { [weak self] finished in
-                    guard let me = self else {
-                        return .error(Error.selfReleased)
-                    }
-                    guard  let canceller = me.logic.placeDiskCanceller else {
+            return animateSettingDisks(at: [coordinate] + diskCoordinates, to: disk, logic: logic, state: state)
+                .flatMap { finished in
+                    guard  let canceller = logic.placeDiskCanceller else {
                         return .error(Error.animationCancellerReleased)
                     }
 
@@ -282,9 +300,11 @@ extension ReversiViewModel {
                 })
         } else {
             let coordinates = [coordinate] + diskCoordinates
-            let observables = coordinates.map { setDisk(disk, at: $0, animated: false).asObservable() }
+            let observables = coordinates.map {
+                setDisk(disk, at: $0, animated: false, logic: logic, state: state).asObservable()
+            }
             return Observable.just(())
-                .observeOn(mainAsyncScheduler)
+                .observeOn(extra.mainAsyncScheduler)
                 .flatMap { Observable.zip(observables) }
                 .map { _ in true }
                 .asSingle()
@@ -293,7 +313,6 @@ extension ReversiViewModel {
 
     enum Error: Swift.Error, Equatable {
         case diskPlacement(disk: Disk, coordinate: Coordinate)
-        case selfReleased
         case animationCancellerReleased
         case animationCancellerCancelled
     }

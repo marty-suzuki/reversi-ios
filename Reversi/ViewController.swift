@@ -34,102 +34,102 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        defer { viewModel.startGame() }
+        do {
+            let output = viewModel.output
+            let scheduler = ConcurrentMainScheduler.instance
 
-        let scheduler = ConcurrentMainScheduler.instance
+            output.showAlert
+                .bind(to: Binder(self, scheduler: scheduler) { me, alert in
+                    let alertController = UIAlertController.make(alert: alert)
+                    me.present(alertController, animated: true)
+                })
+                .disposed(by: disposeBag)
 
-        viewModel.showAlert
-            .bind(to: Binder(self, scheduler: scheduler) { me, alert in
-                let alertController = UIAlertController.make(alert: alert)
-                me.present(alertController, animated: true)
-            })
-            .disposed(by: disposeBag)
+            output.messageDisk
+                .bind(to: Binder(self, scheduler: scheduler) { me, disk in
+                    me.messageDiskView.disk = disk
+                })
+                .disposed(by: disposeBag)
 
-        viewModel.messageDisk
-            .bind(to: Binder(self, scheduler: scheduler) { me, disk in
-                me.messageDiskView.disk = disk
-            })
-            .disposed(by: disposeBag)
+            output.messageDiskSizeConstant
+                .bind(to: Binder(self, scheduler: scheduler) { me, constant in
+                    me.messageDiskSizeConstraint.constant = constant
+                })
+                .disposed(by: disposeBag)
 
-        viewModel.messageDiskSizeConstant
-            .bind(to: Binder(self, scheduler: scheduler) { me, constant in
-                me.messageDiskSizeConstraint.constant = constant
-            })
-            .disposed(by: disposeBag)
+            output.resetBoard
+                .bind(to: Binder(self, scheduler: scheduler) { me, _ in
+                    me.boardView.reset()
+                })
+                .disposed(by: disposeBag)
 
-        viewModel.resetBoard
-            .bind(to: Binder(self, scheduler: scheduler) { me, _ in
-                me.boardView.reset()
-            })
-            .disposed(by: disposeBag)
+            output.updateBoard
+                .bind(to: Binder(self, scheduler: scheduler) { me, update in
+                    me.boardView.setDisk(update.disk,
+                                         atX: update.coordinate.x,
+                                         y: update.coordinate.y,
+                                         animated: update.animated,
+                                         completion: update.completion)
+                })
+                .disposed(by: disposeBag)
 
-        viewModel.updateBoard
-            .bind(to: Binder(self, scheduler: scheduler) { me, update in
-                me.boardView.setDisk(update.disk,
-                                     atX: update.coordinate.x,
-                                     y: update.coordinate.y,
-                                     animated: update.animated,
-                                     completion: update.completion)
-            })
-            .disposed(by: disposeBag)
+            output.messageText
+                .bind(to: messageLabel.rx.text)
+                .disposed(by: disposeBag)
 
-        viewModel.messageText
-            .bind(to: messageLabel.rx.text)
-            .disposed(by: disposeBag)
+            output.isPlayerDarkAnimating
+                .bind(to: playerDarkActivityIndicator.rx.isAnimating)
+                .disposed(by: disposeBag)
 
-        viewModel.isPlayerDarkAnimating
-            .bind(to: playerDarkActivityIndicator.rx.isAnimating)
-            .disposed(by: disposeBag)
+            output.isPlayerLightAnimating
+                .bind(to: playerLightActivityIndicator.rx.isAnimating)
+                .disposed(by: disposeBag)
 
-        viewModel.isPlayerLightAnimating
-            .bind(to: playerLightActivityIndicator.rx.isAnimating)
-            .disposed(by: disposeBag)
+            output.playerDarkCount
+                .bind(to: playerDarkCountLabel.rx.text)
+                .disposed(by: disposeBag)
 
-        viewModel.playerDarkCount
-            .bind(to: playerDarkCountLabel.rx.text)
-            .disposed(by: disposeBag)
+            output.playerLightCount
+                .bind(to: playerLightCountLabel.rx.text)
+                .disposed(by: disposeBag)
 
-        viewModel.playerLightCount
-            .bind(to: playerLightCountLabel.rx.text)
-            .disposed(by: disposeBag)
+            output.playerDarkSelectedIndex
+                .bind(to: playerDarkControl.rx.selectedSegmentIndex)
+                .disposed(by: disposeBag)
 
-        viewModel.playerDarkSelectedIndex
-            .bind(to: playerDarkControl.rx.selectedSegmentIndex)
-            .disposed(by: disposeBag)
+            output.playerLightSelectedIndex
+                .bind(to: playerLightControl.rx.selectedSegmentIndex)
+                .disposed(by: disposeBag)
+        }
 
-        viewModel.playerLightSelectedIndex
-            .bind(to: playerLightControl.rx.selectedSegmentIndex)
-            .disposed(by: disposeBag)
+        do {
+            let input = viewModel.input
+            defer { input.startGame(()) }
 
-        playerDarkControl.rx.selectedSegmentIndex
-            .changed
-            .bind(to: Binder(self, scheduler: scheduler) { me, index in
-                me.viewModel.setPlayer(for: .dark, with: index)
-            })
-            .disposed(by: disposeBag)
+            playerDarkControl.rx.selectedSegmentIndex.changed
+                .map { (.dark, $0) }
+                .bind(to: input.setPlayerWithDiskAndIndex)
+                .disposed(by: disposeBag)
 
-        playerLightControl.rx.selectedSegmentIndex
-            .changed
-            .bind(to: Binder(self, scheduler: scheduler) { me, index in
-                me.viewModel.setPlayer(for: .light, with: index)
-            })
-            .disposed(by: disposeBag)
+            playerLightControl.rx.selectedSegmentIndex.changed
+                .map { (.light, $0) }
+                .bind(to: input.setPlayerWithDiskAndIndex)
+                .disposed(by: disposeBag)
 
-        resetButton.rx.tap
-            .bind(to: Binder(self, scheduler: scheduler) { me, _ in
-                me.viewModel.handleReset()
-            })
-            .disposed(by: disposeBag)
+            resetButton.rx.tap
+                .bind(to: input.handleReset)
+                .disposed(by: disposeBag)
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        viewModel.viewDidAppear()
+        viewModel.input.viewDidAppear(())
     }
 }
 
 extension ViewController: BoardViewDelegate {
     func boardView(_ boardView: BoardView, didSelectCellAtX x: Int, y: Int) {
-        viewModel.handle(selectedCoordinate: .init(x: x, y: y))
+        viewModel.input.handleSelectedCoordinate(.init(x: x, y: y))
     }
 }
