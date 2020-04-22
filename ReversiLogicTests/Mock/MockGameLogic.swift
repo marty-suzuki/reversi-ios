@@ -37,21 +37,6 @@ final class MockGameLogic: GameLogicProtocol {
     @CountableProperty
     var placeDiskCanceller: Canceller?
 
-    @MockPublishWrapper
-    private(set) var playTurnOfComputer: Observable<Void>
-
-    @MockBehaviorWrapeer(value: 0)
-    private(set) var countOfDark: ValueObservable<Int>
-
-    @MockBehaviorWrapeer(value: 0)
-    private(set) var countOfLight: ValueObservable<Int>
-
-    @MockBehaviorWrapeer(value: nil)
-    private(set) var playerOfCurrentTurn: ValueObservable<GameData.Player?>
-
-    @MockBehaviorWrapeer(value: nil)
-    private(set) var sideWithMoreDisks: ValueObservable<Disk?>
-
     @MockResponse<FlippedDiskCoordinates, [Coordinate]>
     var _flippedDiskCoordinates = []
 

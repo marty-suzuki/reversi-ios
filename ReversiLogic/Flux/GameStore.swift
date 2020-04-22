@@ -6,6 +6,10 @@ public protocol GameStoreProtocol: AnyObject {
     var status: ValueObservable<GameData.Status> { get }
     var playerDark: ValueObservable<GameData.Player> { get }
     var playerLight: ValueObservable<GameData.Player> { get }
+    var countOfDark: ValueObservable<Int> { get }
+    var countOfLight: ValueObservable<Int> { get }
+    var playerOfCurrentTurn: ValueObservable<GameData.Player?> { get }
+    var sideWithMoreDisks: ValueObservable<Disk?> { get }
     var faildToLoad: Observable<Void> { get }
     var loaded: Observable<Void> { get }
     var reset: Observable<Void> { get }
@@ -25,6 +29,18 @@ public final class GameStore: GameStoreProtocol {
 
     @BehaviorWrapper(value: GameData.initial.playerLight)
     public private(set) var playerLight: ValueObservable<GameData.Player>
+
+    @BehaviorWrapper(value: 0)
+    public private(set) var countOfDark: ValueObservable<Int>
+
+    @BehaviorWrapper(value: 0)
+    public private(set) var countOfLight: ValueObservable<Int>
+
+    @BehaviorWrapper(value: nil)
+    public private(set) var playerOfCurrentTurn: ValueObservable<GameData.Player?>
+
+    @BehaviorWrapper(value: nil)
+    public private(set) var sideWithMoreDisks: ValueObservable<Disk?>
 
     public let faildToLoad: Observable<Void>
     public let loaded: Observable<Void>
@@ -67,6 +83,50 @@ public final class GameStore: GameStoreProtocol {
                 return .just(cells)
             }
             .bind(to: _cells)
+            .disposed(by: disposeBag)
+
+        let countOf: (Disk, [[GameData.Cell]]) -> Int = { disk, cells in
+            cells.reduce(0) { result, rows in
+                rows.reduce(result) { result, cell in
+                    if cell.disk == disk {
+                        return result + 1
+                    } else {
+                        return result
+                    }
+                }
+            }
+        }
+
+        cells
+            .map { countOf(.dark, $0) }
+            .bind(to: _countOfDark)
+            .disposed(by: disposeBag)
+
+        cells
+            .map { countOf(.light, $0) }
+            .bind(to: _countOfLight)
+            .disposed(by: disposeBag)
+
+        Observable.combineLatest(status, playerDark, playerLight)
+            .map { status, dark, light -> GameData.Player? in
+                switch status {
+                case .gameOver:  return nil
+                case .turn(.dark): return dark
+                case .turn(.light): return light
+                }
+            }
+            .bind(to: _playerOfCurrentTurn)
+            .disposed(by: disposeBag)
+
+        Observable.combineLatest(countOfDark, countOfLight)
+            .map { darkCount, lightCount -> Disk? in
+                if darkCount == lightCount {
+                    return nil
+                } else {
+                    return darkCount > lightCount ? .dark : .light
+                }
+            }
+            .bind(to: _sideWithMoreDisks)
             .disposed(by: disposeBag)
     }
 

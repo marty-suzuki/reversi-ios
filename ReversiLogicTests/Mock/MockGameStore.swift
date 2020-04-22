@@ -5,28 +5,40 @@ import RxTest
 final class MockGameStore: GameStoreProtocol {
 
     @MockBehaviorWrapeer(value: [])
-    var cells: ValueObservable<[[GameData.Cell]]>
+    private(set) var cells: ValueObservable<[[GameData.Cell]]>
 
     @MockBehaviorWrapeer(value: .turn(.dark))
-    var status: ValueObservable<GameData.Status>
+    private(set) var status: ValueObservable<GameData.Status>
 
     @MockBehaviorWrapeer(value: .manual)
-    var playerDark: ValueObservable<GameData.Player>
+    private(set) var playerDark: ValueObservable<GameData.Player>
 
     @MockBehaviorWrapeer(value: .manual)
-    var playerLight: ValueObservable<GameData.Player>
+    private(set) var playerLight: ValueObservable<GameData.Player>
+
+    @MockBehaviorWrapeer(value: 0)
+    private(set) var countOfDark: ValueObservable<Int>
+
+    @MockBehaviorWrapeer(value: 0)
+    private(set) var countOfLight: ValueObservable<Int>
+
+    @MockBehaviorWrapeer(value: nil)
+    private(set) var playerOfCurrentTurn: ValueObservable<GameData.Player?>
+
+    @MockBehaviorWrapeer(value: nil)
+    private(set) var sideWithMoreDisks: ValueObservable<Disk?>
 
     @MockPublishWrapper
-    var faildToLoad: Observable<Void>
+    private(set) var faildToLoad: Observable<Void>
 
     @MockPublishWrapper
-    var loaded: Observable<Void>
+    private(set) var loaded: Observable<Void>
 
     @MockPublishWrapper
-    var reset: Observable<Void>
+    private(set) var reset: Observable<Void>
 
     @MockResponse<Coordinate, Disk?>
-    var diskAtCoordinate: Disk? = nil
+    private(set) var diskAtCoordinate: Disk? = nil
 
     func disk(at coordinate: Coordinate) -> Disk? {
         cells.value[safe: coordinate.y]?[safe: coordinate.x]?.disk

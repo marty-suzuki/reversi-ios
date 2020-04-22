@@ -13,105 +13,6 @@ final class GameLogicTests: XCTestCase {
     }
 }
 
-// - MARK: count
-
-extension GameLogicTests {
-
-    func test_countOfDark() {
-        let disk = Disk.dark
-        let y = 2
-        let x = 3
-
-        dependency.store.$cells.accept((0..<y).map { y in
-            (0..<x).map { x in
-                GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
-            }
-        })
-
-        let count = dependency.testTarget.countOfDark.value
-        XCTAssertEqual(count, x * y)
-    }
-
-    func test_countOfLight() {
-        let disk = Disk.light
-        let y = 2
-        let x = 3
-
-        dependency.store.$cells.accept((0..<y).map { y in
-            (0..<x).map { x in
-                GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
-            }
-        })
-
-        let count = dependency.testTarget.countOfLight.value
-        XCTAssertEqual(count, x * y)
-    }
-}
-
-// - MARK: playerOfCurrentTurn
-
-extension GameLogicTests {
-
-    func test_playerOfCurrentTurn() {
-        let logic = dependency.testTarget
-        let store = dependency.store
-
-        store.$status.accept(.gameOver)
-        XCTAssertNil(logic.playerOfCurrentTurn.value)
-
-        store.$status.accept(.turn(.dark))
-        store.$playerDark.accept(.computer)
-        XCTAssertEqual(logic.playerOfCurrentTurn.value, .computer)
-
-        store.$status.accept(.turn(.light))
-        store.$playerLight.accept(.computer)
-        XCTAssertEqual(logic.playerOfCurrentTurn.value, .computer)
-    }
-}
-
-// - MARK: sideWithMoreDisks
-
-extension GameLogicTests {
-
-    func test_sideWithMoreDisks_darkの方が多い() {
-        dependency.store.$cells.accept([
-            [
-                GameData.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
-                GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .dark),
-                GameData.Cell(coordinate: .init(x: 2, y: 0), disk: .light)
-            ]
-        ])
-
-        let result = dependency.testTarget.sideWithMoreDisks.value
-        XCTAssertEqual(result, .dark)
-    }
-
-    func test_sideWithMoreDisks_lightの方が多い() {
-        dependency.store.$cells.accept([
-            [
-                GameData.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
-                GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .light),
-                GameData.Cell(coordinate: .init(x: 2, y: 0), disk: .light)
-            ]
-        ])
-
-        let result = dependency.testTarget.sideWithMoreDisks.value
-        XCTAssertEqual(result, .light)
-    }
-
-    func test_sideWithMoreDisks_darkとlightが同じ数() {
-        dependency.store.$cells.accept([
-            [
-                GameData.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
-                GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .light)
-            ]
-        ])
-
-        let result = dependency.testTarget.sideWithMoreDisks.value
-        XCTAssertNil(result)
-    }
-}
-
 // - MARK: flippedDiskCoordinatesByPlacingDisk
 
 extension GameLogicTests {
@@ -396,7 +297,8 @@ extension GameLogicTests {
 
         let disk = Disk.dark
         store.$status.accept(.turn(disk))
-        store.$playerDark.accept(.manual)
+        store.$playerOfCurrentTurn.accept(.manual)
+        logic.placeDiskCanceller = nil
 
         let diskWithCoordinate = BehaviorRelay<(Disk, Coordinate)?>(value: nil)
         let disposable = logic.handleDiskWithCoordinate

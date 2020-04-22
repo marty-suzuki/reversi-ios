@@ -7,10 +7,6 @@ public protocol GameLogicProtocol: AnyObject {
     var placeDiskCanceller: Canceller? { get set }
 
     var playerCancellers: [Disk: Canceller] { get set }
-    var countOfDark: ValueObservable<Int> { get }
-    var countOfLight: ValueObservable<Int> { get }
-    var playerOfCurrentTurn:  ValueObservable<GameData.Player?> { get }
-    var sideWithMoreDisks: ValueObservable<Disk?> { get }
     var gameLoaded: Observable<Void> { get }
     var newGameBegan: Observable<Void> { get }
     var handleDiskWithCoordinate: Observable<(Disk, Coordinate)> { get }
@@ -45,18 +41,6 @@ final class GameLogic: GameLogicProtocol {
 
     var placeDiskCanceller: Canceller?
 
-    @BehaviorWrapper(value: 0)
-    private(set) var countOfDark: ValueObservable<Int>
-
-    @BehaviorWrapper(value: 0)
-    private(set) var countOfLight: ValueObservable<Int>
-
-    @BehaviorWrapper(value: nil)
-    private(set) var playerOfCurrentTurn: ValueObservable<GameData.Player?>
-
-    @BehaviorWrapper(value: nil)
-    private(set) var sideWithMoreDisks: ValueObservable<Disk?>
-
     @PublishWrapper
     private(set) var gameLoaded: Observable<Void>
 
@@ -90,50 +74,6 @@ final class GameLogic: GameLogicProtocol {
         self.store = store
         self.mainScheduler = mainScheduler
         self.actionCreator = actionCreator
-
-        let countOf: (Disk, [[GameData.Cell]]) -> Int = { disk, cells in
-            cells.reduce(0) { result, rows in
-                rows.reduce(result) { result, cell in
-                    if cell.disk == disk {
-                        return result + 1
-                    } else {
-                        return result
-                    }
-                }
-            }
-        }
-
-        store.cells
-            .map { countOf(.dark, $0) }
-            .bind(to: _countOfDark)
-            .disposed(by: disposeBag)
-
-        store.cells
-            .map { countOf(.light, $0) }
-            .bind(to: _countOfLight)
-            .disposed(by: disposeBag)
-
-        Observable.combineLatest(store.status, store.playerDark, store.playerLight)
-            .map { status, dark, light -> GameData.Player? in
-                switch status {
-                case .gameOver:  return nil
-                case .turn(.dark): return dark
-                case .turn(.light): return light
-                }
-            }
-            .bind(to: _playerOfCurrentTurn)
-            .disposed(by: disposeBag)
-
-        Observable.combineLatest(countOfDark, countOfLight)
-            .map { darkCount, lightCount -> Disk? in
-                if darkCount == lightCount {
-                    return nil
-                } else {
-                    return darkCount > lightCount ? .dark : .light
-                }
-            }
-            .bind(to: _sideWithMoreDisks)
-            .disposed(by: disposeBag)
 
         store.loaded
             .bind(to: _gameLoaded)
@@ -300,7 +240,7 @@ final class GameLogic: GameLogicProtocol {
         guard
             !isDiskPlacing,
             case let .turn(turn) = store.status.value,
-            case .manual = playerOfCurrentTurn.value
+            case .manual = store.playerOfCurrentTurn.value
         else {
             return
         }

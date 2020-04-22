@@ -57,9 +57,8 @@ final class ReversiViewModelTests: XCTestCase {
         self.dependency = Dependency(cells: [],
                                      messageDiskSize: expectedSize)
 
-        let logic = dependency.gameLogic
-        logic.$sideWithMoreDisks.accept(expectedDisk)
         let store = dependency.store
+        store.$sideWithMoreDisks.accept(expectedDisk)
         store.$status.accept(.gameOver)
 
         let setMessageDiskSizeConstant = dependency.$setMessageDiskSizeConstant
@@ -87,9 +86,8 @@ final class ReversiViewModelTests: XCTestCase {
         self.dependency = Dependency(cells: [[cell1, cell2]],
                                      messageDiskSize: 0)
 
-        let logic = dependency.gameLogic
-        logic.$sideWithMoreDisks.accept(nil)
         let store = dependency.store
+        store.$sideWithMoreDisks.accept(nil)
         store.$status.accept(.gameOver)
 
         let setMessageDiskSizeConstant = dependency.$setMessageDiskSizeConstant
@@ -107,9 +105,9 @@ final class ReversiViewModelTests: XCTestCase {
     func test_updateCount() {
         let darkCount = Int(arc4random() % 100)
         let lightCount = Int(arc4random() % 100)
-        let logic = dependency.gameLogic
-        logic.$countOfDark.accept(darkCount)
-        logic.$countOfLight.accept(lightCount)
+        let store = dependency.store
+        store.$countOfDark.accept(darkCount)
+        store.$countOfLight.accept(lightCount)
 
         dependency.state.updateCount.accept(())
 
