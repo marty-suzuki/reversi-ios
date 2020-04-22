@@ -22,17 +22,6 @@ final class GameStoreTests: XCTestCase {
         XCTAssertEqual(cells, [[GameData.Cell(coordinate: coordinate, disk: disk)]])
     }
 
-    func test_diskAtCooordinate() {
-        let disk = Disk.light
-        let coordinate = Coordinate(x: 0, y: 0)
-        dependency.dispatcher.setCells.accept([[
-            GameData.Cell(coordinate: coordinate, disk: disk)
-        ]])
-
-        let response = dependency.testTarget.disk(at: coordinate)
-        XCTAssertEqual(response, disk)
-    }
-
     func test_countOfDark() {
         dependency.dispatcher.setCells.accept([[
             GameData.Cell(coordinate: Coordinate(x: 0, y: 0), disk: .dark)

@@ -16,7 +16,6 @@ public protocol GameStoreProtocol: AnyObject {
     var faildToLoad: Observable<Void> { get }
     var loaded: Observable<Void> { get }
     var reset: Observable<Void> { get }
-    func disk(at coordinate: Coordinate) -> Disk?
 }
 
 public final class GameStore: GameStoreProtocol {
@@ -163,15 +162,5 @@ public final class GameStore: GameStoreProtocol {
             .map { $0 != nil }
             .bind(to: _isDiskPlacing)
             .disposed(by: disposeBag)
-    }
-
-    public func disk(at coordinate: Coordinate) -> Disk? {
-        guard
-            let cell = cells.value[safe: coordinate.y]?[safe: coordinate.x],
-            cell.coordinate == coordinate
-        else {
-            return nil
-        }
-        return cell.disk
     }
 }

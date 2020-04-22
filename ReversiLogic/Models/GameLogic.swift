@@ -145,7 +145,7 @@ final class GameLogic: GameLogicProtocol {
             (x: -1, y:  1),
         ]
 
-        guard store.disk(at: coordinate) == nil else {
+        guard store.cells.value[coordinate] == nil else {
             return []
         }
 
@@ -161,7 +161,7 @@ final class GameLogic: GameLogicProtocol {
                 y += direction.y
 
                 let coordinate = Coordinate(x: x, y: y)
-                switch (disk, store.disk(at: coordinate)) { // Uses tuples to make patterns exhaustive
+                switch (disk, store.cells.value[coordinate]) { // Uses tuples to make patterns exhaustive
                 case (.dark, .dark?), (.light, .light?):
                     diskCoordinates.append(contentsOf: diskCoordinatesInLine)
                     break flipping
