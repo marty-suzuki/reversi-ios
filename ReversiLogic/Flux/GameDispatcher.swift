@@ -9,4 +9,6 @@ public final class GameDispatcher {
     let setPlayerOfLight = PublishRelay<GameData.Player>()
     let setStatus = PublishRelay<GameData.Status>()
     let setDiskAtCoordinate = PublishRelay<(Disk?, Coordinate)>()
+    let setPlayerCancellerForDisk = PublishRelay<(Canceller?, Disk)>()
+    let setPlaceDiskCanceller = PublishRelay<Canceller?>()
 }

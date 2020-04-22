@@ -104,6 +104,29 @@ final class GameStoreTests: XCTestCase {
         let result = dependency.testTarget.sideWithMoreDisks.value
         XCTAssertNil(result)
     }
+
+    func test_isDiskPlacing() {
+        let dispatcher = dependency.dispatcher
+        let store = dependency.testTarget
+
+        dispatcher.setPlaceDiskCanceller.accept(Canceller {})
+        XCTAssertEqual(store.isDiskPlacing.value, true)
+
+        dispatcher.setPlaceDiskCanceller.accept(nil)
+        XCTAssertEqual(store.isDiskPlacing.value, false)
+    }
+
+    func test_playerCancellers() {
+        let dispatcher = dependency.dispatcher
+        let store = dependency.testTarget
+        let disk = Disk.light
+
+        dispatcher.setPlayerCancellerForDisk.accept((Canceller {}, disk))
+        XCTAssertNotNil(store.playerCancellers.value[disk])
+
+        dispatcher.setPlayerCancellerForDisk.accept((nil, disk))
+        XCTAssertNil(store.playerCancellers.value[disk])
+    }
 }
 
 extension GameStoreTests {

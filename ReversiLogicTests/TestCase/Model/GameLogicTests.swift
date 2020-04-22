@@ -356,6 +356,7 @@ extension GameLogicTests {
     func test_playTurnOfComputer() throws {
         let logic = dependency.testTarget
         let store = dependency.store
+        let actionCreator = dependency.actionCreator
         let scheduler = dependency.testScheduler
         let disk = Disk.light
         store.$status.accept(.turn(disk))
@@ -379,14 +380,22 @@ extension GameLogicTests {
 
         logic.playTurnOfComputer()
 
-        XCTAssertNotNil(logic.playerCancellers[disk])
+        do {
+            let parameter = try XCTUnwrap(actionCreator.$_setPlayerCanceller.parameters.last)
+            XCTAssertNotNil(parameter.0)
+            XCTAssertEqual(parameter.1, disk)
+        }
 
         scheduler.advanceTo(scheduler.clock + 200)
 
         XCTAssertEqual(willTurnDiskOfComputer.value, disk)
         XCTAssertEqual(didTurnDiskOfComputer.value, disk)
 
-        XCTAssertNil(logic.playerCancellers[disk])
+        do {
+            let parameter = try XCTUnwrap(actionCreator.$_setPlayerCanceller.parameters.last)
+            XCTAssertNil(parameter.0)
+            XCTAssertEqual(parameter.1, disk)
+        }
 
         let handleDiskWithCoordinate = dependency.$handleDiskWithCoordinate
         XCTAssertEqual(handleDiskWithCoordinate.parameters,

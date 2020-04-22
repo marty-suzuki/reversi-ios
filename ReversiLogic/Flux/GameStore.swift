@@ -2,6 +2,9 @@ import RxRelay
 import RxSwift
 
 public protocol GameStoreProtocol: AnyObject {
+    var playerCancellers: ValueObservable<[Disk: Canceller]> { get }
+    var placeDiskCanceller: ValueObservable<Canceller?> { get }
+    var isDiskPlacing: ValueObservable<Bool> { get }
     var cells: ValueObservable<[[GameData.Cell]]> { get }
     var status: ValueObservable<GameData.Status> { get }
     var playerDark: ValueObservable<GameData.Player> { get }
@@ -17,6 +20,15 @@ public protocol GameStoreProtocol: AnyObject {
 }
 
 public final class GameStore: GameStoreProtocol {
+
+    @BehaviorWrapper(value: [:])
+    public private(set) var playerCancellers: ValueObservable<[Disk: Canceller]>
+
+    @BehaviorWrapper(value: nil)
+    public private(set) var placeDiskCanceller: ValueObservable<Canceller?>
+
+    @BehaviorWrapper(value: false)
+    public private(set) var isDiskPlacing: ValueObservable<Bool>
 
     @BehaviorWrapper(value: [])
     public private(set) var cells: ValueObservable<[[GameData.Cell]]>
@@ -85,6 +97,24 @@ public final class GameStore: GameStoreProtocol {
             .bind(to: _cells)
             .disposed(by: disposeBag)
 
+        dispatcher.setPlayerCancellerForDisk
+            .withLatestFrom(playerCancellers) { ($0.0, $0.1, $1) }
+            .map { canceller, disk, playerCancellers in
+                var playerCancellers = playerCancellers
+                if let canceller = canceller {
+                    playerCancellers[disk] = canceller
+                } else {
+                    playerCancellers.removeValue(forKey: disk)
+                }
+                return playerCancellers
+            }
+            .bind(to: _playerCancellers)
+            .disposed(by: disposeBag)
+
+        dispatcher.setPlaceDiskCanceller
+            .bind(to: _placeDiskCanceller)
+            .disposed(by: disposeBag)
+
         let countOf: (Disk, [[GameData.Cell]]) -> Int = { disk, cells in
             cells.reduce(0) { result, rows in
                 rows.reduce(result) { result, cell in
@@ -127,6 +157,11 @@ public final class GameStore: GameStoreProtocol {
                 }
             }
             .bind(to: _sideWithMoreDisks)
+            .disposed(by: disposeBag)
+
+        placeDiskCanceller
+            .map { $0 != nil }
+            .bind(to: _isDiskPlacing)
             .disposed(by: disposeBag)
     }
 

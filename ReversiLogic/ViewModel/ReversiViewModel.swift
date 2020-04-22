@@ -139,7 +139,7 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel> {
 
                     for side in Disk.allCases {
                         logic.playerCancellers[side]?.cancel()
-                        logic.playerCancellers.removeValue(forKey: side)
+                        logic.setPlayerCanceller(nil, for: side)
                     }
 
                     logic.newGame()

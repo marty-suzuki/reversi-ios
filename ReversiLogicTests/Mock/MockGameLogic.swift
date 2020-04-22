@@ -16,6 +16,7 @@ struct MockGameLogicFactory: GameLogicFactoryProtocol {
 
 final class MockGameLogic: GameLogicProtocol {
 
+
     @MockPublishWrapper
     private(set) var willTurnDiskOfComputer: Observable<Disk>
 
@@ -70,6 +71,9 @@ final class MockGameLogic: GameLogicProtocol {
     @MockResponse<Void, Void>()
     var _save: Void
 
+    @MockResponse<(Canceller?, Disk), Void>()
+    var _setPlayerCanceller: Void
+
     let store = MockGameStore()
 
     func flippedDiskCoordinates(by disk: Disk, at coordinate: Coordinate) -> [Coordinate] {
@@ -115,6 +119,10 @@ final class MockGameLogic: GameLogicProtocol {
 
     func setDisk(_ disk: Disk?, at coordinate: Coordinate) {
         __setDisk.respond(.init(disk: disk, coordinate: coordinate))
+    }
+
+    func setPlayerCanceller(_ canceller: Canceller?, for disk: Disk) {
+        __setPlayerCanceller.respond((canceller, disk))
     }
 }
 

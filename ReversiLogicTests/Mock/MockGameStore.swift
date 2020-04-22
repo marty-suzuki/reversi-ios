@@ -4,6 +4,15 @@ import RxTest
 
 final class MockGameStore: GameStoreProtocol {
 
+    @MockBehaviorWrapeer(value: [:])
+    private(set) var playerCancellers: ValueObservable<[Disk : Canceller]>
+
+    @MockBehaviorWrapeer(value: nil)
+    private(set) var placeDiskCanceller: ValueObservable<Canceller?>
+
+    @MockBehaviorWrapeer(value: false)
+    private(set) var isDiskPlacing: ValueObservable<Bool>
+
     @MockBehaviorWrapeer(value: [])
     private(set) var cells: ValueObservable<[[GameData.Cell]]>
 

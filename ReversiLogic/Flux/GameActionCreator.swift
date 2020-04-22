@@ -12,6 +12,8 @@ public protocol GameActionCreatorProtocol: AnyObject {
     func setPlayerOfLight(_ player: GameData.Player)
     func setStatus(_ status: GameData.Status)
     func setDisk(_ disk: Disk?, at coordinate: Coordinate)
+    func setPlayerCanceller(_ canceller: Canceller?, for disk: Disk)
+    func setPlaceDiskCanceller(_ canceller: Canceller?)
 }
 
 public final class GameActionCreator: GameActionCreatorProtocol {
@@ -90,6 +92,14 @@ public final class GameActionCreator: GameActionCreatorProtocol {
 
     public func setDisk(_ disk: Disk?, at coordinate: Coordinate) {
         dispatcher.setDiskAtCoordinate.accept((disk, coordinate))
+    }
+
+    public func setPlayerCanceller(_ canceller: Canceller?, for disk: Disk) {
+        dispatcher.setPlayerCancellerForDisk.accept((canceller, disk))
+    }
+
+    public func setPlaceDiskCanceller(_ canceller: Canceller?) {
+        dispatcher.setPlaceDiskCanceller.accept(canceller)
     }
 }
 

@@ -23,6 +23,12 @@ final class MockGameActionCreator: GameActionCreatorProtocol {
     @MockResponse<SetDiskParameters, Void>()
     var _setDisk: Void
 
+    @MockResponse<(Canceller?, Disk), Void>()
+    var _setPlayerCanceller: Void
+
+    @MockResponse<Canceller?, Void>()
+    var _setPlaceDiskCanceller: Void
+
     func load() {
         __load.respond()
     }
@@ -49,6 +55,13 @@ final class MockGameActionCreator: GameActionCreatorProtocol {
 
     func setDisk(_ disk: Disk?, at coordinate: Coordinate) {
         __setDisk.respond(.init(disk: disk, coordinate: coordinate))
+    }
+
+    func setPlaceDiskCanceller(_ canceller: Canceller?) {
+        __setPlaceDiskCanceller.respond(canceller)
+    }
+    func setPlayerCanceller(_ canceller: Canceller?, for disk: Disk) {
+        __setPlayerCanceller.respond((canceller, disk))
     }
 }
 

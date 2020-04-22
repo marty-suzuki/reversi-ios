@@ -5,13 +5,14 @@ import RxSwift
 public protocol GameLogicProtocol: AnyObject {
     var isDiskPlacing: Bool { get }
     var placeDiskCanceller: Canceller? { get set }
-
-    var playerCancellers: [Disk: Canceller] { get set }
+    var playerCancellers: [Disk: Canceller] { get }
     var gameLoaded: Observable<Void> { get }
     var newGameBegan: Observable<Void> { get }
     var handleDiskWithCoordinate: Observable<(Disk, Coordinate)> { get }
     var willTurnDiskOfComputer: Observable<Disk> { get}
     var didTurnDiskOfComputer: Observable<Disk> { get }
+
+    func setPlayerCanceller(_ canceller: Canceller?, for disk: Disk)
 
     func flippedDiskCoordinates(by disk: Disk,
                                 at coordinate: Coordinate) -> [Coordinate]
@@ -37,9 +38,14 @@ extension GameLogicProtocol {
 
 final class GameLogic: GameLogicProtocol {
 
-    var playerCancellers: [Disk: Canceller] = [:]
+    var playerCancellers: [Disk: Canceller] {
+        store.playerCancellers.value
+    }
 
-    var placeDiskCanceller: Canceller?
+    var placeDiskCanceller: Canceller? {
+        get { store.placeDiskCanceller.value }
+        set { actionCreator.setPlaceDiskCanceller(newValue) }
+    }
 
     @PublishWrapper
     private(set) var gameLoaded: Observable<Void>
@@ -120,6 +126,10 @@ final class GameLogic: GameLogicProtocol {
 
     subscript<T>(dynamicMember keyPath: KeyPath<GameStoreProtocol, ValueObservable<T>>) -> ValueObservable<T> {
         store[keyPath: keyPath]
+    }
+
+    func setPlayerCanceller(_ canceller: Canceller?, for disk: Disk) {
+        actionCreator.setPlayerCanceller(canceller, for: disk)
     }
 
     func flippedDiskCoordinates(by disk: Disk,
@@ -260,10 +270,10 @@ final class GameLogic: GameLogicProtocol {
         let cleanUp: () -> Void = { [weak self] in
             guard let me = self else { return }
             me._didTurnDiskOfComputer.accept(disk)
-            me.playerCancellers[disk] = nil
+            me.actionCreator.setPlayerCanceller(nil, for: disk)
         }
         let canceller = Canceller(cleanUp)
-        playerCancellers[disk] = canceller
+        actionCreator.setPlayerCanceller(canceller, for: disk)
 
         _readyComputerDisk.accept((disk, coordinate, canceller))
     }
