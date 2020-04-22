@@ -33,14 +33,9 @@ public final class GameStore: GameStoreProtocol {
     private let disposeBag = DisposeBag()
 
     public init(dispatcher: GameDispatcher) {
-        self.faildToLoad = dispatcher.reasonOfUpdate
-            .flatMap { $0 == .faildToLoad ? Observable.just(()) : .empty() }
-
-        self.loaded = dispatcher.reasonOfUpdate
-            .flatMap { $0 == .loaded ? Observable.just(()) : .empty() }
-
-        self.reset = dispatcher.reasonOfUpdate
-            .flatMap { $0 == .reset ? Observable.just(()) : .empty() }
+        self.faildToLoad = dispatcher.faildToLoad.asObservable()
+        self.loaded = dispatcher.loaded.asObservable()
+        self.reset = dispatcher.reset.asObservable()
 
         dispatcher.setCells
             .bind(to: _cells)

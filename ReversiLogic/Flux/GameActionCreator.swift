@@ -31,7 +31,7 @@ public final class GameActionCreator: GameActionCreatorProtocol {
             .disposed(by: disposeBag)
 
         let update = _load
-            .flatMap { _ -> Single<(GameData, GameDispatcher.ReasonOfUpdate)> in
+            .flatMap { _ -> Single<(GameData, ReasonOfUpdate)> in
                 cache.load()
                     .map { ($0, .loaded) }
                     .catchError { _ in Single.just((.initial, .faildToLoad)) }
@@ -46,7 +46,14 @@ public final class GameActionCreator: GameActionCreatorProtocol {
                 dispatcher.setStatus.accept(data.status)
                 dispatcher.setPlayerOfDark.accept(data.playerDark)
                 dispatcher.setPlayerOfLight.accept(data.playerLight)
-                dispatcher.reasonOfUpdate.accept(reasonOfUpdate)
+                switch reasonOfUpdate {
+                case .reset:
+                    dispatcher.reset.accept(())
+                case .loaded:
+                    dispatcher.loaded.accept(())
+                case .faildToLoad:
+                    dispatcher.faildToLoad.accept(())
+                }
             })
             .disposed(by: disposeBag)
     }
@@ -83,5 +90,14 @@ public final class GameActionCreator: GameActionCreatorProtocol {
 
     public func setDisk(_ disk: Disk?, at coordinate: Coordinate) {
         dispatcher.setDiskAtCoordinate.accept((disk, coordinate))
+    }
+}
+
+extension GameActionCreator {
+
+    private enum ReasonOfUpdate {
+        case reset
+        case loaded
+        case faildToLoad
     }
 }

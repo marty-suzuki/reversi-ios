@@ -3,69 +3,18 @@ import RxSwift
 
 final class MockGameDataCache: GameDataCacheProtocol {
 
-    @MockBehaviorWrapeer(value: .manual)
-    private(set) var playerDark: ValueObservable<GameData.Player>
+    @MockPublishResponse<GameData, Void>()
+    var _save: AnyObserver<Void>
 
-    @MockBehaviorWrapeer(value: .manual)
-    private(set) var playerLight: ValueObservable<GameData.Player>
+    @MockPublishResponse<Void, GameData>()
+    var _load: AnyObserver<GameData>
 
-    @MockBehaviorWrapeer(value: .turn(.dark))
-    private(set) var status: ValueObservable<GameData.Status>
-
-    @MockBehaviorWrapeer(value: [])
-    private(set) var cells: ValueObservable<[[GameData.Cell]]>
-
-    @MockResponse<Void, Void>()
-    var _load: Void
-
-    @MockResponse<Void, Void>()
-    var _save: Void
-
-    @MockResponse<Void, Void>()
-    var _reset: Void
-
-    @MockResponse<Coordinate, Disk?>
-    var _getDisk = nil
-
-    @MockResponse<(Coordinate, Disk?), Void>()
-    var _setDisk: Void
-
-    @MockResponse<GameData.Player, Void>()
-    var _setPalyerDark: Void
-
-    @MockResponse<GameData.Player, Void>()
-    var _setPalyerLight: Void
-
-    @MockResponse<GameData.Status, Void>()
-    var _setStatus: Void
-
-    subscript(coordinate: Coordinate) -> Disk? {
-        get { __getDisk.respond(coordinate) }
-        set { __setDisk.respond((coordinate, newValue)) }
+    func save(data: GameData) -> Single<Void> {
+        __save.respond(data).asSingle()
     }
 
-    func setPlayerOfDark(_ player: GameData.Player) {
-        __setPalyerDark.respond(player)
-    }
-
-    func setPlayerOfLight(_ player: GameData.Player) {
-        __setPalyerLight.respond(player)
-    }
-
-    func setStatus(_ status: GameData.Status) {
-        __setStatus.respond(status)
-    }
-
-    func load() -> Single<Void> {
-        .just(__load.respond())
-    }
-
-    func save() throws {
-        __save.respond()
-    }
-
-    func reset() {
-        __reset.respond()
+    func load() -> Single<GameData> {
+        __load.respond().asSingle()
     }
 }
 

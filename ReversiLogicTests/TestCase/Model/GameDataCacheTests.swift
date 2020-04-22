@@ -1,3 +1,4 @@
+import RxRelay
 import XCTest
 @testable import ReversiLogic
 
@@ -23,16 +24,17 @@ final class GameDataCacheTests: XCTestCase {
             cells: [[expectedCell]]
         )
 
-        var isCompletionCalled = false
+        let gameData = BehaviorRelay<GameData?>(value: nil)
         let disposable = cache.load()
-            .subscribe(onSuccess: { isCompletionCalled = true })
+            .asObservable()
+            .bind(to: gameData)
         defer { disposable.dispose() }
 
-        XCTAssertTrue(isCompletionCalled)
-        XCTAssertEqual(cache.status.value, expectedStatus)
-        XCTAssertEqual(cache.playerDark.value, expectedPlayerDark)
-        XCTAssertEqual(cache.playerLight.value, expectedPlayerLight)
-        XCTAssertEqual(cache.cells.value, [[expectedCell]])
+        let response = try XCTUnwrap(gameData.value)
+        XCTAssertEqual(response.status, expectedStatus)
+        XCTAssertEqual(response.playerDark, expectedPlayerDark)
+        XCTAssertEqual(response.playerLight, expectedPlayerLight)
+        XCTAssertEqual(response.cells, [[expectedCell]])
     }
 
     func test_save() throws {
@@ -43,35 +45,21 @@ final class GameDataCacheTests: XCTestCase {
 
         self.dependency = Dependency(cells: [[expectedCell]])
         let cache = dependency.testTarget
-        cache.setPlayerOfDark(expectedPlayerDark)
-        cache.setPlayerOfLight(expectedPlayerLight)
-        cache.setStatus(expectedStatus)
-
-        try cache.save()
-
-        let saveGame = dependency.$saveGame
-        XCTAssertEqual(saveGame.calledCount, 1)
-
         let expected = GameData(status: expectedStatus,
                                 playerDark: expectedPlayerDark,
                                 playerLight: expectedPlayerLight,
                                 cells: [[expectedCell]])
+
+        let save = BehaviorRelay<Void?>(value: nil)
+        let disposable = cache.save(data: expected)
+            .asObservable()
+            .bind(to: save)
+        defer { disposable.dispose() }
+
+        let saveGame = dependency.$saveGame
+        XCTAssertNotNil(save.value)
+        XCTAssertEqual(saveGame.calledCount, 1)
         XCTAssertEqual(saveGame.parameters, [expected])
-    }
-
-    func test_rest() {
-        self.dependency = Dependency(cells: [])
-        let cache = dependency.testTarget
-        cache.setStatus(.gameOver)
-        cache.setPlayerOfDark(.computer)
-        cache.setPlayerOfLight(.computer)
-
-        cache.reset()
-
-        XCTAssertEqual(cache.cells.value, GameData.initial.cells)
-        XCTAssertEqual(cache.status.value, GameData.initial.status)
-        XCTAssertEqual(cache.playerDark.value, GameData.initial.playerDark)
-        XCTAssertEqual(cache.playerLight.value, GameData.initial.playerLight)
     }
 }
 
@@ -92,8 +80,7 @@ extension GameDataCacheTests {
                 }
                 completion(me._loadGame.respond())
             },
-            saveGame: { [weak self] data, _ in self?._saveGame.respond(data) },
-            cells: loadGame.cells
+            saveGame: { [weak self] data, _ in self?._saveGame.respond(data) }
         )
 
         init(cells: [[GameData.Cell]]) {

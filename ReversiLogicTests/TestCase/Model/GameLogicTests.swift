@@ -22,7 +22,7 @@ extension GameLogicTests {
         let y = 2
         let x = 3
 
-        dependency.cache.$cells.accept((0..<y).map { y in
+        dependency.store.$cells.accept((0..<y).map { y in
             (0..<x).map { x in
                 GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
             }
@@ -37,7 +37,7 @@ extension GameLogicTests {
         let y = 2
         let x = 3
 
-        dependency.cache.$cells.accept((0..<y).map { y in
+        dependency.store.$cells.accept((0..<y).map { y in
             (0..<x).map { x in
                 GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
             }
@@ -54,17 +54,17 @@ extension GameLogicTests {
 
     func test_playerOfCurrentTurn() {
         let logic = dependency.testTarget
-        let cache = dependency.cache
+        let store = dependency.store
 
-        cache.$status.accept(.gameOver)
+        store.$status.accept(.gameOver)
         XCTAssertNil(logic.playerOfCurrentTurn.value)
 
-        cache.$status.accept(.turn(.dark))
-        cache.$playerDark.accept(.computer)
+        store.$status.accept(.turn(.dark))
+        store.$playerDark.accept(.computer)
         XCTAssertEqual(logic.playerOfCurrentTurn.value, .computer)
 
-        cache.$status.accept(.turn(.light))
-        cache.$playerLight.accept(.computer)
+        store.$status.accept(.turn(.light))
+        store.$playerLight.accept(.computer)
         XCTAssertEqual(logic.playerOfCurrentTurn.value, .computer)
     }
 }
@@ -74,7 +74,7 @@ extension GameLogicTests {
 extension GameLogicTests {
 
     func test_sideWithMoreDisks_darkの方が多い() {
-        dependency.cache.$cells.accept([
+        dependency.store.$cells.accept([
             [
                 GameData.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
                 GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .dark),
@@ -87,7 +87,7 @@ extension GameLogicTests {
     }
 
     func test_sideWithMoreDisks_lightの方が多い() {
-        dependency.cache.$cells.accept([
+        dependency.store.$cells.accept([
             [
                 GameData.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
                 GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .light),
@@ -100,7 +100,7 @@ extension GameLogicTests {
     }
 
     func test_sideWithMoreDisks_darkとlightが同じ数() {
-        dependency.cache.$cells.accept([
+        dependency.store.$cells.accept([
             [
                 GameData.Cell(coordinate: .init(x: 0, y: 0), disk: .dark),
                 GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .light)
@@ -123,7 +123,7 @@ extension GameLogicTests {
             [nil, .light, .dark, .dark, nil],
             [nil, .light, nil,   nil,   nil]
         ]
-        dependency.cache.$cells.accept(board.enumerated().map { y, rows in
+        dependency.store.$cells.accept(board.enumerated().map { y, rows in
             rows.enumerated().map { x, disk in
                 GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
             }
@@ -166,7 +166,7 @@ extension GameLogicTests {
             [nil, .light, .dark, .dark, nil],
             [nil, .light, nil,   nil,   nil]
         ]
-        dependency.cache.$cells.accept(board.enumerated().map { y, rows in
+        dependency.store.$cells.accept(board.enumerated().map { y, rows in
             rows.enumerated().map { x, disk in
                 GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
             }
@@ -206,7 +206,7 @@ extension GameLogicTests {
             [nil, .light, .dark, .dark, nil],
             [nil, .light, nil,   nil,   nil]
         ]
-        dependency.cache.$cells.accept(board.enumerated().map { y, rows in
+        dependency.store.$cells.accept(board.enumerated().map { y, rows in
             rows.enumerated().map { x, disk in
                 GameData.Cell(coordinate: .init(x: x, y: y), disk: disk)
             }
@@ -230,10 +230,10 @@ extension GameLogicTests {
 
     func test_waitForPlayer_turnがdarkで_playerDarkがmanualの場合() {
         let viewModel = dependency.testTarget
-        let cache = dependency.cache
+        let store = dependency.store
         let turn = Disk.dark
-        cache.$status.accept(.turn(turn))
-        cache.$playerDark.accept(.manual)
+        store.$status.accept(.turn(turn))
+        store.$playerDark.accept(.manual)
 
         viewModel.waitForPlayer()
 
@@ -243,13 +243,13 @@ extension GameLogicTests {
 
     func test_waitForPlayer_turnがlightで_playerLightがcomputerの場合() {
         let logic = dependency.testTarget
-        let cache = dependency.cache
+        let store = dependency.store
         let turn = Disk.light
-        cache.$status.accept(.turn(turn))
-        cache.$playerLight.accept(.computer)
+        store.$status.accept(.turn(turn))
+        store.$playerLight.accept(.computer)
         let disk = Disk.light
-        cache.$status.accept(.turn(disk))
-        cache.$cells.accept([
+        store.$status.accept(.turn(disk))
+        store.$cells.accept([
             [
                 GameData.Cell(coordinate: .init(x: 0, y: 0), disk: nil),
                 GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .dark),
@@ -268,10 +268,10 @@ extension GameLogicTests {
 
     func test_waitForPlayer_statusがgameOverの場合() {
         let viewModel = dependency.testTarget
-        let cache = dependency.cache
-        cache.$status.accept(.gameOver)
-        cache.$playerDark.accept(.computer)
-        cache.$playerLight.accept(.computer)
+        let store = dependency.store
+        store.$status.accept(.gameOver)
+        store.$playerDark.accept(.computer)
+        store.$playerLight.accept(.computer)
 
         viewModel.waitForPlayer()
 
@@ -286,37 +286,35 @@ extension GameLogicTests {
 
     func test_setPlayer_playerDarkに値が反映される() {
         let logic = dependency.testTarget
-        let cache = dependency.cache
+        let actionCreator = dependency.actionCreator
         let disk = Disk.dark
-        cache.$playerDark.accept(.manual)
 
         logic.setPlayer(for: disk, with: 1)
-        XCTAssertEqual(cache.$_setPalyerDark.parameters, [.computer])
+        XCTAssertEqual(actionCreator.$_setPlayerOfDark.parameters, [.computer])
 
         logic.setPlayer(for: disk, with: 0)
-        XCTAssertEqual(cache.$_setPalyerDark.parameters, [.computer, .manual])
+        XCTAssertEqual(actionCreator.$_setPlayerOfDark.parameters, [.computer, .manual])
     }
 
     func test_setPlayer_playerLightに値が反映される() {
         let logic = dependency.testTarget
-        let cache = dependency.cache
+        let actionCreator = dependency.actionCreator
         let disk = Disk.light
-        cache.$playerLight.accept(.manual)
 
         logic.setPlayer(for: disk, with: 1)
-        XCTAssertEqual(cache.$_setPalyerLight.parameters, [.computer])
+        XCTAssertEqual(actionCreator.$_setPlayerOfLight.parameters, [.computer])
 
         logic.setPlayer(for: disk, with: 0)
-        XCTAssertEqual(cache.$_setPalyerLight.parameters, [.computer, .manual])
+        XCTAssertEqual(actionCreator.$_setPlayerOfLight.parameters, [.computer, .manual])
     }
 
     func test_setPlayer_diskと現在のplayerが一致していて_playerがcomputerの場合() {
         let logic = dependency.testTarget
-        let cache = dependency.cache
+        let store = dependency.store
         let disk = Disk.light
-        cache.$status.accept(.turn(disk))
-        cache.$playerLight.accept(.computer)
-        cache.$cells.accept([
+        store.$status.accept(.turn(disk))
+        store.$playerLight.accept(.computer)
+        store.$cells.accept([
             [
                 GameData.Cell(coordinate: .init(x: 0, y: 0), disk: nil),
                 GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .dark),
@@ -335,9 +333,9 @@ extension GameLogicTests {
 
     func test_setPlayer_diskと現在のplayerが不一致で_playerがcomputerの場合() {
         let logic = dependency.testTarget
-        let cache = dependency.cache
-        cache.$status.accept(.turn(.light))
-        cache.$playerLight.accept(.computer)
+        let store = dependency.store
+        store.$status.accept(.turn(.light))
+        store.$playerLight.accept(.computer)
 
         logic.setPlayer(for: .dark, with: 1)
 
@@ -347,10 +345,10 @@ extension GameLogicTests {
 
     func test_setPlayer_diskと現在のplayerが一致していて_playerがmanualの場合() {
         let logic = dependency.testTarget
-        let cache = dependency.cache
+        let store = dependency.store
         let disk = Disk.light
-        cache.$status.accept(.turn(disk))
-        cache.$playerLight.accept(.manual)
+        store.$status.accept(.turn(disk))
+        store.$playerLight.accept(.manual)
 
         logic.setPlayer(for: disk, with: 0)
 
@@ -365,7 +363,8 @@ extension GameLogicTests {
 
     func test_newGame() {
         let logic = dependency.testTarget
-        let cache = dependency.cache
+        let store = dependency.store
+        let actionCreator = dependency.actionCreator
 
         let newGameBegan = BehaviorRelay<Void?>(value: nil)
         let disposable = logic.newGameBegan
@@ -374,10 +373,10 @@ extension GameLogicTests {
 
         logic.newGame()
 
-        let reset = cache.$_reset
+        let reset = actionCreator.$_reset
         XCTAssertEqual(reset.calledCount, 1)
 
-        let save = cache.$_save
+        let save = actionCreator.$_save
         XCTAssertEqual(save.calledCount, 1)
 
         XCTAssertNotNil(newGameBegan.value)
@@ -385,24 +384,19 @@ extension GameLogicTests {
 
     func test_startGame() throws {
         let logic = dependency.testTarget
-
-        let gameLoaded = BehaviorRelay<Void?>(value: nil)
-        let disposable = logic.gameLoaded
-            .bind(to: gameLoaded)
-        defer { disposable.dispose() }
-
         logic.startGame()
 
-        XCTAssertNotNil(gameLoaded.value)
+        let load = dependency.actionCreator.$_load
+        XCTAssertEqual(load.calledCount, 1)
     }
 
     func test_handleSelectedCoordinate_statusがturnで_playerがmanualの場合() {
         let logic = dependency.testTarget
-        let cache = dependency.cache
+        let store = dependency.store
 
         let disk = Disk.dark
-        cache.$status.accept(.turn(disk))
-        cache.$playerDark.accept(.manual)
+        store.$status.accept(.turn(disk))
+        store.$playerDark.accept(.manual)
 
         let diskWithCoordinate = BehaviorRelay<(Disk, Coordinate)?>(value: nil)
         let disposable = logic.handleDiskWithCoordinate
@@ -418,9 +412,9 @@ extension GameLogicTests {
 
     func test_handleSelectedCoordinate_statusがgameOverの場合() {
         let logic = dependency.testTarget
-        let cache = dependency.cache
+        let store = dependency.store
 
-        cache.$status.accept(.gameOver)
+        store.$status.accept(.gameOver)
 
         let diskWithCoordinate = BehaviorRelay<(Disk, Coordinate)?>(value: nil)
         let disposable = logic.handleDiskWithCoordinate
@@ -435,11 +429,11 @@ extension GameLogicTests {
 
     func test_handleSelectedCoordinate_statusがturnで_playerがcomputerの場合() {
         let logic = dependency.testTarget
-        let cache = dependency.cache
+        let store = dependency.store
 
         let disk = Disk.dark
-        cache.$status.accept(.turn(disk))
-        cache.$playerDark.accept(.computer)
+        store.$status.accept(.turn(disk))
+        store.$playerDark.accept(.computer)
 
         let diskWithCoordinate = BehaviorRelay<(Disk, Coordinate)?>(value: nil)
         let disposable = logic.handleDiskWithCoordinate
@@ -459,11 +453,11 @@ extension GameLogicTests {
 
     func test_playTurnOfComputer() throws {
         let logic = dependency.testTarget
-        let cache = dependency.cache
+        let store = dependency.store
         let scheduler = dependency.testScheduler
         let disk = Disk.light
-        cache.$status.accept(.turn(disk))
-        cache.$cells.accept([
+        store.$status.accept(.turn(disk))
+        store.$cells.accept([
             [
                 GameData.Cell(coordinate: .init(x: 0, y: 0), disk: nil),
                 GameData.Cell(coordinate: .init(x: 1, y: 0), disk: .dark),
@@ -506,11 +500,13 @@ extension GameLogicTests {
         var handleDiskWithCoordinate: Void
 
         private(set) lazy var testTarget = GameLogic(
-            cache: cache,
+            actionCreator: actionCreator,
+            store: store,
             mainScheduler: testScheduler
         )
 
-        let cache = MockGameDataCache()
+        let actionCreator = MockGameActionCreator()
+        let store = MockGameStore()
         let testScheduler = TestScheduler(initialClock: 0)
 
         private let disposeBag = DisposeBag()

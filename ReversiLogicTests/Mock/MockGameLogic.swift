@@ -55,9 +55,6 @@ final class MockGameLogic: GameLogicProtocol {
     @MockResponse<FlippedDiskCoordinates, [Coordinate]>
     var _flippedDiskCoordinates = []
 
-    @MockResponse<CanPlace, Bool>
-    var _canPlace = false
-
     @MockResponse<Disk, [Coordinate]>
     var _validMovekForDark = []
 
@@ -71,22 +68,27 @@ final class MockGameLogic: GameLogicProtocol {
     var _setPlayer: Void
 
     @MockResponse<Void, Void>()
-    var _newGame: Void
+    var _startGame: Void
 
     @MockResponse<Void, Void>()
-    var _startGame: Void
+    var _newGame: Void
+
+    @MockResponse<SetDiskParameters, Void>()
+    var _setDisk: Void
+
+    @MockResponse<GameData.Status, Void>()
+    var _setStatus: Void
 
     @MockResponse<Coordinate, Void>()
     var _handleSelectedCoordinate: Void
 
-    let cache = MockGameDataCache()
+    @MockResponse<Void, Void>()
+    var _save: Void
+
+    let store = MockGameStore()
 
     func flippedDiskCoordinates(by disk: Disk, at coordinate: Coordinate) -> [Coordinate] {
         __flippedDiskCoordinates.respond(.init(disk: disk, coordinate: coordinate))
-    }
-
-    func canPlace(disk: Disk, at coordinate: Coordinate) -> Bool {
-        __canPlace.respond(.init(disk: disk, coordinate: coordinate))
     }
 
     func validMoves(for disk: Disk) -> [Coordinate] {
@@ -117,24 +119,24 @@ final class MockGameLogic: GameLogicProtocol {
     func handle(selectedCoordinate: Coordinate) {
         __handleSelectedCoordinate.respond(selectedCoordinate)
     }
+
+    func save() {
+        __save.respond()
+    }
+
+    func setStatus(_ status: GameData.Status) {
+        __setStatus.respond(status)
+    }
+
+    func setDisk(_ disk: Disk?, at coordinate: Coordinate) {
+        __setDisk.respond(.init(disk: disk, coordinate: coordinate))
+    }
 }
 
 extension MockGameLogic {
 
-    subscript<T>(dynamicMember keyPath: KeyPath<GameDataGettable, ValueObservable<T>>) -> ValueObservable<T> {
-        cache[keyPath: keyPath]
-    }
-
-    func save() throws {
-        try cache.save()
-    }
-
-    func setStatus(_ status: GameData.Status) {
-        cache.setStatus(status)
-    }
-
-    func setDisk(_ disk: Disk?, at coordinate: Coordinate) {
-        cache[coordinate] = disk
+    subscript<T>(dynamicMember keyPath: KeyPath<GameStoreProtocol, ValueObservable<T>>) -> ValueObservable<T> {
+        store[keyPath: keyPath]
     }
 }
 
@@ -144,8 +146,8 @@ extension MockGameLogic {
         let coordinate: Coordinate
     }
 
-    struct CanPlace: Equatable {
-        let disk: Disk
+    struct SetDiskParameters: Equatable {
+        let disk: Disk?
         let coordinate: Coordinate
     }
 

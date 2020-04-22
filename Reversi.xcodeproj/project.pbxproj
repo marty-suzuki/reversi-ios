@@ -38,6 +38,11 @@
 		ED3D8EF2244DF9B000DBF850 /* RxCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EE4244DF95F00DBF850 /* RxCocoa.framework */; };
 		ED3D8EF4244DF9B000DBF850 /* RxTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EF3244DF9B000DBF850 /* RxTest.framework */; };
 		ED4E71452448DA6D00518585 /* GameDataCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4E71442448DA6D00518585 /* GameDataCacheTests.swift */; };
+		ED6D32A9245088D700D0932F /* MockGameStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6D32A8245088D700D0932F /* MockGameStore.swift */; };
+		ED6D32AB245089D400D0932F /* MockGameActionCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6D32AA245089D400D0932F /* MockGameActionCreator.swift */; };
+		ED6D32AD24508C0500D0932F /* MockPublishResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6D32AC24508C0500D0932F /* MockPublishResponse.swift */; };
+		ED6D32B22450A12500D0932F /* GameStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6D32B12450A12500D0932F /* GameStoreTests.swift */; };
+		ED6D32B42450A38700D0932F /* GameActionCreatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6D32B32450A38700D0932F /* GameActionCreatorTests.swift */; };
 		ED6EAC7D24436B2C00BAF620 /* ReversiLogic.h in Headers */ = {isa = PBXBuildFile; fileRef = ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		ED6EAC8024436B2C00BAF620 /* ReversiLogic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; };
 		ED6EAC8124436B2C00BAF620 /* ReversiLogic.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -135,6 +140,11 @@
 		ED3D8EE6244DF95F00DBF850 /* RxSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxSwift.framework; path = Carthage/Build/iOS/RxSwift.framework; sourceTree = "<group>"; };
 		ED3D8EF3244DF9B000DBF850 /* RxTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxTest.framework; path = Carthage/Build/iOS/RxTest.framework; sourceTree = "<group>"; };
 		ED4E71442448DA6D00518585 /* GameDataCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDataCacheTests.swift; sourceTree = "<group>"; };
+		ED6D32A8245088D700D0932F /* MockGameStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockGameStore.swift; sourceTree = "<group>"; };
+		ED6D32AA245089D400D0932F /* MockGameActionCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockGameActionCreator.swift; sourceTree = "<group>"; };
+		ED6D32AC24508C0500D0932F /* MockPublishResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPublishResponse.swift; sourceTree = "<group>"; };
+		ED6D32B12450A12500D0932F /* GameStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStoreTests.swift; sourceTree = "<group>"; };
+		ED6D32B32450A38700D0932F /* GameActionCreatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameActionCreatorTests.swift; sourceTree = "<group>"; };
 		ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ReversiLogic.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED6EAC6D24436B2B00BAF620 /* ReversiLogic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReversiLogic.h; sourceTree = "<group>"; };
 		ED6EAC6E24436B2B00BAF620 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -278,6 +288,8 @@
 			children = (
 				ED20D532244ADCAE00F7BA46 /* MockGameDataCache.swift */,
 				ED20D534244B276400F7BA46 /* MockGameLogic.swift */,
+				ED6D32A8245088D700D0932F /* MockGameStore.swift */,
+				ED6D32AA245089D400D0932F /* MockGameActionCreator.swift */,
 			);
 			path = Mock;
 			sourceTree = "<group>";
@@ -292,6 +304,35 @@
 				ED3D8EE6244DF95F00DBF850 /* RxSwift.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		ED6D32AE2450A0F400D0932F /* TestCase */ = {
+			isa = PBXGroup;
+			children = (
+				ED6D32B02450A11600D0932F /* Flux */,
+				ED6D32AF2450A10600D0932F /* Model */,
+				ED6EACA72444CD7E00BAF620 /* ReversiViewModelTests.swift */,
+			);
+			path = TestCase;
+			sourceTree = "<group>";
+		};
+		ED6D32AF2450A10600D0932F /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				ED4E71442448DA6D00518585 /* GameDataCacheTests.swift */,
+				ED6EAC9E24436EE800BAF620 /* GameDataIOTests.swift */,
+				EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		ED6D32B02450A11600D0932F /* Flux */ = {
+			isa = PBXGroup;
+			children = (
+				ED6D32B12450A12500D0932F /* GameStoreTests.swift */,
+				ED6D32B32450A38700D0932F /* GameActionCreatorTests.swift */,
+			);
+			path = Flux;
 			sourceTree = "<group>";
 		};
 		ED6EAC6C24436B2B00BAF620 /* ReversiLogic */ = {
@@ -315,10 +356,7 @@
 				ED20D531244ADC8600F7BA46 /* Mock */,
 				ED6EACA92444D36400BAF620 /* Util */,
 				ED6EAC7C24436B2C00BAF620 /* Info.plist */,
-				ED4E71442448DA6D00518585 /* GameDataCacheTests.swift */,
-				ED6EAC9E24436EE800BAF620 /* GameDataIOTests.swift */,
-				EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */,
-				ED6EACA72444CD7E00BAF620 /* ReversiViewModelTests.swift */,
+				ED6D32AE2450A0F400D0932F /* TestCase */,
 			);
 			path = ReversiLogicTests;
 			sourceTree = "<group>";
@@ -360,6 +398,7 @@
 				ED9AEF7B244C39F8004A068C /* MockBehaviorWrapper.swift */,
 				EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */,
 				ED9AEF7D244C4223004A068C /* CountableProperty.swift */,
+				ED6D32AC24508C0500D0932F /* MockPublishResponse.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -644,15 +683,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED6D32AB245089D400D0932F /* MockGameActionCreator.swift in Sources */,
 				ED6EACAB2444D3C200BAF620 /* MockResponse.swift in Sources */,
 				ED4E71452448DA6D00518585 /* GameDataCacheTests.swift in Sources */,
 				ED20D533244ADCAE00F7BA46 /* MockGameDataCache.swift in Sources */,
 				ED9AEF7E244C4223004A068C /* CountableProperty.swift in Sources */,
 				ED6EAC9F24436EE800BAF620 /* GameDataIOTests.swift in Sources */,
 				EDCC2A582448B5D0009E69F7 /* GameLogicTests.swift in Sources */,
+				ED6D32B42450A38700D0932F /* GameActionCreatorTests.swift in Sources */,
+				ED6D32B22450A12500D0932F /* GameStoreTests.swift in Sources */,
 				ED20D535244B276400F7BA46 /* MockGameLogic.swift in Sources */,
 				ED6EACA82444CD7E00BAF620 /* ReversiViewModelTests.swift in Sources */,
 				ED9AEF7C244C39F8004A068C /* MockBehaviorWrapper.swift in Sources */,
+				ED6D32AD24508C0500D0932F /* MockPublishResponse.swift in Sources */,
+				ED6D32A9245088D700D0932F /* MockGameStore.swift in Sources */,
 				EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

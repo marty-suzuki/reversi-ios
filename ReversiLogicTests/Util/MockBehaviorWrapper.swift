@@ -17,7 +17,7 @@ final class MockBehaviorWrapeer<Element> {
     init(value: Element) {
         let relay = BehaviorRelay<Element>(value: value)
         self._valueObservable = ValueObservable(relay: relay)
-        self.projectedValue = Response { relay.accept($0) }
+        self.projectedValue = Response(relay: relay)
     }
 }
 
@@ -25,10 +25,16 @@ extension MockBehaviorWrapeer {
 
     final class Response {
         fileprivate(set) var calledCount = 0
-        let accept: (Element) -> Void
+        fileprivate(set) var parameters: [Element] = []
+        private let relay: BehaviorRelay<Element>
 
-        init(accept: @escaping (Element) -> Void) {
-            self.accept = accept
+        init(relay: BehaviorRelay<Element>) {
+            self.relay = relay
+        }
+
+        func accept(_ value: Element) {
+            parameters += [value]
+            relay.accept(value)
         }
 
         func clear() {

@@ -15,10 +15,10 @@ final class ReversiViewModelTests: XCTestCase {
 
     func test_viewDidAppear_waitForPlayerが2回呼ばれることはない() {
         let viewModel = dependency.testTarget
-        let cache = dependency.gameDataCache
-        cache.$playerDark.accept(.manual)
+        let store = dependency.store
+        store.$playerDark.accept(.manual)
         let turn = Disk.dark
-        cache.$status.accept(.turn(turn))
+        store.$status.accept(.turn(turn))
         let logic = dependency.gameLogic
         logic._validMovekForDark = [Coordinate(x: 0, y: 0)]
         let waitForPlayer = logic.$_waitForPlayer
@@ -35,8 +35,8 @@ final class ReversiViewModelTests: XCTestCase {
         self.dependency = Dependency(cells: GameData.initial.cells, messageDiskSize: expectedSize)
 
         let expectedTurn = Disk.light
-        let cache = dependency.gameDataCache
-        cache.$status.accept(.turn(expectedTurn))
+        let store = dependency.store
+        store.$status.accept(.turn(expectedTurn))
 
         let setMessageDiskSizeConstant = dependency.$setMessageDiskSizeConstant
         XCTAssertEqual(setMessageDiskSizeConstant.calledCount, 1)
@@ -59,8 +59,8 @@ final class ReversiViewModelTests: XCTestCase {
 
         let logic = dependency.gameLogic
         logic.$sideWithMoreDisks.accept(expectedDisk)
-        let cache = dependency.gameDataCache
-        cache.$status.accept(.gameOver)
+        let store = dependency.store
+        store.$status.accept(.gameOver)
 
         let setMessageDiskSizeConstant = dependency.$setMessageDiskSizeConstant
         XCTAssertEqual(setMessageDiskSizeConstant.calledCount, 1)
@@ -89,8 +89,8 @@ final class ReversiViewModelTests: XCTestCase {
 
         let logic = dependency.gameLogic
         logic.$sideWithMoreDisks.accept(nil)
-        let cache = dependency.gameDataCache
-        cache.$status.accept(.gameOver)
+        let store = dependency.store
+        store.$status.accept(.gameOver)
 
         let setMessageDiskSizeConstant = dependency.$setMessageDiskSizeConstant
         XCTAssertEqual(setMessageDiskSizeConstant.calledCount, 1)
@@ -122,20 +122,20 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(setPlayerLightCount.parameters, ["\(lightCount)"])
     }
     func test_nextTurn_statusがlightのときに_darkの有効な配置がある場合() {
-        let cache = dependency.gameDataCache
-        cache.$status.accept(.turn(.light))
+        let store = dependency.store
+        store.$status.accept(.turn(.light))
 
         let logic = dependency.gameLogic
         logic._validMovekForDark = [Coordinate(x: 0, y: 0)]
 
         dependency.state.nextTurn.accept(())
 
-        XCTAssertEqual(cache.$_setStatus.parameters, [.turn(.dark)])
+        XCTAssertEqual(logic.$_setStatus.parameters, [.turn(.dark)])
     }
 
     func test_nextTurn_statusがlightのときに_darkの有効な配置はないが_lightの有効な配置がある場合() {
-        let cache = dependency.gameDataCache
-        cache.$status.accept(.turn(.light))
+        let store = dependency.store
+        store.$status.accept(.turn(.light))
 
         let logic = dependency.gameLogic
         logic._validMovekForDark = []
@@ -143,7 +143,7 @@ final class ReversiViewModelTests: XCTestCase {
 
         dependency.state.nextTurn.accept(())
 
-        XCTAssertEqual(cache.$_setStatus.parameters, [.turn(.dark)])
+        XCTAssertEqual(logic.$_setStatus.parameters, [.turn(.dark)])
 
         let showAlert = dependency.$showAlert
         XCTAssertEqual(showAlert.calledCount, 1)
@@ -151,8 +151,8 @@ final class ReversiViewModelTests: XCTestCase {
     }
 
     func test_nextTurn_statuがlightのときに_darkもlightの有効な配置はない場合() {
-        let cache = dependency.gameDataCache
-        cache.$status.accept(.turn(.light))
+        let store = dependency.store
+        store.$status.accept(.turn(.light))
 
         let logic = dependency.gameLogic
         logic._validMovekForDark = []
@@ -160,7 +160,7 @@ final class ReversiViewModelTests: XCTestCase {
 
         dependency.state.nextTurn.accept(())
 
-        XCTAssertEqual(cache.$_setStatus.parameters, [.gameOver])
+        XCTAssertEqual(logic.$_setStatus.parameters, [.gameOver])
     }
 
     func test_handleReset() {
@@ -453,8 +453,8 @@ extension ReversiViewModelTests {
         @MockResponse<Void, Void>()
         var reset: Void
 
-        var gameDataCache: MockGameDataCache {
-            gameLogic.cache
+        var store: MockGameStore {
+            gameLogic.store
         }
         let gameLogic = MockGameLogic()
         let state = ReversiViewModel.State()
@@ -478,7 +478,7 @@ extension ReversiViewModelTests {
         init(cells: [[GameData.Cell]], messageDiskSize: CGFloat) {
             self.messageDiskSize = messageDiskSize
 
-            gameDataCache.$cells.accept(cells)
+            store.$cells.accept(cells)
 
             testTarget.output.messageDiskSizeConstant
                 .subscribe(onNext: { [weak self] in self?._setMessageDiskSizeConstant.respond($0) })
