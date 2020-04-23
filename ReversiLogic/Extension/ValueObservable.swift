@@ -1,7 +1,8 @@
 import RxRelay
 import RxSwift
+import Unio
 
-public struct ValueObservable<Element>: ObservableType {
+public struct ValueObservable<Element>: ObservableType, ValueAccessible {
 
     public var value: Element {
         relay.value

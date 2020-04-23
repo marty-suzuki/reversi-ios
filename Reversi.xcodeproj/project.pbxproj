@@ -63,6 +63,7 @@
 		EDAAB28B2451FB2E00B72937 /* ReversiPlaceDiskStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDAAB28A2451FB2E00B72937 /* ReversiPlaceDiskStream.swift */; };
 		EDAAB28D2452006000B72937 /* UpdateDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDAAB28C2452006000B72937 /* UpdateDisk.swift */; };
 		EDAAB28F2452043200B72937 /* FlippedDiskCoordinates.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDAAB28E2452043200B72937 /* FlippedDiskCoordinates.swift */; };
+		EDAAB293245216B500B72937 /* ReversiManagementStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDAAB292245216B500B72937 /* ReversiManagementStream.swift */; };
 		EDBC5A94244F488F006D3865 /* Unio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDBC5A93244F488F006D3865 /* Unio.framework */; };
 		EDBC5A95244F488F006D3865 /* Unio.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = EDBC5A93244F488F006D3865 /* Unio.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		EDBC5A96244F48BE006D3865 /* Unio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDBC5A93244F488F006D3865 /* Unio.framework */; };
@@ -172,6 +173,7 @@
 		EDAAB28A2451FB2E00B72937 /* ReversiPlaceDiskStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiPlaceDiskStream.swift; sourceTree = "<group>"; };
 		EDAAB28C2452006000B72937 /* UpdateDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateDisk.swift; sourceTree = "<group>"; };
 		EDAAB28E2452043200B72937 /* FlippedDiskCoordinates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlippedDiskCoordinates.swift; sourceTree = "<group>"; };
+		EDAAB292245216B500B72937 /* ReversiManagementStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiManagementStream.swift; sourceTree = "<group>"; };
 		EDBC5A93244F488F006D3865 /* Unio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Unio.framework; path = Carthage/Build/iOS/Unio.framework; sourceTree = "<group>"; };
 		EDBC5A98244F5EEF006D3865 /* GameStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStore.swift; sourceTree = "<group>"; };
 		EDBC5A9A244F5EFC006D3865 /* GameDispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDispatcher.swift; sourceTree = "<group>"; };
@@ -401,6 +403,7 @@
 			children = (
 				ED6EACA32444B1E900BAF620 /* ReversiViewModel.swift */,
 				EDAAB28A2451FB2E00B72937 /* ReversiPlaceDiskStream.swift */,
+				EDAAB292245216B500B72937 /* ReversiManagementStream.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -674,6 +677,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EDF8F038244CC87E00C2CF0B /* GameLogicFactory.swift in Sources */,
+				EDAAB293245216B500B72937 /* ReversiManagementStream.swift in Sources */,
 				EDAAB28D2452006000B72937 /* UpdateDisk.swift in Sources */,
 				EDBC5A99244F5EEF006D3865 /* GameStore.swift in Sources */,
 				EDAAB28F2452043200B72937 /* FlippedDiskCoordinates.swift in Sources */,
