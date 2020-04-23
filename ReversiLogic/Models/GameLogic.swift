@@ -14,8 +14,6 @@ public protocol GameLogicProtocol: AnyObject {
 
     func setPlayerCanceller(_ canceller: Canceller?, for disk: Disk)
 
-    func flippedDiskCoordinates(by disk: Disk,
-                                at coordinate: Coordinate) -> [Coordinate]
     func validMoves(for disk: Disk) -> [Coordinate]
     func waitForPlayer()
     func setPlayer(for disk: Disk, with index: Int)
@@ -132,52 +130,10 @@ final class GameLogic: GameLogicProtocol {
         actionCreator.setPlayerCanceller(canceller, for: disk)
     }
 
-    func flippedDiskCoordinates(by disk: Disk,
-                                at coordinate: Coordinate) -> [Coordinate] {
-        let directions = [
-            (x: -1, y: -1),
-            (x:  0, y: -1),
-            (x:  1, y: -1),
-            (x:  1, y:  0),
-            (x:  1, y:  1),
-            (x:  0, y:  1),
-            (x: -1, y:  0),
-            (x: -1, y:  1),
-        ]
-
-        guard store.cells.value[coordinate] == nil else {
-            return []
-        }
-
-        var diskCoordinates: [Coordinate] = []
-
-        for direction in directions {
-            var x = coordinate.x
-            var y = coordinate.y
-
-            var diskCoordinatesInLine: [Coordinate] = []
-            flipping: while true {
-                x += direction.x
-                y += direction.y
-
-                let coordinate = Coordinate(x: x, y: y)
-                switch (disk, store.cells.value[coordinate]) { // Uses tuples to make patterns exhaustive
-                case (.dark, .dark?), (.light, .light?):
-                    diskCoordinates.append(contentsOf: diskCoordinatesInLine)
-                    break flipping
-                case (.dark, .light?), (.light, .dark?):
-                    diskCoordinatesInLine.append(coordinate)
-                case (_, .none):
-                    break flipping
-                }
-            }
-        }
-
-        return diskCoordinates
-    }
-
     func canPlace(disk: Disk, at coordinate: Coordinate) -> Bool {
-        !flippedDiskCoordinates(by: disk, at: coordinate).isEmpty
+        !FlippedDiskCoordinates()
+            .execute(disk: disk, at: coordinate, cells: store.cells.value)
+            .isEmpty
     }
 
     func validMoves(for disk: Disk) -> [Coordinate] {

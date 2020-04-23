@@ -48,18 +48,26 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel> {
         let mainAsyncScheduler: SchedulerType
         let mainScheduler: SchedulerType
         let logic: GameLogicProtocol
+        let placeDiskStream: ReversiPlaceDiskStreamType
     }
 
     public convenience init(messageDiskSize: CGFloat,
                             mainAsyncScheduler: SchedulerType,
                             mainScheduler: SchedulerType,
                             logicFactory: GameLogicFactoryProtocol) {
+        let placeDiskStream = ReversiPlaceDiskStream(
+            actionCreator: logicFactory.actionCreator,
+            store: logicFactory.store,
+            mainAsyncScheduler: mainAsyncScheduler,
+            flippedDiskCoordinates: FlippedDiskCoordinates()
+        )
         self.init(input: Input(),
                   state: State(),
                   extra: Extra(messageDiskSize: messageDiskSize,
                                mainAsyncScheduler: mainAsyncScheduler,
                                mainScheduler: mainScheduler,
-                               logic: logicFactory.make()))
+                               logic: logicFactory.make(),
+                               placeDiskStream: placeDiskStream))
     }
 
     public static func bind(from dependency: Dependency<Input, State, Extra>, disposeBag: DisposeBag) -> Output {
@@ -89,18 +97,6 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel> {
             })
             .disposed(by: disposeBag)
 
-        logic.gameLoaded
-            .subscribe(onNext: {
-                logic.cells.value.forEach { rows in
-                    rows.forEach { cell in
-                        let update = UpdateDisk(disk: cell.disk, coordinate: cell.coordinate, animated: false, completion: nil)
-                        state.updateBoard.accept(update)
-                    }
-                }
-                state.updateCount.accept(())
-            })
-            .disposed(by: disposeBag)
-
         logic.newGameBegan
             .subscribe(onNext: {
                 state.resetBoard.accept(())
@@ -108,18 +104,34 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel> {
             })
             .disposed(by: disposeBag)
 
-        logic.handleDiskWithCoordinate
-            .flatMap { disk, coordinate -> Observable<Bool> in
-                return placeDisk(disk, at: coordinate, animated: true, logic: logic, state: state, extra: extra)
-                    .asObservable()
-                    .catchError { _ in .empty() }
-            }
-            .subscribe(onNext: { _ in
-                state.nextTurn.accept(())
-                logic.save()
-                state.updateCount.accept(())
-            })
-            .disposed(by: disposeBag)
+        do {
+            let input = extra.placeDiskStream.input
+            let output = extra.placeDiskStream.output
+
+            logic.gameLoaded
+                .bind(to: input.refreshAllDisk)
+                .disposed(by: disposeBag)
+
+            output.didRefreshAllDisk
+                .bind(to: state.updateCount)
+                .disposed(by: disposeBag)
+
+            output.updateDisk
+                .bind(to: state.updateBoard)
+                .disposed(by: disposeBag)
+
+            output.didUpdateDisk
+                .subscribe(onNext: { _ in
+                    state.nextTurn.accept(())
+                    logic.save()
+                    state.updateCount.accept(())
+                })
+                .disposed(by: disposeBag)
+
+            logic.handleDiskWithCoordinate
+                .bind(to: input.handleDiskWithCoordinate)
+                .disposed(by: disposeBag)
+        }
 
         Observable.merge(logic.willTurnDiskOfComputer.map { ($0, true) },
                          logic.didTurnDiskOfComputer.map { ($0, false) })
@@ -218,111 +230,6 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel> {
 }
 
 extension ReversiViewModel {
-
-    static func setDisk(_ disk: Disk?,
-                        at coordinate: Coordinate,
-                        animated: Bool,
-                        logic: GameLogicProtocol,
-                        state: State) -> Single<Bool> {
-        Single<Bool>.create { observer in
-            logic.setDisk(disk, at: coordinate)
-            let update = UpdateDisk(disk: disk, coordinate: coordinate, animated: animated) {
-                observer(.success($0))
-            }
-            state.updateBoard.accept(update)
-            return Disposables.create()
-        }
-    }
-
-    static func animateSettingDisks(at coordinates: [Coordinate],
-                                    to disk: Disk,
-                                    logic:  GameLogicProtocol,
-                                    state: State) -> Single<Bool> {
-        guard let coordinate = coordinates.first else {
-            return .just(true)
-        }
-
-        guard let placeDiskCanceller = logic.placeDiskCanceller else {
-            return .error(Error.animationCancellerReleased)
-        }
-
-        return setDisk(disk, at: coordinate, animated: true, logic: logic, state: state)
-            .flatMap { finished in
-                if placeDiskCanceller.isCancelled {
-                    return .error(Error.animationCancellerCancelled)
-                }
-                if finished {
-                    return animateSettingDisks(at: Array(coordinates.dropFirst()), to: disk, logic: logic, state: state)
-                } else {
-                    let observables = coordinates.map { setDisk(disk, at: $0, animated: false, logic: logic, state: state).asObservable() }
-                    return Observable.zip(observables)
-                        .map { _ in false }
-                        .asSingle()
-                }
-            }
-    }
-
-    /// - Parameter completion: A closure to be executed when the animation sequence ends.
-    ///     This closure has no return value and takes a single Boolean argument that indicates
-    ///     whether or not the animations actually finished before the completion handler was called.
-    ///     If `animated` is `false`,  this closure is performed at the beginning of the next run loop cycle. This parameter may be `nil`.
-    /// - Throws: `DiskPlacementError` if the `disk` cannot be placed at (`x`, `y`).
-    static func placeDisk(_ disk: Disk,
-                          at coordinate: Coordinate,
-                          animated isAnimated: Bool,
-                          logic:  GameLogicProtocol,
-                          state: State,
-                          extra: Extra) -> Single<Bool> {
-        let diskCoordinates = logic.flippedDiskCoordinates(by: disk, at: coordinate)
-        if diskCoordinates.isEmpty {
-            return .error(Error.diskPlacement(disk: disk, coordinate: coordinate))
-        }
-
-        if isAnimated {
-            let cleanUp: () -> Void = {
-                logic.placeDiskCanceller = nil
-            }
-            logic.placeDiskCanceller = Canceller(cleanUp)
-            return animateSettingDisks(at: [coordinate] + diskCoordinates, to: disk, logic: logic, state: state)
-                .flatMap { finished in
-                    guard  let canceller = logic.placeDiskCanceller else {
-                        return .error(Error.animationCancellerReleased)
-                    }
-
-                    if canceller.isCancelled {
-                        return .error(Error.animationCancellerCancelled)
-                    }
-
-                    return .just(finished)
-                }
-                .do(onSuccess: { _ in
-                    cleanUp()
-                })
-        } else {
-            let coordinates = [coordinate] + diskCoordinates
-            let observables = coordinates.map {
-                setDisk(disk, at: $0, animated: false, logic: logic, state: state).asObservable()
-            }
-            return Observable.just(())
-                .observeOn(extra.mainAsyncScheduler)
-                .flatMap { Observable.zip(observables) }
-                .map { _ in true }
-                .asSingle()
-        }
-    }
-
-    enum Error: Swift.Error, Equatable {
-        case diskPlacement(disk: Disk, coordinate: Coordinate)
-        case animationCancellerReleased
-        case animationCancellerCancelled
-    }
-
-    public struct UpdateDisk {
-        public let disk: Disk?
-        public let coordinate: Coordinate
-        public let animated: Bool
-        public let completion: ((Bool) -> Void)?
-    }
 
     @available(*, unavailable)
     private enum MainScheduler {}
