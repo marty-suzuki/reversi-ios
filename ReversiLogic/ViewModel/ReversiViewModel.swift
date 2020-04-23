@@ -32,7 +32,6 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel> {
         let messageDisk = PublishRelay<Disk>()
         let messageDiskSizeConstant = PublishRelay<CGFloat>()
         let messageText = PublishRelay<String>()
-        let showAlert = PublishRelay<Alert>()
         let isPlayerDarkAnimating = PublishRelay<Bool>()
         let isPlayerLightAnimating = PublishRelay<Bool>()
         let playerDarkCount = PublishRelay<String>()
@@ -40,7 +39,6 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel> {
         let resetBoard = PublishRelay<Void>()
         let updateBoard = PublishRelay<UpdateDisk>()
         let updateCount = PublishRelay<Void>()
-        let nextTurn = PublishRelay<Void>()
     }
 
     public struct Extra: ExtraType {
@@ -122,7 +120,7 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel> {
 
             output.didUpdateDisk
                 .subscribe(onNext: { _ in
-                    state.nextTurn.accept(())
+                    logic.nextTurn()
                     logic.save()
                     state.updateCount.accept(())
                 })
@@ -144,21 +142,9 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel> {
             .disposed(by: disposeBag)
 
         input.handleReset
-            .map { _ -> Alert in
-                Alert.reset {
-                    logic.placeDiskCanceller?.cancel()
-                    logic.placeDiskCanceller = nil
-
-                    for side in Disk.allCases {
-                        logic.playerCancellers[side]?.cancel()
-                        logic.setPlayerCanceller(nil, for: side)
-                    }
-
-                    logic.newGame()
-                    logic.waitForPlayer()
-                }
-            }
-            .bind(to: state.showAlert)
+            .subscribe(onNext: {
+                logic.prepareForReset()
+            })
             .disposed(by: disposeBag)
 
         input.handleSelectedCoordinate
@@ -184,40 +170,10 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel> {
             })
             .disposed(by: disposeBag)
 
-        state.nextTurn
-            .subscribe(onNext: {
-                var turn: Disk
-                switch logic.status.value {
-                case let .turn(disk):
-                    turn = disk
-                case .gameOver:
-                    return
-                }
-
-                turn.flip()
-
-                if logic.validMoves(for: turn).isEmpty {
-                    if logic.validMoves(for: turn.flipped).isEmpty {
-                        logic.setStatus(.gameOver)
-                    } else {
-                        logic.setStatus(.turn(turn))
-
-                        let alert = Alert.pass {
-                            state.nextTurn.accept(())
-                        }
-                        state.showAlert.accept(alert)
-                    }
-                } else {
-                    logic.setStatus(.turn(turn))
-                    logic.waitForPlayer()
-                }
-            })
-            .disposed(by: disposeBag)
-
         return Output(messageDisk: state.messageDisk.asObservable(),
                       messageDiskSizeConstant: state.messageDiskSizeConstant.asObservable(),
                       messageText: state.messageText.asObservable(),
-                      showAlert: state.showAlert.asObservable(),
+                      showAlert: logic.handerAlert.asObservable(),
                       isPlayerDarkAnimating: state.isPlayerDarkAnimating.asObservable(),
                       isPlayerLightAnimating: state.isPlayerLightAnimating.asObservable(),
                       playerDarkCount: state.playerDarkCount.asObservable(),

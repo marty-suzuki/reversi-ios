@@ -1,49 +1,32 @@
 import RxCocoa
 import RxSwift
 
-@dynamicMemberLookup
 public protocol GameLogicProtocol: AnyObject {
-    var isDiskPlacing: Bool { get }
-    var placeDiskCanceller: Canceller? { get set }
-    var playerCancellers: [Disk: Canceller] { get }
     var gameLoaded: Observable<Void> { get }
     var newGameBegan: Observable<Void> { get }
     var handleDiskWithCoordinate: Observable<(Disk, Coordinate)> { get }
     var willTurnDiskOfComputer: Observable<Disk> { get}
     var didTurnDiskOfComputer: Observable<Disk> { get }
+    var handerAlert: Observable<Alert> { get }
 
-    func setPlayerCanceller(_ canceller: Canceller?, for disk: Disk)
+    var status: ValueObservable<GameData.Status> { get }
+    var sideWithMoreDisks: ValueObservable<Disk?> { get }
+    var countOfDark: ValueObservable<Int> { get }
+    var countOfLight: ValueObservable<Int> { get }
+    var playerDark: ValueObservable<GameData.Player> { get }
+    var playerLight: ValueObservable<GameData.Player> { get }
 
-    func validMoves(for disk: Disk) -> [Coordinate]
     func waitForPlayer()
     func setPlayer(for disk: Disk, with index: Int)
     func startGame()
     func newGame()
-    func setDisk(_ disk: Disk?, at coordinate: Coordinate)
-    func setStatus(_ status: GameData.Status)
     func handle(selectedCoordinate: Coordinate)
     func save()
-
-    subscript<T>(dynamicMember keyPath: KeyPath<GameStoreProtocol, ValueObservable<T>>) -> ValueObservable<T> { get }
-}
-
-extension GameLogicProtocol {
-
-    var isDiskPlacing: Bool {
-        placeDiskCanceller != nil
-    }
+    func nextTurn()
+    func prepareForReset()
 }
 
 final class GameLogic: GameLogicProtocol {
-
-    var playerCancellers: [Disk: Canceller] {
-        store.playerCancellers.value
-    }
-
-    var placeDiskCanceller: Canceller? {
-        get { store.placeDiskCanceller.value }
-        set { actionCreator.setPlaceDiskCanceller(newValue) }
-    }
 
     @PublishWrapper
     private(set) var gameLoaded: Observable<Void>
@@ -63,6 +46,16 @@ final class GameLogic: GameLogicProtocol {
     @PublishWrapper
     private(set) var placeDiskWithCoordinate: Observable<(Disk, Coordinate)>
 
+    @PublishWrapper
+    private(set) var handerAlert: Observable<Alert>
+
+    let status: ValueObservable<GameData.Status>
+    let sideWithMoreDisks: ValueObservable<Disk?>
+    let countOfDark: ValueObservable<Int>
+    let countOfLight: ValueObservable<Int>
+    let playerDark: ValueObservable<GameData.Player>
+    let playerLight: ValueObservable<GameData.Player>
+
     private let store: GameStoreProtocol
     private let actionCreator: GameActionCreatorProtocol
     private let mainScheduler: SchedulerType
@@ -78,6 +71,13 @@ final class GameLogic: GameLogicProtocol {
         self.store = store
         self.mainScheduler = mainScheduler
         self.actionCreator = actionCreator
+
+        self.status = store.status
+        self.sideWithMoreDisks = store.sideWithMoreDisks
+        self.countOfDark = store.countOfDark
+        self.countOfLight = store.countOfLight
+        self.playerDark = store.playerDark
+        self.playerLight = store.playerLight
 
         store.loaded
             .bind(to: _gameLoaded)
@@ -120,14 +120,6 @@ final class GameLogic: GameLogicProtocol {
             }
             .bind(to: _handleDiskWithCoordinate)
             .disposed(by: disposeBag)
-    }
-
-    subscript<T>(dynamicMember keyPath: KeyPath<GameStoreProtocol, ValueObservable<T>>) -> ValueObservable<T> {
-        store[keyPath: keyPath]
-    }
-
-    func setPlayerCanceller(_ canceller: Canceller?, for disk: Disk) {
-        actionCreator.setPlayerCanceller(canceller, for: disk)
     }
 
     func canPlace(disk: Disk, at coordinate: Coordinate) -> Bool {
@@ -177,7 +169,7 @@ final class GameLogic: GameLogicProtocol {
 
         save()
 
-        if let canceller = playerCancellers[disk] {
+        if let canceller = store.playerCancellers.value[disk] {
             canceller.cancel()
         }
 
@@ -189,7 +181,7 @@ final class GameLogic: GameLogicProtocol {
             player = store.playerLight.value
         }
 
-        if !isDiskPlacing, store.status.value == .turn(disk), case .computer = player {
+        if !store.isDiskPlacing.value, store.status.value == .turn(disk), case .computer = player {
             playTurnOfComputer()
         }
     }
@@ -204,7 +196,7 @@ final class GameLogic: GameLogicProtocol {
 
     func handle(selectedCoordinate: Coordinate) {
         guard
-            !isDiskPlacing,
+            !store.isDiskPlacing.value,
             case let .turn(turn) = store.status.value,
             case .manual = store.playerOfCurrentTurn.value
         else {
@@ -233,6 +225,57 @@ final class GameLogic: GameLogicProtocol {
 
         _readyComputerDisk.accept((disk, coordinate, canceller))
     }
+
+    func nextTurn() {
+        var turn: Disk
+        switch store.status.value {
+        case let .turn(disk):
+            turn = disk
+        case .gameOver:
+            return
+        }
+
+        turn.flip()
+
+        if validMoves(for: turn).isEmpty {
+            if validMoves(for: turn.flipped).isEmpty {
+                actionCreator.setStatus(.gameOver)
+            } else {
+                actionCreator.setStatus(.turn(turn))
+
+                let alert = Alert.pass { [weak self] in
+                    self?.nextTurn()
+                }
+                self._handerAlert.accept(alert)
+            }
+        } else {
+            actionCreator.setStatus(.turn(turn))
+            waitForPlayer()
+        }
+    }
+
+    func prepareForReset() {
+        let alert = Alert.reset { [weak self, store, actionCreator] in
+            store.placeDiskCanceller.value?.cancel()
+            actionCreator.setPlaceDiskCanceller(nil)
+
+            for side in Disk.allCases {
+                store.playerCancellers.value[side]?.cancel()
+                actionCreator.setPlayerCanceller(nil, for: side)
+            }
+
+            self?.newGame()
+            self?.waitForPlayer()
+        }
+        _handerAlert.accept(alert)
+    }
+
+    func save() {
+        actionCreator.save(cells: store.cells.value,
+                           status: store.status.value,
+                           playerDark: store.playerDark.value,
+                           playerLight: store.playerLight.value)
+    }
 }
 
 extension GameLogic {
@@ -242,18 +285,6 @@ extension GameLogic {
         case selfReleased
     }
 
-    func save() {
-        actionCreator.save(cells: store.cells.value,
-                           status: store.status.value,
-                           playerDark: store.playerDark.value,
-                           playerLight: store.playerLight.value)
-    }
-
-    func setStatus(_ status: GameData.Status) {
-        actionCreator.setStatus(status)
-    }
-
-    func setDisk(_ disk: Disk?, at coordinate: Coordinate) {
-        actionCreator.setDisk(disk, at: coordinate)
-    }
+    @available(*, unavailable)
+    private enum MainScheduler {}
 }
