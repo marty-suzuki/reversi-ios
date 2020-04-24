@@ -75,6 +75,7 @@
 		EDBC5A9B244F5EFC006D3865 /* GameDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBC5A9A244F5EFC006D3865 /* GameDispatcher.swift */; };
 		EDBC5A9D244F5F09006D3865 /* GameActionCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBC5A9C244F5F09006D3865 /* GameActionCreator.swift */; };
 		EDBDD2BB24530C9400BB545A /* ReversiViewModelFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBDD2BA24530C9400BB545A /* ReversiViewModelFactory.swift */; };
+		EDBDD2BD245313A400BB545A /* Watcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBDD2BC245313A400BB545A /* Watcher.swift */; };
 		EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A552448B3E9009E69F7 /* Coordinate.swift */; };
 		EDCC2A582448B5D0009E69F7 /* GameLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */; };
 		EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */; };
@@ -186,6 +187,7 @@
 		EDBC5A9A244F5EFC006D3865 /* GameDispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDispatcher.swift; sourceTree = "<group>"; };
 		EDBC5A9C244F5F09006D3865 /* GameActionCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameActionCreator.swift; sourceTree = "<group>"; };
 		EDBDD2BA24530C9400BB545A /* ReversiViewModelFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiViewModelFactory.swift; sourceTree = "<group>"; };
+		EDBDD2BC245313A400BB545A /* Watcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Watcher.swift; sourceTree = "<group>"; };
 		EDCC2A552448B3E9009E69F7 /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
 		EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLogicTests.swift; sourceTree = "<group>"; };
 		EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPublishWrapper.swift; sourceTree = "<group>"; };
@@ -433,6 +435,7 @@
 				EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */,
 				ED9AEF7D244C4223004A068C /* CountableProperty.swift */,
 				ED6D32AC24508C0500D0932F /* MockPublishResponse.swift */,
+				EDBDD2BC245313A400BB545A /* Watcher.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -728,6 +731,7 @@
 				ED4E71452448DA6D00518585 /* GameDataCacheTests.swift in Sources */,
 				ED20D533244ADCAE00F7BA46 /* MockGameDataCache.swift in Sources */,
 				ED9AEF7E244C4223004A068C /* CountableProperty.swift in Sources */,
+				EDBDD2BD245313A400BB545A /* Watcher.swift in Sources */,
 				ED6EAC9F24436EE800BAF620 /* GameDataIOTests.swift in Sources */,
 				EDCC2A582448B5D0009E69F7 /* GameLogicTests.swift in Sources */,
 				ED6D32B42450A38700D0932F /* GameActionCreatorTests.swift in Sources */,

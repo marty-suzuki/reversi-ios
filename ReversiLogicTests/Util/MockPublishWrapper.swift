@@ -17,7 +17,7 @@ final class MockPublishWrapper<Element> {
     init() {
         let relay = PublishRelay<Element>()
         self._observable = relay.asObservable()
-        self.projectedValue = Response { relay.accept($0) }
+        self.projectedValue = Response(relay: relay)
     }
 }
 
@@ -25,10 +25,16 @@ extension MockPublishWrapper {
 
     final class Response {
         fileprivate(set) var calledCount = 0
-        let accept: (Element) -> Void
+        fileprivate(set) var parameters: [Element] = []
+        private let relay: PublishRelay<Element>
 
-        init(accept: @escaping (Element) -> Void) {
-            self.accept = accept
+        init(relay: PublishRelay<Element>) {
+            self.relay = relay
+        }
+
+        func accept(_ value: Element) {
+            parameters += [value]
+            relay.accept(value)
         }
 
         func clear() {
