@@ -1,9 +1,9 @@
 @testable import ReversiLogic
 
-struct MockFlippedDiskCoordinates: FlippedDiskCoordinatesProtocol {
+final class MockFlippedDiskCoordinates: FlippedDiskCoordinatesProtocol {
 
     @MockResponse<ExecuteParameters, [Coordinate]>
-    private(set) var _execute: [Coordinate] = []
+    var _execute: [Coordinate] = []
 
     func execute(disk: Disk, at coordinate: Coordinate, cells: [[GameData.Cell]]) -> [Coordinate] {
         __execute.respond(.init(disk: disk, coordinate: coordinate, cells: cells))

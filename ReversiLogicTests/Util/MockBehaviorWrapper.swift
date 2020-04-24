@@ -39,6 +39,7 @@ extension MockBehaviorWrapeer {
 
         func clear() {
             calledCount = 0
+            parameters.removeAll()
         }
     }
 }

@@ -10,10 +10,75 @@ final class ReversiPlaceDiskStreamTests: XCTestCase {
         self.dependency = Dependency()
     }
 
-    func test_handleDiskWithCoordinate() {
-        let coordinate = Coordinate(x: 0, y: 0)
+    func test_handleDiskWithCoordinate() throws {
+        let stream = dependency.testTarget
+        let store = dependency.store
+        let flippedDiskCoordinates = dependency.flippedDiskCoordinates
+        let scheduler = dependency.testScheduler
 
-        dependency.testTarget.input.handleDiskWithCoordinate((.dark, coordinate))
+        store.$placeDiskCanceller.accept(Canceller {})
+
+        let coordinate = Coordinate(x: 0, y: 1)
+        let disk = Disk.dark
+
+        let updateDisk = Watcher(stream.output.updateDisk)
+        let didUpdateDisk = Watcher(stream.output.didUpdateDisk)
+
+        flippedDiskCoordinates._execute = [coordinate]
+        stream.input.handleDiskWithCoordinate((disk, coordinate))
+
+        XCTAssertEqual(updateDisk.calledCount,1)
+        let completion1 = try XCTUnwrap(updateDisk.parameters.last?.completion)
+        completion1(true)
+
+        scheduler.advanceTo(scheduler.clock + 200)
+        let completion2 = try XCTUnwrap(updateDisk.parameters.last?.completion)
+        completion2(true)
+
+        let expected = UpdateDisk(disk: disk,
+                                  coordinate: coordinate,
+                                  animated: true,
+                                  completion: nil)
+        XCTAssertEqual(updateDisk.calledCount, 2)
+        XCTAssertEqual(updateDisk.parameters, [expected, expected])
+
+        XCTAssertEqual(didUpdateDisk.calledCount, 1)
+        XCTAssertEqual(didUpdateDisk.parameters, [true])
+    }
+
+    func test_refreshAllDisk() throws {
+        let stream = dependency.testTarget
+        let store = dependency.store
+        let scheduler = dependency.testScheduler
+
+        store.$placeDiskCanceller.accept(Canceller {})
+
+        let coordinates = [Coordinate(x: 0, y: 0), Coordinate(x: 0, y: 1)]
+        let disk = Disk.dark
+
+        let updateDisk = Watcher(stream.output.updateDisk)
+        let didRefreshAllDisk = Watcher(stream.output.didRefreshAllDisk)
+
+        store.$cells.accept([coordinates.map { GameData.Cell(coordinate: $0, disk: disk) }])
+        stream.input.refreshAllDisk(())
+
+        XCTAssertEqual(updateDisk.calledCount, 2)
+        let completion1 = try XCTUnwrap(updateDisk.parameters.first?.completion)
+        completion1(true)
+
+        scheduler.advanceTo(scheduler.clock + 200)
+        let completion2 = try XCTUnwrap(updateDisk.parameters.last?.completion)
+        completion2(true)
+
+        let expected = coordinates.map {
+            UpdateDisk(disk: disk, coordinate: $0, animated: false, completion: nil)
+        }
+
+        XCTAssertEqual(updateDisk.calledCount, 2)
+        XCTAssertEqual(updateDisk.parameters, expected)
+
+        XCTAssertEqual(didRefreshAllDisk.calledCount, 1)
+        XCTAssertFalse(didRefreshAllDisk.parameters.isEmpty)
     }
 }
 
@@ -39,86 +104,6 @@ extension ReversiPlaceDiskStreamTests {
     }
 }
 
-// - MARK: placeDisk
-//extension ReversiViewModelTests {
-//
-//    func test_placeDisk_animatedがfalseの場合() throws {
-//        let logic = dependency.gameLogic
-//        let state = dependency.state
-//        let extra = dependency.extra
-//        let scheduler = dependency.testScheduler
-//
-//        let coordinate = Coordinate(x: 0, y: 1)
-//        let disk = Disk.dark
-//
-//        logic._flippedDiskCoordinates = [coordinate]
-//
-//        let isFinished = BehaviorRelay<Bool?>(value: nil)
-//        let disposable = ReversiViewModel.placeDisk(disk, at: coordinate, animated: false, logic: logic, state: state, extra: extra)
-//            .asObservable()
-//            .bind(to: isFinished)
-//        defer { disposable.dispose() }
-//
-//        scheduler.advanceTo(scheduler.clock + 200)
-//
-//        let updateBoard = dependency.$updateBoard
-//        updateBoard.parameters.forEach { $0.completion?(false) }
-//
-//        let expected = Dependency.SetDisk(disk: disk,
-//                                          coordinate: coordinate,
-//                                          animated: false,
-//                                          completion: nil)
-//
-//        XCTAssertEqual(updateBoard.calledCount, 2)
-//        XCTAssertEqual(updateBoard.parameters, [expected, expected])
-//
-//        XCTAssertEqual(isFinished.value, true)
-//    }
-//
-//    func test_placeDisk_animatedがtrueの場合() throws {
-//        let logic = dependency.gameLogic
-//        let state = dependency.state
-//        let extra = dependency.extra
-//        let coordinate = Coordinate(x: 0, y: 1)
-//        let disk = Disk.dark
-//
-//        logic._flippedDiskCoordinates = [coordinate]
-//
-//        let isFinished = BehaviorRelay<Bool?>(value: nil)
-//        let disposable = ReversiViewModel.placeDisk(disk, at: coordinate, animated: true, logic: logic, state: state, extra: extra)
-//            .asObservable()
-//            .bind(to: isFinished)
-//        defer { disposable.dispose() }
-//
-//        let updateBoard = dependency.$updateBoard
-//        let expected = Dependency.SetDisk(disk: disk,
-//                                          coordinate: coordinate,
-//                                          animated: true,
-//                                          completion: nil)
-//
-//        do {
-//            XCTAssertEqual(updateBoard.calledCount, 1)
-//            let parameter = try XCTUnwrap(updateBoard.parameters.last)
-//            parameter.completion?(false)
-//
-//            XCTAssertEqual(parameter, expected)
-//        }
-//
-//        do {
-//            updateBoard.parameters.forEach { $0.completion?(false) }
-//
-//            let expected2 = Dependency.SetDisk(disk: disk,
-//                                               coordinate: coordinate,
-//                                               animated: false,
-//                                               completion: nil)
-//            XCTAssertEqual(updateBoard.calledCount, 3)
-//            XCTAssertEqual(updateBoard.parameters, [expected, expected2, expected2])
-//        }
-//
-//        XCTAssertEqual(isFinished.value, false)
-//    }
-//}
-//
 //// - MARK: animateSettingDisks
 //
 //extension ReversiViewModelTests {

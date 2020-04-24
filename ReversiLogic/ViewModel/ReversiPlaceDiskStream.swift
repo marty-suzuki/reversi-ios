@@ -64,6 +64,7 @@ extension ReversiPlaceDiskStream {
                 }
                 return Observable.zip(updates).map { _ in }
             }
+            .share()
 
         let didUpdateDisk = dependency.inputObservables.handleDiskWithCoordinate
             .flatMap { disk, coordinate -> Observable<Bool> in
@@ -71,6 +72,7 @@ extension ReversiPlaceDiskStream {
                     .asObservable()
                     .catchError { _ in .empty() }
             }
+            .share()
 
         return Output(updateDisk: state.updateDisk,
                       didUpdateDisk: didUpdateDisk,
@@ -93,6 +95,7 @@ extension ReversiPlaceDiskStream {
             state.updateDisk.accept(update)
             return Disposables.create()
         }
+        .debug()
     }
 
     static func animateSettingDisks(at coordinates: [Coordinate],

@@ -21,4 +21,9 @@ final class Watcher<Element> {
             .bind(to: _calledCount)
             .disposed(by: disposeBag)
     }
+
+    func clear() {
+        _calledCount.accept(0)
+        _parameters.accept([])
+    }
 }

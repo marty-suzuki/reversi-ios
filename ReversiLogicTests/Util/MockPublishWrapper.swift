@@ -39,6 +39,7 @@ extension MockPublishWrapper {
 
         func clear() {
             calledCount = 0
+            parameters.removeAll()
         }
     }
 }
