@@ -2,12 +2,12 @@ import RxCocoa
 import RxSwift
 import Unio
 
-protocol ReversiManagementStreamType: AnyObject {
+public protocol ReversiManagementStreamType: AnyObject {
     var input: InputWrapper<ReversiManagementStream.Input> { get }
     var output: OutputWrapper<ReversiManagementStream.Output> { get }
 }
 
-final class ReversiManagementStream: UnioStream<ReversiManagementStream>, ReversiManagementStreamType {
+public final class ReversiManagementStream: UnioStream<ReversiManagementStream>, ReversiManagementStreamType {
 
     convenience init(store: GameStoreProtocol,
                      actionCreator: GameActionCreatorProtocol,
@@ -24,7 +24,7 @@ final class ReversiManagementStream: UnioStream<ReversiManagementStream>, Revers
 
 extension ReversiManagementStream {
 
-    struct Input: InputType {
+    public struct Input: InputType {
         let waitForPlayer = PublishRelay<Void>()
         let setPlayerForDiskWithIndex = PublishRelay<(Disk, Int)>()
         let startGame = PublishRelay<Void>()
@@ -35,7 +35,7 @@ extension ReversiManagementStream {
         let prepareForReset = PublishRelay<Void>()
     }
 
-    struct Output: OutputType {
+    public struct Output: OutputType {
         let gameLoaded: Observable<Void>
         let newGameBegan: Observable<Void>
         let handleDiskWithCoordinate: Observable<(Disk, Coordinate)>
@@ -51,7 +51,7 @@ extension ReversiManagementStream {
         let playerLight: ValueObservable<GameData.Player>
     }
 
-    struct State: StateType {
+    public struct State: StateType {
         let newGame = PublishRelay<Void>()
         let readyComputerDisk = PublishRelay<(Disk, Coordinate, Canceller)>()
 
@@ -62,14 +62,14 @@ extension ReversiManagementStream {
         let handerAlert = PublishRelay<Alert>()
     }
 
-    struct Extra: ExtraType {
+    public struct Extra: ExtraType {
         let store: GameStoreProtocol
         let actionCreator: GameActionCreatorProtocol
         let mainScheduler: SchedulerType
         let flippedDiskCoordinates: FlippedDiskCoordinatesProtocol
     }
 
-    static func bind(from dependency: Dependency<Input, State, Extra>, disposeBag: DisposeBag) -> Output {
+    public static func bind(from dependency: Dependency<Input, State, Extra>, disposeBag: DisposeBag) -> Output {
 
         let state = dependency.state
         let extra = dependency.extra

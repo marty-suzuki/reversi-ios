@@ -24,11 +24,11 @@ class ViewController: UIViewController {
 
     private let disposeBag = DisposeBag()
 
-    private lazy var viewModel = ReversiViewModel(
+    private let viewModelFactory = ReversiViewModelFactory()
+    private lazy var viewModel = viewModelFactory.make(
         messageDiskSize: messageDiskSizeConstraint.constant,
         mainAsyncScheduler: MainScheduler.asyncInstance,
-        mainScheduler: MainScheduler.instance,
-        logicFactory: GameLogicFactory()
+        mainScheduler: MainScheduler.instance
     )
 
     override func viewDidLoad() {

@@ -3,7 +3,12 @@ import RxCocoa
 import RxSwift
 import Unio
 
-public final class ReversiViewModel: UnioStream<ReversiViewModel> {
+public protocol ReversiViewModelType: AnyObject {
+    var input: InputWrapper<ReversiViewModel.Input> { get }
+    var output: OutputWrapper<ReversiViewModel.Output> { get }
+}
+
+public final class ReversiViewModel: UnioStream<ReversiViewModel>, ReversiViewModelType {
 
     public struct Input: InputType {
         public let startGame = PublishRelay<Void>()
@@ -49,22 +54,11 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel> {
         let managementStream: ReversiManagementStreamType
     }
 
-    public convenience init(messageDiskSize: CGFloat,
-                            mainAsyncScheduler: SchedulerType,
-                            mainScheduler: SchedulerType,
-                            logicFactory: GameLogicFactoryProtocol) {
-        let flippedDiskCoordinates = FlippedDiskCoordinates()
-        let placeDiskStream = ReversiPlaceDiskStream(
-            actionCreator: logicFactory.actionCreator,
-            store: logicFactory.store,
-            mainAsyncScheduler: mainAsyncScheduler,
-            flippedDiskCoordinates: flippedDiskCoordinates
-        )
-        let managementStream = ReversiManagementStream(
-            store: logicFactory.store,
-            actionCreator: logicFactory.actionCreator,
-            mainScheduler: mainScheduler,
-            flippedDiskCoordinates: flippedDiskCoordinates)
+    convenience init(messageDiskSize: CGFloat,
+                     mainAsyncScheduler: SchedulerType,
+                     mainScheduler: SchedulerType,
+                     placeDiskStream: ReversiPlaceDiskStreamType,
+                     managementStream: ReversiManagementStreamType) {
         self.init(input: Input(),
                   state: State(),
                   extra: Extra(messageDiskSize: messageDiskSize,
