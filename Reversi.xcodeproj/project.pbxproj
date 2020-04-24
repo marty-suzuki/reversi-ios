@@ -75,11 +75,9 @@
 		EDBC5A9B244F5EFC006D3865 /* GameDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBC5A9A244F5EFC006D3865 /* GameDispatcher.swift */; };
 		EDBC5A9D244F5F09006D3865 /* GameActionCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBC5A9C244F5F09006D3865 /* GameActionCreator.swift */; };
 		EDBDD2BB24530C9400BB545A /* ReversiViewModelFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBDD2BA24530C9400BB545A /* ReversiViewModelFactory.swift */; };
-		EDCC2A542448B324009E69F7 /* GameLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A532448B324009E69F7 /* GameLogic.swift */; };
 		EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A552448B3E9009E69F7 /* Coordinate.swift */; };
 		EDCC2A582448B5D0009E69F7 /* GameLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */; };
 		EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */; };
-		EDF8F038244CC87E00C2CF0B /* GameLogicFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF8F037244CC87E00C2CF0B /* GameLogicFactory.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -188,11 +186,9 @@
 		EDBC5A9A244F5EFC006D3865 /* GameDispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDispatcher.swift; sourceTree = "<group>"; };
 		EDBC5A9C244F5F09006D3865 /* GameActionCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameActionCreator.swift; sourceTree = "<group>"; };
 		EDBDD2BA24530C9400BB545A /* ReversiViewModelFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiViewModelFactory.swift; sourceTree = "<group>"; };
-		EDCC2A532448B324009E69F7 /* GameLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLogic.swift; sourceTree = "<group>"; };
 		EDCC2A552448B3E9009E69F7 /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
 		EDCC2A572448B5D0009E69F7 /* GameLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLogicTests.swift; sourceTree = "<group>"; };
 		EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPublishWrapper.swift; sourceTree = "<group>"; };
-		EDF8F037244CC87E00C2CF0B /* GameLogicFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLogicFactory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -413,8 +409,6 @@
 				ED6EACA52444BDE100BAF620 /* Canceller.swift */,
 				ED8CC36324478D5B00CD2CAB /* GameDataCache.swift */,
 				ED6EAC9A24436D9400BAF620 /* GameDataIO.swift */,
-				EDCC2A532448B324009E69F7 /* GameLogic.swift */,
-				EDF8F037244CC87E00C2CF0B /* GameLogicFactory.swift */,
 				EDAAB28E2452043200B72937 /* FlippedDiskCoordinates.swift */,
 			);
 			path = Models;
@@ -699,7 +693,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EDF8F038244CC87E00C2CF0B /* GameLogicFactory.swift in Sources */,
 				EDAAB293245216B500B72937 /* ReversiManagementStream.swift in Sources */,
 				EDAAB28D2452006000B72937 /* UpdateDisk.swift in Sources */,
 				EDBC5A99244F5EEF006D3865 /* GameStore.swift in Sources */,
@@ -707,7 +700,6 @@
 				ED6EACA12443838900BAF620 /* GameData.swift in Sources */,
 				ED8CC36424478D5B00CD2CAB /* GameDataCache.swift in Sources */,
 				EDBC5A9B244F5EFC006D3865 /* GameDispatcher.swift in Sources */,
-				EDCC2A542448B324009E69F7 /* GameLogic.swift in Sources */,
 				ED6EACA42444B1E900BAF620 /* ReversiViewModel.swift in Sources */,
 				EDAAB28B2451FB2E00B72937 /* ReversiPlaceDiskStream.swift in Sources */,
 				EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */,
