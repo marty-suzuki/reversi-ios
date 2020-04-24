@@ -95,7 +95,6 @@ extension ReversiPlaceDiskStream {
             state.updateDisk.accept(update)
             return Disposables.create()
         }
-        .debug()
     }
 
     static func animateSettingDisks(at coordinates: [Coordinate],
