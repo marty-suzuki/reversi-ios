@@ -14,33 +14,17 @@ final class ReversiPlaceDiskStreamTests: XCTestCase {
         let stream = dependency.testTarget
         let store = dependency.store
         let flippedDiskCoordinates = dependency.flippedDiskCoordinates
-        let scheduler = dependency.testScheduler
 
         store.$placeDiskCanceller.accept(Canceller {})
 
         let coordinate = Coordinate(x: 0, y: 1)
         let disk = Disk.dark
-
-        let updateDisk = Watcher(stream.output.updateDisk)
-        let didUpdateDisk = Watcher(stream.output.didUpdateDisk)
-
         flippedDiskCoordinates.callAsFunctionResponse = [coordinate]
+
+        let didUpdateDisk = Watcher(stream.output.didUpdateDisk)
         stream.input.handleDiskWithCoordinate((disk, coordinate))
-
-        XCTAssertEqual(updateDisk.calledCount,1)
-        let completion1 = try XCTUnwrap(updateDisk.parameters.last?.completion)
-        completion1(true)
-
-        scheduler.advanceTo(scheduler.clock + 200)
-        let completion2 = try XCTUnwrap(updateDisk.parameters.last?.completion)
-        completion2(true)
-
-        let expected = UpdateDisk(disk: disk,
-                                  coordinate: coordinate,
-                                  animated: true,
-                                  completion: nil)
-        XCTAssertEqual(updateDisk.calledCount, 2)
-        XCTAssertEqual(updateDisk.parameters, [expected, expected])
+        dependency.setDisk._callAsFunction.onNext(true)
+        dependency.setDisk._callAsFunction.onNext(true)
 
         XCTAssertEqual(didUpdateDisk.calledCount, 1)
         XCTAssertEqual(didUpdateDisk.parameters, [true])
@@ -49,33 +33,17 @@ final class ReversiPlaceDiskStreamTests: XCTestCase {
     func test_refreshAllDisk() throws {
         let stream = dependency.testTarget
         let store = dependency.store
-        let scheduler = dependency.testScheduler
 
         store.$placeDiskCanceller.accept(Canceller {})
 
         let coordinates = [Coordinate(x: 0, y: 0), Coordinate(x: 0, y: 1)]
         let disk = Disk.dark
-
-        let updateDisk = Watcher(stream.output.updateDisk)
-        let didRefreshAllDisk = Watcher(stream.output.didRefreshAllDisk)
-
         store.$cells.accept([coordinates.map { GameData.Cell(coordinate: $0, disk: disk) }])
+
+        let didRefreshAllDisk = Watcher(stream.output.didRefreshAllDisk)
         stream.input.refreshAllDisk(())
-
-        XCTAssertEqual(updateDisk.calledCount, 2)
-        let completion1 = try XCTUnwrap(updateDisk.parameters.first?.completion)
-        completion1(true)
-
-        scheduler.advanceTo(scheduler.clock + 200)
-        let completion2 = try XCTUnwrap(updateDisk.parameters.last?.completion)
-        completion2(true)
-
-        let expected = coordinates.map {
-            UpdateDisk(disk: disk, coordinate: $0, animated: false, completion: nil)
-        }
-
-        XCTAssertEqual(updateDisk.calledCount, 2)
-        XCTAssertEqual(updateDisk.parameters, expected)
+        dependency.setDisk._callAsFunction.onNext(true)
+        dependency.setDisk._callAsFunction.onNext(true)
 
         XCTAssertEqual(didRefreshAllDisk.calledCount, 1)
         XCTAssertFalse(didRefreshAllDisk.parameters.isEmpty)
@@ -89,6 +57,7 @@ extension ReversiPlaceDiskStreamTests {
         let store = MockGameStore()
         let actionCreator = MockGameActionCreator()
         let flippedDiskCoordinates = MockFlippedDiskCoordinates()
+        let setDisk = MockSetDisk()
         let testScheduler = TestScheduler(initialClock: 0)
 
         let testTarget: ReversiPlaceDiskStream
@@ -98,7 +67,8 @@ extension ReversiPlaceDiskStreamTests {
                 actionCreator: actionCreator,
                 store: store,
                 mainAsyncScheduler: testScheduler,
-                flippedDiskCoordinates: flippedDiskCoordinates
+                flippedDiskCoordinates: flippedDiskCoordinates,
+                setDisk: setDisk
             )
         }
     }

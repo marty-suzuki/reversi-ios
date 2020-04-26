@@ -22,11 +22,13 @@ public struct ReversiViewModelFactory: ReversiViewModelFactoryType {
         let actionCreator = GameActionCreator(dispatcher: dispatcher, cache: cache)
 
         let flippedDiskCoordinates = FlippedDiskCoordinates()
+        let setDisk = SetDisk()
         let placeDiskStream = ReversiPlaceDiskStream(
             actionCreator: actionCreator,
             store: store,
             mainAsyncScheduler: mainAsyncScheduler,
-            flippedDiskCoordinates: flippedDiskCoordinates
+            flippedDiskCoordinates: flippedDiskCoordinates,
+            setDisk: setDisk
         )
         let managementStream = ReversiManagementStream(
             store: store,

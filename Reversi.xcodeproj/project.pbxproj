@@ -77,6 +77,8 @@
 		EDBDD2BD245313A400BB545A /* Watcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBDD2BC245313A400BB545A /* Watcher.swift */; };
 		EDBDD2BF245325B700BB545A /* UpdateDiskExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBDD2BE245325B700BB545A /* UpdateDiskExtension.swift */; };
 		EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A552448B3E9009E69F7 /* Coordinate.swift */; };
+		EDDDC5732455EE63001F73C2 /* SetDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC5722455EE63001F73C2 /* SetDisk.swift */; };
+		EDDDC5762455F116001F73C2 /* MockSetDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC5752455F116001F73C2 /* MockSetDisk.swift */; };
 		EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */; };
 /* End PBXBuildFile section */
 
@@ -188,6 +190,8 @@
 		EDBDD2BC245313A400BB545A /* Watcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Watcher.swift; sourceTree = "<group>"; };
 		EDBDD2BE245325B700BB545A /* UpdateDiskExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateDiskExtension.swift; sourceTree = "<group>"; };
 		EDCC2A552448B3E9009E69F7 /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
+		EDDDC5722455EE63001F73C2 /* SetDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDisk.swift; sourceTree = "<group>"; };
+		EDDDC5752455F116001F73C2 /* MockSetDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSetDisk.swift; sourceTree = "<group>"; };
 		EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPublishWrapper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -313,12 +317,12 @@
 		ED20D531244ADC8600F7BA46 /* Mock */ = {
 			isa = PBXGroup;
 			children = (
+				EDDDC5742455F100001F73C2 /* PlaceDisk */,
 				ED6D32AA245089D400D0932F /* MockGameActionCreator.swift */,
 				ED20D532244ADCAE00F7BA46 /* MockGameDataCache.swift */,
 				ED6D32A8245088D700D0932F /* MockGameStore.swift */,
 				ED1BEDBA2452F0700066E68E /* MockFlippedDiskCoordinates.swift */,
 				ED1BEDB52452EBAA0066E68E /* MockReversiManagementStream.swift */,
-				ED1BEDB32452EA120066E68E /* MockReversiPlaceDiskStream.swift */,
 			);
 			path = Mock;
 			sourceTree = "<group>";
@@ -416,8 +420,8 @@
 		ED6EACA22444B1D100BAF620 /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
+				EDDDC5712455EE44001F73C2 /* PlaceDisk */,
 				EDAAB292245216B500B72937 /* ReversiManagementStream.swift */,
-				EDAAB28A2451FB2E00B72937 /* ReversiPlaceDiskStream.swift */,
 				ED6EACA32444B1E900BAF620 /* ReversiViewModel.swift */,
 				EDBDD2BA24530C9400BB545A /* ReversiViewModelFactory.swift */,
 			);
@@ -474,6 +478,24 @@
 				EDBDD2BE245325B700BB545A /* UpdateDiskExtension.swift */,
 			);
 			path = Extension;
+			sourceTree = "<group>";
+		};
+		EDDDC5712455EE44001F73C2 /* PlaceDisk */ = {
+			isa = PBXGroup;
+			children = (
+				EDAAB28A2451FB2E00B72937 /* ReversiPlaceDiskStream.swift */,
+				EDDDC5722455EE63001F73C2 /* SetDisk.swift */,
+			);
+			path = PlaceDisk;
+			sourceTree = "<group>";
+		};
+		EDDDC5742455F100001F73C2 /* PlaceDisk */ = {
+			isa = PBXGroup;
+			children = (
+				ED1BEDB32452EA120066E68E /* MockReversiPlaceDiskStream.swift */,
+				EDDDC5752455F116001F73C2 /* MockSetDisk.swift */,
+			);
+			path = PlaceDisk;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -713,6 +735,7 @@
 				EDAAB28D2452006000B72937 /* UpdateDisk.swift in Sources */,
 				EDBC5A99244F5EEF006D3865 /* GameStore.swift in Sources */,
 				EDAAB28F2452043200B72937 /* FlippedDiskCoordinates.swift in Sources */,
+				EDDDC5732455EE63001F73C2 /* SetDisk.swift in Sources */,
 				ED6EACA12443838900BAF620 /* GameData.swift in Sources */,
 				ED8CC36424478D5B00CD2CAB /* GameDataCache.swift in Sources */,
 				EDBC5A9B244F5EFC006D3865 /* GameDispatcher.swift in Sources */,
@@ -756,6 +779,7 @@
 				ED6D32AD24508C0500D0932F /* MockPublishResponse.swift in Sources */,
 				ED6D32A9245088D700D0932F /* MockGameStore.swift in Sources */,
 				ED1BEDB62452EBAA0066E68E /* MockReversiManagementStream.swift in Sources */,
+				EDDDC5762455F116001F73C2 /* MockSetDisk.swift in Sources */,
 				ED1BEDB42452EA120066E68E /* MockReversiPlaceDiskStream.swift in Sources */,
 				EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */,
 			);

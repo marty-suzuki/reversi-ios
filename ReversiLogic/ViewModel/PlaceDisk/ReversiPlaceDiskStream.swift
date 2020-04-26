@@ -12,13 +12,15 @@ public final class ReversiPlaceDiskStream: UnioStream<ReversiPlaceDiskStream>, R
     convenience init(actionCreator: GameActionCreatorProtocol,
                      store: GameStoreProtocol,
                      mainAsyncScheduler: SchedulerType,
-                     flippedDiskCoordinates: FlippedDiskCoordinatesProtocol) {
+                     flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
+                     setDisk: SetDiskProtocol) {
         self.init(input: Input(),
                   state: State(),
                   extra: Extra(actionCreator: actionCreator,
                                store: store,
                                mainAsyncScheduler: mainAsyncScheduler,
-                               flippedDiskCoordinates: flippedDiskCoordinates))
+                               flippedDiskCoordinates: flippedDiskCoordinates,
+                               setDisk: setDisk))
     }
 }
 
@@ -44,11 +46,13 @@ extension ReversiPlaceDiskStream {
         let store: GameStoreProtocol
         let mainAsyncScheduler: SchedulerType
         let flippedDiskCoordinates: FlippedDiskCoordinatesProtocol
+        let setDisk: SetDiskProtocol
     }
 
     public static func bind(from dependency: Dependency<Input, State, Extra>, disposeBag: DisposeBag) -> Output {
         let state = dependency.state
         let extra = dependency.extra
+        let setDisk = extra.setDisk
 
         let didRefreshAllDisk = dependency.inputObservables.refreshAllDisk
             .withLatestFrom(extra.store.cells)
@@ -58,8 +62,8 @@ extension ReversiPlaceDiskStream {
                         setDisk(cell.disk,
                                 at: cell.coordinate,
                                 animated: false,
-                                extra: extra,
-                                state: state).asObservable()
+                                updateDisk: state.updateDisk,
+                                actionCreator: extra.actionCreator).asObservable()
                     }
                 }
                 return Observable.zip(updates).map { _ in }
@@ -82,25 +86,12 @@ extension ReversiPlaceDiskStream {
 
 extension ReversiPlaceDiskStream {
 
-    static func setDisk(_ disk: Disk?,
-                        at coordinate: Coordinate,
-                        animated: Bool,
-                        extra: Extra,
-                        state: State) -> Single<Bool> {
-        Single<Bool>.create { observer in
-            extra.actionCreator.setDisk(disk, at: coordinate)
-            let update = UpdateDisk(disk: disk, coordinate: coordinate, animated: animated) {
-                observer(.success($0))
-            }
-            state.updateDisk.accept(update)
-            return Disposables.create()
-        }
-    }
-
     static func animateSettingDisks(at coordinates: [Coordinate],
                                     to disk: Disk,
                                     extra: Extra,
                                     state: State) -> Single<Bool> {
+        let setDisk = extra.setDisk
+
         guard let coordinate = coordinates.first else {
             return .just(true)
         }
@@ -109,7 +100,8 @@ extension ReversiPlaceDiskStream {
             return .error(Error.animationCancellerReleased)
         }
 
-        return setDisk(disk, at: coordinate, animated: true, extra: extra, state: state)
+        return setDisk(disk, at: coordinate, animated: true, updateDisk: state.updateDisk, actionCreator: extra.actionCreator)
+            .debug()
             .flatMap { finished in
                 if placeDiskCanceller.isCancelled {
                     return .error(Error.animationCancellerCancelled)
@@ -117,7 +109,7 @@ extension ReversiPlaceDiskStream {
                 if finished {
                     return animateSettingDisks(at: Array(coordinates.dropFirst()), to: disk, extra: extra, state: state)
                 } else {
-                    let observables = coordinates.map { setDisk(disk, at: $0, animated: false, extra: extra, state: state).asObservable() }
+                    let observables = coordinates.map { setDisk(disk, at: $0, animated: false, updateDisk: state.updateDisk, actionCreator: extra.actionCreator).asObservable() }
                     return Observable.zip(observables)
                         .map { _ in false }
                         .asSingle()
@@ -135,6 +127,8 @@ extension ReversiPlaceDiskStream {
                           animated isAnimated: Bool,
                           extra: Extra,
                           state: State) -> Single<Bool> {
+        let setDisk = extra.setDisk
+
         let diskCoordinates = extra.flippedDiskCoordinates(by: disk, at: coordinate, cells: extra.store.cells.value)
         if diskCoordinates.isEmpty {
             return .error(Error.diskPlacement(disk: disk, coordinate: coordinate))
@@ -163,7 +157,7 @@ extension ReversiPlaceDiskStream {
         } else {
             let coordinates = [coordinate] + diskCoordinates
             let observables = coordinates.map {
-                setDisk(disk, at: $0, animated: false, extra: extra, state: state).asObservable()
+                setDisk(disk, at: $0, animated: false, updateDisk: state.updateDisk, actionCreator: extra.actionCreator).asObservable()
             }
             return Observable.just(())
                 .observeOn(extra.mainAsyncScheduler)
