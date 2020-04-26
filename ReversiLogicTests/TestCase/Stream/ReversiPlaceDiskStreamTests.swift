@@ -14,6 +14,7 @@ final class ReversiPlaceDiskStreamTests: XCTestCase {
         let stream = dependency.testTarget
         let store = dependency.store
         let flippedDiskCoordinates = dependency.flippedDiskCoordinates
+        let animateSettingDisks = dependency.animateSettingDisks
 
         store.$placeDiskCanceller.accept(Canceller {})
 
@@ -23,11 +24,14 @@ final class ReversiPlaceDiskStreamTests: XCTestCase {
 
         let didUpdateDisk = Watcher(stream.output.didUpdateDisk)
         stream.input.handleDiskWithCoordinate((disk, coordinate))
-        dependency.setDisk._callAsFunction.onNext(true)
-        dependency.setDisk._callAsFunction.onNext(true)
+        animateSettingDisks._callAsFunction.onNext(true)
 
         XCTAssertEqual(didUpdateDisk.calledCount, 1)
         XCTAssertEqual(didUpdateDisk.parameters, [true])
+
+        let callAsFunction = animateSettingDisks.$_callAsFunction
+        XCTAssertEqual(callAsFunction.parameters, [.init(disk: disk,
+                                                         coordinates: [coordinate, coordinate])])
     }
 
     func test_refreshAllDisk() throws {
@@ -56,8 +60,11 @@ extension ReversiPlaceDiskStreamTests {
 
         let store = MockGameStore()
         let actionCreator = MockGameActionCreator()
+
         let flippedDiskCoordinates = MockFlippedDiskCoordinates()
         let setDisk = MockSetDisk()
+        let animateSettingDisks = MockAnimateSettingDisks()
+
         let testScheduler = TestScheduler(initialClock: 0)
 
         let testTarget: ReversiPlaceDiskStream
@@ -68,7 +75,8 @@ extension ReversiPlaceDiskStreamTests {
                 store: store,
                 mainAsyncScheduler: testScheduler,
                 flippedDiskCoordinates: flippedDiskCoordinates,
-                setDisk: setDisk
+                setDisk: setDisk,
+                animateSettingDisks: animateSettingDisks
             )
         }
     }

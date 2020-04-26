@@ -13,14 +13,16 @@ public final class ReversiPlaceDiskStream: UnioStream<ReversiPlaceDiskStream>, R
                      store: GameStoreProtocol,
                      mainAsyncScheduler: SchedulerType,
                      flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
-                     setDisk: SetDiskProtocol) {
+                     setDisk: SetDiskProtocol,
+                     animateSettingDisks: AnimateSettingDisksProtocol) {
         self.init(input: Input(),
                   state: State(),
                   extra: Extra(actionCreator: actionCreator,
                                store: store,
                                mainAsyncScheduler: mainAsyncScheduler,
                                flippedDiskCoordinates: flippedDiskCoordinates,
-                               setDisk: setDisk))
+                               setDisk: setDisk,
+                               animateSettingDisks: animateSettingDisks))
     }
 }
 
@@ -47,6 +49,7 @@ extension ReversiPlaceDiskStream {
         let mainAsyncScheduler: SchedulerType
         let flippedDiskCoordinates: FlippedDiskCoordinatesProtocol
         let setDisk: SetDiskProtocol
+        let animateSettingDisks: AnimateSettingDisksProtocol
     }
 
     public static func bind(from dependency: Dependency<Input, State, Extra>, disposeBag: DisposeBag) -> Output {
@@ -86,37 +89,6 @@ extension ReversiPlaceDiskStream {
 
 extension ReversiPlaceDiskStream {
 
-    static func animateSettingDisks(at coordinates: [Coordinate],
-                                    to disk: Disk,
-                                    extra: Extra,
-                                    state: State) -> Single<Bool> {
-        let setDisk = extra.setDisk
-
-        guard let coordinate = coordinates.first else {
-            return .just(true)
-        }
-
-        guard let placeDiskCanceller = extra.store.placeDiskCanceller.value else {
-            return .error(Error.animationCancellerReleased)
-        }
-
-        return setDisk(disk, at: coordinate, animated: true, updateDisk: state.updateDisk, actionCreator: extra.actionCreator)
-            .debug()
-            .flatMap { finished in
-                if placeDiskCanceller.isCancelled {
-                    return .error(Error.animationCancellerCancelled)
-                }
-                if finished {
-                    return animateSettingDisks(at: Array(coordinates.dropFirst()), to: disk, extra: extra, state: state)
-                } else {
-                    let observables = coordinates.map { setDisk(disk, at: $0, animated: false, updateDisk: state.updateDisk, actionCreator: extra.actionCreator).asObservable() }
-                    return Observable.zip(observables)
-                        .map { _ in false }
-                        .asSingle()
-                }
-            }
-    }
-
     /// - Parameter completion: A closure to be executed when the animation sequence ends.
     ///     This closure has no return value and takes a single Boolean argument that indicates
     ///     whether or not the animations actually finished before the completion handler was called.
@@ -128,6 +100,7 @@ extension ReversiPlaceDiskStream {
                           extra: Extra,
                           state: State) -> Single<Bool> {
         let setDisk = extra.setDisk
+        let animateSettingDisks = extra.animateSettingDisks
 
         let diskCoordinates = extra.flippedDiskCoordinates(by: disk, at: coordinate, cells: extra.store.cells.value)
         if diskCoordinates.isEmpty {
@@ -139,7 +112,12 @@ extension ReversiPlaceDiskStream {
                 extra.actionCreator.setPlaceDiskCanceller(nil)
             }
             extra.actionCreator.setPlaceDiskCanceller(Canceller(cleanUp))
-            return animateSettingDisks(at: [coordinate] + diskCoordinates, to: disk, extra: extra, state: state)
+            return animateSettingDisks(at: [coordinate] + diskCoordinates,
+                                       to: disk,
+                                       setDisk: setDisk,
+                                       updateDisk: state.updateDisk,
+                                       actionCreator: extra.actionCreator,
+                                       store: extra.store)
                 .flatMap { finished in
                     guard  let canceller = extra.store.placeDiskCanceller.value else {
                         return .error(Error.animationCancellerReleased)
