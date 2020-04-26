@@ -22,7 +22,7 @@ struct ValidMoves: ValidMovesProtocol {
     let store: GameStoreProtocol
 
     func canPlace(disk: Disk, at coordinate: Coordinate) -> Bool {
-        return !flippedDiskCoordinates(by: disk, at: coordinate, cells: store.cells.value)
+        return !flippedDiskCoordinates(by: disk, at: coordinate)
             .isEmpty
     }
 

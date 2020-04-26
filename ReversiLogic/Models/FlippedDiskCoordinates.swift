@@ -1,10 +1,22 @@
+public protocol FlippedDiskCoordinatesFactoryProtocol {
+    func make(store: GameStoreProtocol) -> FlippedDiskCoordinatesProtocol
+}
+
+public struct FlippedDiskCoordinatesFactory: FlippedDiskCoordinatesFactoryProtocol {
+    public func make(store: GameStoreProtocol) -> FlippedDiskCoordinatesProtocol {
+        FlippedDiskCoordinates(store: store)
+    }
+}
+
 public protocol FlippedDiskCoordinatesProtocol {
-    func callAsFunction(by disk: Disk, at coordinate: Coordinate, cells: [[GameData.Cell]]) -> [Coordinate]
+    func callAsFunction(by disk: Disk, at coordinate: Coordinate) -> [Coordinate]
 }
 
 struct FlippedDiskCoordinates: FlippedDiskCoordinatesProtocol {
 
-    func callAsFunction(by disk: Disk, at coordinate: Coordinate, cells: [[GameData.Cell]]) -> [Coordinate] {
+    let store: GameStoreProtocol
+
+    func callAsFunction(by disk: Disk, at coordinate: Coordinate) -> [Coordinate] {
         let directions = [
             (x: -1, y: -1),
             (x:  0, y: -1),
@@ -16,7 +28,7 @@ struct FlippedDiskCoordinates: FlippedDiskCoordinatesProtocol {
             (x: -1, y:  1),
         ]
 
-        guard cells[coordinate] == nil else {
+        guard store.cells.value[coordinate] == nil else {
             return []
         }
 
@@ -32,7 +44,7 @@ struct FlippedDiskCoordinates: FlippedDiskCoordinatesProtocol {
                 y += direction.y
 
                 let coordinate = Coordinate(x: x, y: y)
-                switch (disk, cells[coordinate]) { // Uses tuples to make patterns exhaustive
+                switch (disk, store.cells.value[coordinate]) { // Uses tuples to make patterns exhaustive
                 case (.dark, .dark?), (.light, .light?):
                     diskCoordinates.append(contentsOf: diskCoordinatesInLine)
                     break flipping

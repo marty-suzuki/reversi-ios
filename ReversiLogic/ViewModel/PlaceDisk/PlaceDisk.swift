@@ -50,7 +50,7 @@ struct PlaceDisk: PlaceDiskProtocol {
                         at coordinate: Coordinate,
                         animated isAnimated: Bool) -> Single<Bool> {
 
-        let diskCoordinates = flippedDiskCoordinates(by: disk, at: coordinate, cells: store.cells.value)
+        let diskCoordinates = flippedDiskCoordinates(by: disk, at: coordinate)
         if diskCoordinates.isEmpty {
             return .error(Error.diskPlacement(disk: disk, coordinate: coordinate))
         }

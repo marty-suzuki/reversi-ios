@@ -12,7 +12,7 @@ public final class ReversiPlaceDiskStream: UnioStream<ReversiPlaceDiskStream>, R
     convenience init(actionCreator: GameActionCreatorProtocol,
                      store: GameStoreProtocol,
                      mainAsyncScheduler: SchedulerType,
-                     flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
+                     flippedDiskCoordinatesFactory: FlippedDiskCoordinatesFactoryProtocol,
                      setDiskFactory: SetDiskFactoryProtocol,
                      animateSettingDisksFactory: AnimateSettingDisksFactoryProtocol,
                      placeDiskFactory: PlaceDiskFactoryProtocol) {
@@ -27,6 +27,8 @@ public final class ReversiPlaceDiskStream: UnioStream<ReversiPlaceDiskStream>, R
             store: store
         )
 
+        let flippedDiskCoordinates = flippedDiskCoordinatesFactory.make(store: store)
+
         let placeDisk = placeDiskFactory.make(
             flippedDiskCoordinates: flippedDiskCoordinates,
             setDisk: setDisk,
@@ -37,10 +39,7 @@ public final class ReversiPlaceDiskStream: UnioStream<ReversiPlaceDiskStream>, R
         )
         self.init(input: Input(),
                   state: state,
-                  extra: Extra(actionCreator: actionCreator,
-                               store: store,
-                               mainAsyncScheduler: mainAsyncScheduler,
-                               flippedDiskCoordinates: flippedDiskCoordinates,
+                  extra: Extra(store: store,
                                setDisk: setDisk,
                                placeDisk: placeDisk))
     }
@@ -64,10 +63,7 @@ extension ReversiPlaceDiskStream {
     }
 
     public struct Extra: ExtraType {
-        let actionCreator: GameActionCreatorProtocol
         let store: GameStoreProtocol
-        let mainAsyncScheduler: SchedulerType
-        let flippedDiskCoordinates: FlippedDiskCoordinatesProtocol
         let setDisk: SetDiskProtocol
         let placeDisk: PlaceDiskProtocol
     }

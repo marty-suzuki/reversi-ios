@@ -12,8 +12,10 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
     convenience init(store: GameStoreProtocol,
                      actionCreator: GameActionCreatorProtocol,
                      mainScheduler: SchedulerType,
-                     flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
+                     flippedDiskCoordinatesFactory: FlippedDiskCoordinatesFactoryProtocol,
                      validMovesFactory: ValidMovesFactoryProtocol) {
+        let flippedDiskCoordinates = flippedDiskCoordinatesFactory.make(store: store)
+
         let validMoves = validMovesFactory.make(
             flippedDiskCoordinates: flippedDiskCoordinates,
             store: store
