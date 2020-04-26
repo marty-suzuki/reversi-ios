@@ -89,9 +89,7 @@ struct PlaceDisk: PlaceDiskProtocol {
             let observables = coordinates.map {
                 setDisk(disk,
                         at: $0,
-                        animated: false,
-                        updateDisk: updateDisk,
-                        actionCreator: actionCreator).asObservable()
+                        animated: false).asObservable()
             }
             return Observable.just(())
                 .observeOn(mainAsyncScheduler)

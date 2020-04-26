@@ -22,7 +22,7 @@ public struct ReversiViewModelFactory: ReversiViewModelFactoryType {
         let actionCreator = GameActionCreator(dispatcher: dispatcher, cache: cache)
 
         let flippedDiskCoordinates = FlippedDiskCoordinates()
-        let setDisk = SetDisk()
+        let setDiskFactory = SetDiskFactory()
         let animateSettingDisks = AnimateSettingDisks()
 
         let placeDiskFactory = PlaceDiskFactory()
@@ -32,7 +32,7 @@ public struct ReversiViewModelFactory: ReversiViewModelFactoryType {
             store: store,
             mainAsyncScheduler: mainAsyncScheduler,
             flippedDiskCoordinates: flippedDiskCoordinates,
-            setDisk: setDisk,
+            setDiskFactory: setDiskFactory,
             animateSettingDisks: animateSettingDisks,
             placeDiskFactory: placeDiskFactory
         )

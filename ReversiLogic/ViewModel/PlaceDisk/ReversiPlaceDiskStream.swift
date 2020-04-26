@@ -13,10 +13,15 @@ public final class ReversiPlaceDiskStream: UnioStream<ReversiPlaceDiskStream>, R
                      store: GameStoreProtocol,
                      mainAsyncScheduler: SchedulerType,
                      flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
-                     setDisk: SetDiskProtocol,
+                     setDiskFactory: SetDiskFactoryProtocol,
                      animateSettingDisks: AnimateSettingDisksProtocol,
                      placeDiskFactory: PlaceDiskFactoryProtocol) {
         let state = State()
+        let setDisk = setDiskFactory.make(
+            updateDisk: state.updateDisk,
+            actionCreator: actionCreator
+        )
+
         let placeDisk = placeDiskFactory.make(
             flippedDiskCoordinates: flippedDiskCoordinates,
             setDisk: setDisk,
@@ -76,9 +81,7 @@ extension ReversiPlaceDiskStream {
                     rows.map { cell in
                         setDisk(cell.disk,
                                 at: cell.coordinate,
-                                animated: false,
-                                updateDisk: state.updateDisk,
-                                actionCreator: extra.actionCreator).asObservable()
+                                animated: false).asObservable()
                     }
                 }
                 return Observable.zip(updates).map { _ in }

@@ -28,9 +28,7 @@ struct AnimateSettingDisks: AnimateSettingDisksProtocol {
 
         return setDisk(disk,
                        at: coordinate,
-                       animated: true,
-                       updateDisk: updateDisk,
-                       actionCreator: actionCreator)
+                       animated: true)
             .flatMap { [animateSettingDisks = self] finished in
                 if placeDiskCanceller.isCancelled {
                     return .error(Error.animationCancellerCancelled)
@@ -46,9 +44,7 @@ struct AnimateSettingDisks: AnimateSettingDisksProtocol {
                     let observables = coordinates.map {
                         setDisk(disk,
                                 at: $0,
-                                animated: false,
-                                updateDisk: updateDisk,
-                                actionCreator: actionCreator).asObservable()
+                                animated: false).asObservable()
                     }
                     return Observable.zip(observables)
                         .map { _ in false }

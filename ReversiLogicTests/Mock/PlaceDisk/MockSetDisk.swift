@@ -2,6 +2,16 @@ import RxRelay
 import RxSwift
 @testable import ReversiLogic
 
+struct MockSetDiskFactory: SetDiskFactoryProtocol {
+
+    let setDisk: MockSetDisk
+
+    func make(updateDisk: PublishRelay<UpdateDisk>,
+              actionCreator: GameActionCreatorProtocol) -> SetDiskProtocol {
+        setDisk
+    }
+}
+
 struct MockSetDisk: SetDiskProtocol {
 
     @MockPublishResponse<Parameters, Bool>
@@ -9,9 +19,7 @@ struct MockSetDisk: SetDiskProtocol {
 
     func callAsFunction(_ disk: Disk?,
                         at coordinate: Coordinate,
-                        animated: Bool,
-                        updateDisk: PublishRelay<UpdateDisk>,
-                        actionCreator: GameActionCreatorProtocol) -> Single<Bool> {
+                        animated: Bool) -> Single<Bool> {
         let parameters = Parameters(disk: disk, coordinate: coordinate, animated: animated)
         return __callAsFunction.respond(parameters).take(1).asSingle()
     }
