@@ -14,12 +14,17 @@ public final class ReversiPlaceDiskStream: UnioStream<ReversiPlaceDiskStream>, R
                      mainAsyncScheduler: SchedulerType,
                      flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
                      setDiskFactory: SetDiskFactoryProtocol,
-                     animateSettingDisks: AnimateSettingDisksProtocol,
+                     animateSettingDisksFactory: AnimateSettingDisksFactoryProtocol,
                      placeDiskFactory: PlaceDiskFactoryProtocol) {
         let state = State()
         let setDisk = setDiskFactory.make(
             updateDisk: state.updateDisk,
             actionCreator: actionCreator
+        )
+
+        let animateSettingDisks = animateSettingDisksFactory.make(
+            setDisk: setDisk,
+            store: store
         )
 
         let placeDisk = placeDiskFactory.make(

@@ -64,12 +64,7 @@ struct PlaceDisk: PlaceDiskProtocol {
                 actionCreator.setPlaceDiskCanceller(nil)
             }
             actionCreator.setPlaceDiskCanceller(Canceller(cleanUp))
-            return animateSettingDisks(at: [coordinate] + diskCoordinates,
-                                       to: disk,
-                                       setDisk: setDisk,
-                                       updateDisk: updateDisk,
-                                       actionCreator: actionCreator,
-                                       store: store)
+            return animateSettingDisks(at: [coordinate] + diskCoordinates, to: disk)
                 .flatMap { [store] finished in
                     guard  let canceller = store.placeDiskCanceller.value else {
                         return .error(Error.animationCancellerReleased)

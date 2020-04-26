@@ -69,13 +69,14 @@ extension ReversiPlaceDiskStreamTests {
         init() {
             let placeDiskFactory = MockPlaceDiskFactory(placeDisk: placeDisk)
             let setDiskFactory = MockSetDiskFactory(setDisk: setDisk)
+            let animateSettingDisksFactory = MockAnimateSettingDisksFactory(animateSettingDisks: animateSettingDisks)
             self.testTarget = ReversiPlaceDiskStream(
                 actionCreator: actionCreator,
                 store: store,
                 mainAsyncScheduler: testScheduler,
                 flippedDiskCoordinates: flippedDiskCoordinates,
                 setDiskFactory: setDiskFactory,
-                animateSettingDisks: animateSettingDisks,
+                animateSettingDisksFactory: animateSettingDisksFactory,
                 placeDiskFactory: placeDiskFactory
             )
         }

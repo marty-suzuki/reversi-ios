@@ -1,23 +1,31 @@
 import RxRelay
 import RxSwift
 
-protocol AnimateSettingDisksProtocol {
+public protocol AnimateSettingDisksFactoryProtocol {
+    func make(setDisk: SetDiskProtocol,
+              store: GameStoreProtocol) -> AnimateSettingDisksProtocol
+}
+
+public struct AnimateSettingDisksFactory: AnimateSettingDisksFactoryProtocol {
+    public func make(setDisk: SetDiskProtocol,
+                     store: GameStoreProtocol) -> AnimateSettingDisksProtocol {
+        AnimateSettingDisks(setDisk: setDisk,
+                            store: store)
+    }
+}
+
+public protocol AnimateSettingDisksProtocol {
     func callAsFunction(at coordinates: [Coordinate],
-                        to disk: Disk,
-                        setDisk: SetDiskProtocol,
-                        updateDisk: PublishRelay<UpdateDisk>,
-                        actionCreator: GameActionCreatorProtocol,
-                        store: GameStoreProtocol) -> Single<Bool>
+                        to disk: Disk) -> Single<Bool>
 }
 
 struct AnimateSettingDisks: AnimateSettingDisksProtocol {
 
+    let setDisk: SetDiskProtocol
+    let store: GameStoreProtocol
+
     func callAsFunction(at coordinates: [Coordinate],
-                        to disk: Disk,
-                        setDisk: SetDiskProtocol,
-                        updateDisk: PublishRelay<UpdateDisk>,
-                        actionCreator: GameActionCreatorProtocol,
-                        store: GameStoreProtocol) -> Single<Bool> {
+                        to disk: Disk) -> Single<Bool> {
         guard let coordinate = coordinates.first else {
             return .just(true)
         }
@@ -29,17 +37,12 @@ struct AnimateSettingDisks: AnimateSettingDisksProtocol {
         return setDisk(disk,
                        at: coordinate,
                        animated: true)
-            .flatMap { [animateSettingDisks = self] finished in
+            .flatMap { [animateSettingDisks = self, setDisk] finished in
                 if placeDiskCanceller.isCancelled {
                     return .error(Error.animationCancellerCancelled)
                 }
                 if finished {
-                    return animateSettingDisks(at: Array(coordinates.dropFirst()),
-                                               to: disk,
-                                               setDisk: setDisk,
-                                               updateDisk: updateDisk,
-                                               actionCreator: actionCreator,
-                                               store: store)
+                    return animateSettingDisks(at: Array(coordinates.dropFirst()), to: disk)
                 } else {
                     let observables = coordinates.map {
                         setDisk(disk,
