@@ -94,7 +94,6 @@ extension ReversiManagementStream {
         let newGameBegan = PublishRelay<Void>()
         let willTurnDiskOfComputer = PublishRelay<Disk>()
         let didTurnDiskOfComputer = PublishRelay<Disk>()
-        let handleDiskWithCoordinate = PublishRelay<(Disk, Coordinate)>()
         let handerAlert = PublishRelay<Alert>()
 
         let updateDisk = PublishRelay<UpdateDisk>()
@@ -129,24 +128,6 @@ extension ReversiManagementStream {
             .subscribe(onNext: { actionCreator.load() })
             .disposed(by: disposeBag)
 
-        state.readyComputerDisk
-            .flatMap { disk, coordinate, canceller -> Maybe<(Disk, Coordinate)> in
-                weak var canceller = canceller
-                return Maybe.just(())
-                    .delay(.seconds(2), scheduler: extra.mainScheduler)
-                    .flatMap { _ -> Maybe<(Disk, Coordinate)> in
-                        if let canceller = canceller, canceller.isCancelled {
-                            return .empty()
-                        }
-                        return .just((disk, coordinate))
-                    }
-                    .do(onNext: { _ in
-                        canceller?.cancel()
-                    })
-            }
-            .bind(to: state.handleDiskWithCoordinate)
-            .disposed(by: disposeBag)
-
         dependency.inputObservables.waitForPlayer
             .subscribe(onNext: { waitForPlayer(extra: extra, state: state) })
             .disposed(by: disposeBag)
@@ -157,10 +138,6 @@ extension ReversiManagementStream {
 
         dependency.inputObservables.newGame
             .bind(to: state.newGame)
-            .disposed(by: disposeBag)
-
-        dependency.inputObservables.handleSelectedCoordinate
-            .subscribe(onNext: { handle(selectedCoordinate: $0, extra: extra, state: state) })
             .disposed(by: disposeBag)
 
         dependency.inputObservables.save
@@ -189,7 +166,41 @@ extension ReversiManagementStream {
             }
             .share()
 
-        let didUpdateDisk = state.handleDiskWithCoordinate
+        let handleDiskWithCoordinate: Observable<(Disk, Coordinate)> = {
+            let o1 = dependency.inputObservables.handleSelectedCoordinate
+                .flatMap { coordinate -> Observable<(Disk, Coordinate)> in
+                    let store = extra.store
+                    guard
+                        !store.isDiskPlacing.value,
+                        case let .turn(turn) = store.status.value,
+                        case .manual = store.playerOfCurrentTurn.value
+                    else {
+                        return .empty()
+                    }
+                    return .just((turn, coordinate))
+                }
+
+            let o2 = state.readyComputerDisk
+                .flatMap { disk, coordinate, canceller -> Maybe<(Disk, Coordinate)> in
+                    weak var canceller = canceller
+                    return Maybe.just(())
+                        .delay(.seconds(2), scheduler: extra.mainScheduler)
+                        .flatMap { _ -> Maybe<(Disk, Coordinate)> in
+                            if let canceller = canceller, canceller.isCancelled {
+                                return .empty()
+                            }
+                            return .just((disk, coordinate))
+                        }
+                        .do(onNext: { _ in
+                            canceller?.cancel()
+                        })
+                }
+                .asObservable()
+
+            return Observable.merge(o1, o2)
+        }()
+
+        let didUpdateDisk = handleDiskWithCoordinate
             .flatMap { disk, coordinate -> Observable<Bool> in
                 extra.placeDisk(disk, at: coordinate, animated: true)
                     .asObservable()
@@ -295,18 +306,6 @@ extension ReversiManagementStream {
         if !store.isDiskPlacing.value, store.status.value == .turn(disk), case .computer = player {
             playTurnOfComputer(extra: extra, state: state)
         }
-    }
-
-    static func handle(selectedCoordinate: Coordinate, extra: Extra, state: State) {
-        let store = extra.store
-        guard
-            !store.isDiskPlacing.value,
-            case let .turn(turn) = store.status.value,
-            case .manual = store.playerOfCurrentTurn.value
-        else {
-            return
-        }
-        state.handleDiskWithCoordinate.accept((turn, selectedCoordinate))
     }
 
     static func nextTurn(extra: Extra, state: State) {
