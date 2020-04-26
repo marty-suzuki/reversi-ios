@@ -24,13 +24,17 @@ public struct ReversiViewModelFactory: ReversiViewModelFactoryType {
         let flippedDiskCoordinates = FlippedDiskCoordinates()
         let setDisk = SetDisk()
         let animateSettingDisks = AnimateSettingDisks()
+
+        let placeDiskFactory = PlaceDiskFactory()
+
         let placeDiskStream = ReversiPlaceDiskStream(
             actionCreator: actionCreator,
             store: store,
             mainAsyncScheduler: mainAsyncScheduler,
             flippedDiskCoordinates: flippedDiskCoordinates,
             setDisk: setDisk,
-            animateSettingDisks: animateSettingDisks
+            animateSettingDisks: animateSettingDisks,
+            placeDiskFactory: placeDiskFactory
         )
         let managementStream = ReversiManagementStream(
             store: store,

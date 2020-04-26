@@ -78,9 +78,11 @@
 		EDBDD2BF245325B700BB545A /* UpdateDiskExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBDD2BE245325B700BB545A /* UpdateDiskExtension.swift */; };
 		EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A552448B3E9009E69F7 /* Coordinate.swift */; };
 		EDDDC5732455EE63001F73C2 /* SetDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC5722455EE63001F73C2 /* SetDisk.swift */; };
-		EDDDC5762455F116001F73C2 /* MockSetDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC5752455F116001F73C2 /* MockSetDisk.swift */; };
 		EDDDC5782455F6BA001F73C2 /* AnimateSettingDisks.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC5772455F6BA001F73C2 /* AnimateSettingDisks.swift */; };
 		EDDDC57A2455F98F001F73C2 /* MockAnimateSettingDisks.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC5792455F98F001F73C2 /* MockAnimateSettingDisks.swift */; };
+		EDDDC57C2455FB23001F73C2 /* PlaceDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC57B2455FB23001F73C2 /* PlaceDisk.swift */; };
+		EDDDC57E2455FF64001F73C2 /* MockSetDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC57D2455FF64001F73C2 /* MockSetDisk.swift */; };
+		EDE3249A245601E900C00F72 /* MockPlaceDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE32499245601E900C00F72 /* MockPlaceDisk.swift */; };
 		EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */; };
 /* End PBXBuildFile section */
 
@@ -193,9 +195,11 @@
 		EDBDD2BE245325B700BB545A /* UpdateDiskExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateDiskExtension.swift; sourceTree = "<group>"; };
 		EDCC2A552448B3E9009E69F7 /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
 		EDDDC5722455EE63001F73C2 /* SetDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDisk.swift; sourceTree = "<group>"; };
-		EDDDC5752455F116001F73C2 /* MockSetDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSetDisk.swift; sourceTree = "<group>"; };
 		EDDDC5772455F6BA001F73C2 /* AnimateSettingDisks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimateSettingDisks.swift; sourceTree = "<group>"; };
 		EDDDC5792455F98F001F73C2 /* MockAnimateSettingDisks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAnimateSettingDisks.swift; sourceTree = "<group>"; };
+		EDDDC57B2455FB23001F73C2 /* PlaceDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceDisk.swift; sourceTree = "<group>"; };
+		EDDDC57D2455FF64001F73C2 /* MockSetDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSetDisk.swift; sourceTree = "<group>"; };
+		EDE32499245601E900C00F72 /* MockPlaceDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPlaceDisk.swift; sourceTree = "<group>"; };
 		EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPublishWrapper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -490,6 +494,7 @@
 				EDAAB28A2451FB2E00B72937 /* ReversiPlaceDiskStream.swift */,
 				EDDDC5722455EE63001F73C2 /* SetDisk.swift */,
 				EDDDC5772455F6BA001F73C2 /* AnimateSettingDisks.swift */,
+				EDDDC57B2455FB23001F73C2 /* PlaceDisk.swift */,
 			);
 			path = PlaceDisk;
 			sourceTree = "<group>";
@@ -498,8 +503,9 @@
 			isa = PBXGroup;
 			children = (
 				ED1BEDB32452EA120066E68E /* MockReversiPlaceDiskStream.swift */,
-				EDDDC5752455F116001F73C2 /* MockSetDisk.swift */,
 				EDDDC5792455F98F001F73C2 /* MockAnimateSettingDisks.swift */,
+				EDDDC57D2455FF64001F73C2 /* MockSetDisk.swift */,
+				EDE32499245601E900C00F72 /* MockPlaceDisk.swift */,
 			);
 			path = PlaceDisk;
 			sourceTree = "<group>";
@@ -754,6 +760,7 @@
 				EDBC5A9D244F5F09006D3865 /* GameActionCreator.swift in Sources */,
 				EDDDC5782455F6BA001F73C2 /* AnimateSettingDisks.swift in Sources */,
 				ED20D56D244C2D6F00F7BA46 /* BehaviorWrapper.swift in Sources */,
+				EDDDC57C2455FB23001F73C2 /* PlaceDisk.swift in Sources */,
 				ED20D56E244C2D6F00F7BA46 /* ValueObservable.swift in Sources */,
 				ED20D557244B826600F7BA46 /* PublishWrapper.swift in Sources */,
 				ED20D530244AD70A00F7BA46 /* UIAlertControllerExtension.swift in Sources */,
@@ -782,11 +789,12 @@
 				ED6736EC2450CEBA00521D10 /* DiskAtCoordinateTests.swift in Sources */,
 				ED6EACA82444CD7E00BAF620 /* ReversiViewModelTests.swift in Sources */,
 				ED1BEDB92452EFF60066E68E /* ReversiPlaceDiskStreamTests.swift in Sources */,
+				EDDDC57E2455FF64001F73C2 /* MockSetDisk.swift in Sources */,
+				EDE3249A245601E900C00F72 /* MockPlaceDisk.swift in Sources */,
 				ED9AEF7C244C39F8004A068C /* MockBehaviorWrapper.swift in Sources */,
 				ED6D32AD24508C0500D0932F /* MockPublishResponse.swift in Sources */,
 				ED6D32A9245088D700D0932F /* MockGameStore.swift in Sources */,
 				ED1BEDB62452EBAA0066E68E /* MockReversiManagementStream.swift in Sources */,
-				EDDDC5762455F116001F73C2 /* MockSetDisk.swift in Sources */,
 				EDDDC57A2455F98F001F73C2 /* MockAnimateSettingDisks.swift in Sources */,
 				ED1BEDB42452EA120066E68E /* MockReversiPlaceDiskStream.swift in Sources */,
 				EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */,

@@ -12,26 +12,22 @@ final class ReversiPlaceDiskStreamTests: XCTestCase {
 
     func test_handleDiskWithCoordinate() throws {
         let stream = dependency.testTarget
-        let store = dependency.store
-        let flippedDiskCoordinates = dependency.flippedDiskCoordinates
-        let animateSettingDisks = dependency.animateSettingDisks
-
-        store.$placeDiskCanceller.accept(Canceller {})
+        let placeDisk = dependency.placeDisk
 
         let coordinate = Coordinate(x: 0, y: 1)
         let disk = Disk.dark
-        flippedDiskCoordinates.callAsFunctionResponse = [coordinate]
 
         let didUpdateDisk = Watcher(stream.output.didUpdateDisk)
         stream.input.handleDiskWithCoordinate((disk, coordinate))
-        animateSettingDisks._callAsFunction.onNext(true)
+        placeDisk._callAsFunction.onNext(true)
 
         XCTAssertEqual(didUpdateDisk.calledCount, 1)
         XCTAssertEqual(didUpdateDisk.parameters, [true])
 
-        let callAsFunction = animateSettingDisks.$_callAsFunction
+        let callAsFunction = placeDisk.$_callAsFunction
         XCTAssertEqual(callAsFunction.parameters, [.init(disk: disk,
-                                                         coordinates: [coordinate, coordinate])])
+                                                         coordinate: coordinate,
+                                                         animated: true)])
     }
 
     func test_refreshAllDisk() throws {
@@ -64,19 +60,22 @@ extension ReversiPlaceDiskStreamTests {
         let flippedDiskCoordinates = MockFlippedDiskCoordinates()
         let setDisk = MockSetDisk()
         let animateSettingDisks = MockAnimateSettingDisks()
+        let placeDisk = MockPlaceDisk()
 
         let testScheduler = TestScheduler(initialClock: 0)
 
         let testTarget: ReversiPlaceDiskStream
 
         init() {
+            let placeDiskFactory = MockPlaceDiskFactory(placeDisk: placeDisk)
             self.testTarget = ReversiPlaceDiskStream(
                 actionCreator: actionCreator,
                 store: store,
                 mainAsyncScheduler: testScheduler,
                 flippedDiskCoordinates: flippedDiskCoordinates,
                 setDisk: setDisk,
-                animateSettingDisks: animateSettingDisks
+                animateSettingDisks: animateSettingDisks,
+                placeDiskFactory: placeDiskFactory
             )
         }
     }
