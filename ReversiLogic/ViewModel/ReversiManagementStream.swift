@@ -163,8 +163,7 @@ extension ReversiManagementStream {
     }
 
     static func canPlace(disk: Disk, at coordinate: Coordinate, extra: Extra) -> Bool {
-        return !extra.flippedDiskCoordinates
-            .execute(disk: disk, at: coordinate, cells: extra.store.cells.value)
+        return !extra.flippedDiskCoordinates(by: disk, at: coordinate, cells: extra.store.cells.value)
             .isEmpty
     }
 

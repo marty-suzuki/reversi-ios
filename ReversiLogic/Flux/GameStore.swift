@@ -21,37 +21,37 @@ public protocol GameStoreProtocol: AnyObject {
 public final class GameStore: GameStoreProtocol {
 
     @BehaviorWrapper(value: [:])
-    public private(set) var playerCancellers: ValueObservable<[Disk: Canceller]>
+    public var playerCancellers: ValueObservable<[Disk: Canceller]>
 
     @BehaviorWrapper(value: nil)
-    public private(set) var placeDiskCanceller: ValueObservable<Canceller?>
+    public var placeDiskCanceller: ValueObservable<Canceller?>
 
     @BehaviorWrapper(value: false)
-    public private(set) var isDiskPlacing: ValueObservable<Bool>
+    public var isDiskPlacing: ValueObservable<Bool>
 
     @BehaviorWrapper(value: [])
-    public private(set) var cells: ValueObservable<[[GameData.Cell]]>
+    public var cells: ValueObservable<[[GameData.Cell]]>
 
     @BehaviorWrapper(value: GameData.initial.status)
-    public private(set) var status: ValueObservable<GameData.Status>
+    public var status: ValueObservable<GameData.Status>
 
     @BehaviorWrapper(value: GameData.initial.playerDark)
-    public private(set) var playerDark: ValueObservable<GameData.Player>
+    public var playerDark: ValueObservable<GameData.Player>
 
     @BehaviorWrapper(value: GameData.initial.playerLight)
-    public private(set) var playerLight: ValueObservable<GameData.Player>
+    public var playerLight: ValueObservable<GameData.Player>
 
     @BehaviorWrapper(value: 0)
-    public private(set) var countOfDark: ValueObservable<Int>
+    public var countOfDark: ValueObservable<Int>
 
     @BehaviorWrapper(value: 0)
-    public private(set) var countOfLight: ValueObservable<Int>
+    public var countOfLight: ValueObservable<Int>
 
     @BehaviorWrapper(value: nil)
-    public private(set) var playerOfCurrentTurn: ValueObservable<GameData.Player?>
+    public var playerOfCurrentTurn: ValueObservable<GameData.Player?>
 
     @BehaviorWrapper(value: nil)
-    public private(set) var sideWithMoreDisks: ValueObservable<Disk?>
+    public var sideWithMoreDisks: ValueObservable<Disk?>
 
     public let faildToLoad: Observable<Void>
     public let loaded: Observable<Void>

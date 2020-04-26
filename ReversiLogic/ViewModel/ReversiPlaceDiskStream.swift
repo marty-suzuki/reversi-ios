@@ -135,7 +135,7 @@ extension ReversiPlaceDiskStream {
                           animated isAnimated: Bool,
                           extra: Extra,
                           state: State) -> Single<Bool> {
-        let diskCoordinates = extra.flippedDiskCoordinates.execute(disk: disk, at: coordinate, cells: extra.store.cells.value)
+        let diskCoordinates = extra.flippedDiskCoordinates(by: disk, at: coordinate, cells: extra.store.cells.value)
         if diskCoordinates.isEmpty {
             return .error(Error.diskPlacement(disk: disk, coordinate: coordinate))
         }

@@ -3,10 +3,10 @@
 final class MockFlippedDiskCoordinates: FlippedDiskCoordinatesProtocol {
 
     @MockResponse<ExecuteParameters, [Coordinate]>
-    var _execute: [Coordinate] = []
+    var callAsFunctionResponse: [Coordinate] = []
 
-    func execute(disk: Disk, at coordinate: Coordinate, cells: [[GameData.Cell]]) -> [Coordinate] {
-        __execute.respond(.init(disk: disk, coordinate: coordinate, cells: cells))
+    func callAsFunction(by disk: Disk, at coordinate: Coordinate, cells: [[GameData.Cell]]) -> [Coordinate] {
+        _callAsFunctionResponse.respond(.init(disk: disk, coordinate: coordinate, cells: cells))
     }
 
     struct ExecuteParameters: Equatable {

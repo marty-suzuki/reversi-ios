@@ -24,7 +24,7 @@ final class ReversiPlaceDiskStreamTests: XCTestCase {
         let updateDisk = Watcher(stream.output.updateDisk)
         let didUpdateDisk = Watcher(stream.output.didUpdateDisk)
 
-        flippedDiskCoordinates._execute = [coordinate]
+        flippedDiskCoordinates.callAsFunctionResponse = [coordinate]
         stream.input.handleDiskWithCoordinate((disk, coordinate))
 
         XCTAssertEqual(updateDisk.calledCount,1)

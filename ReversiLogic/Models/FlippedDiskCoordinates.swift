@@ -1,10 +1,10 @@
 protocol FlippedDiskCoordinatesProtocol {
-    func execute(disk: Disk, at coordinate: Coordinate, cells: [[GameData.Cell]]) -> [Coordinate]
+    func callAsFunction(by disk: Disk, at coordinate: Coordinate, cells: [[GameData.Cell]]) -> [Coordinate]
 }
 
 struct FlippedDiskCoordinates: FlippedDiskCoordinatesProtocol {
 
-    func execute(disk: Disk, at coordinate: Coordinate, cells: [[GameData.Cell]]) -> [Coordinate] {
+    func callAsFunction(by disk: Disk, at coordinate: Coordinate, cells: [[GameData.Cell]]) -> [Coordinate] {
         let directions = [
             (x: -1, y: -1),
             (x:  0, y: -1),
