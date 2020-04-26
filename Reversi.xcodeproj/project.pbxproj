@@ -83,6 +83,7 @@
 		EDDDC57C2455FB23001F73C2 /* PlaceDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC57B2455FB23001F73C2 /* PlaceDisk.swift */; };
 		EDDDC57E2455FF64001F73C2 /* MockSetDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC57D2455FF64001F73C2 /* MockSetDisk.swift */; };
 		EDE3249A245601E900C00F72 /* MockPlaceDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE32499245601E900C00F72 /* MockPlaceDisk.swift */; };
+		EDE3249C2456094300C00F72 /* ValidMoves.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE3249B2456094300C00F72 /* ValidMoves.swift */; };
 		EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */; };
 /* End PBXBuildFile section */
 
@@ -200,6 +201,7 @@
 		EDDDC57B2455FB23001F73C2 /* PlaceDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceDisk.swift; sourceTree = "<group>"; };
 		EDDDC57D2455FF64001F73C2 /* MockSetDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSetDisk.swift; sourceTree = "<group>"; };
 		EDE32499245601E900C00F72 /* MockPlaceDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPlaceDisk.swift; sourceTree = "<group>"; };
+		EDE3249B2456094300C00F72 /* ValidMoves.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidMoves.swift; sourceTree = "<group>"; };
 		EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPublishWrapper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -495,6 +497,7 @@
 				EDDDC5722455EE63001F73C2 /* SetDisk.swift */,
 				EDDDC5772455F6BA001F73C2 /* AnimateSettingDisks.swift */,
 				EDDDC57B2455FB23001F73C2 /* PlaceDisk.swift */,
+				EDE3249B2456094300C00F72 /* ValidMoves.swift */,
 			);
 			path = PlaceDisk;
 			sourceTree = "<group>";
@@ -750,6 +753,7 @@
 				EDDDC5732455EE63001F73C2 /* SetDisk.swift in Sources */,
 				ED6EACA12443838900BAF620 /* GameData.swift in Sources */,
 				ED8CC36424478D5B00CD2CAB /* GameDataCache.swift in Sources */,
+				EDE3249C2456094300C00F72 /* ValidMoves.swift in Sources */,
 				EDBC5A9B244F5EFC006D3865 /* GameDispatcher.swift in Sources */,
 				ED6EACA42444B1E900BAF620 /* ReversiViewModel.swift in Sources */,
 				EDAAB28B2451FB2E00B72937 /* ReversiPlaceDiskStream.swift in Sources */,

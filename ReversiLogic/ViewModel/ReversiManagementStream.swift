@@ -12,13 +12,18 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
     convenience init(store: GameStoreProtocol,
                      actionCreator: GameActionCreatorProtocol,
                      mainScheduler: SchedulerType,
-                     flippedDiskCoordinates: FlippedDiskCoordinatesProtocol) {
+                     flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
+                     validMovesFactory: ValidMovesFactoryProtocol) {
+        let validMoves = validMovesFactory.make(
+            flippedDiskCoordinates: flippedDiskCoordinates,
+            store: store
+        )
         self.init(input: Input(),
                   state: State(),
                   extra: Extra(store: store,
                                actionCreator: actionCreator,
                                mainScheduler: mainScheduler,
-                               flippedDiskCoordinates: flippedDiskCoordinates))
+                               validMoves: validMoves))
     }
 }
 
@@ -66,7 +71,7 @@ extension ReversiManagementStream {
         let store: GameStoreProtocol
         let actionCreator: GameActionCreatorProtocol
         let mainScheduler: SchedulerType
-        let flippedDiskCoordinates: FlippedDiskCoordinatesProtocol
+        let validMoves: ValidMovesProtocol
     }
 
     public static func bind(from dependency: Dependency<Input, State, Extra>, disposeBag: DisposeBag) -> Output {
@@ -162,29 +167,13 @@ extension ReversiManagementStream {
                                  playerLight: store.playerLight.value)
     }
 
-    static func canPlace(disk: Disk, at coordinate: Coordinate, extra: Extra) -> Bool {
-        return !extra.flippedDiskCoordinates(by: disk, at: coordinate, cells: extra.store.cells.value)
-            .isEmpty
-    }
-
-    static func validMoves(for disk: Disk, extra: Extra) -> [Coordinate] {
-        extra.store.cells.value.reduce([Coordinate]()) { result, rows in
-            rows.reduce(result) { result, cell in
-                if canPlace(disk: disk, at: cell.coordinate, extra: extra) {
-                    return result + [cell.coordinate]
-                } else {
-                    return result
-                }
-            }
-        }
-    }
-
     static func playTurnOfComputer(extra: Extra, state: State) {
         let store = extra.store
         let actionCreator = extra.actionCreator
+        let validMoves = extra.validMoves
         guard
             case let .turn(disk) = store.status.value,
-            let coordinate = validMoves(for: disk, extra: extra).randomElement()
+            let coordinate = validMoves(for: disk).randomElement()
         else {
             preconditionFailure()
         }
@@ -265,6 +254,7 @@ extension ReversiManagementStream {
     static func nextTurn(extra: Extra, state: State) {
         let store = extra.store
         let actionCreator = extra.actionCreator
+        let validMoves = extra.validMoves
 
         var turn: Disk
         switch store.status.value {
@@ -276,8 +266,8 @@ extension ReversiManagementStream {
 
         turn.flip()
 
-        if validMoves(for: turn, extra: extra).isEmpty {
-            if validMoves(for: turn.flipped, extra: extra).isEmpty {
+        if validMoves(for: turn).isEmpty {
+            if validMoves(for: turn.flipped).isEmpty {
                 actionCreator.setStatus(.gameOver)
             } else {
                 actionCreator.setStatus(.turn(turn))

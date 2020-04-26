@@ -1,4 +1,4 @@
-protocol FlippedDiskCoordinatesProtocol {
+public protocol FlippedDiskCoordinatesProtocol {
     func callAsFunction(by disk: Disk, at coordinate: Coordinate, cells: [[GameData.Cell]]) -> [Coordinate]
 }
 
