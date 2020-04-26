@@ -12,20 +12,47 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
     convenience init(store: GameStoreProtocol,
                      actionCreator: GameActionCreatorProtocol,
                      mainScheduler: SchedulerType,
+                     mainAsyncScheduler: SchedulerType,
                      flippedDiskCoordinatesFactory: FlippedDiskCoordinatesFactoryProtocol,
+                     setDiskFactory: SetDiskFactoryProtocol,
+                     animateSettingDisksFactory: AnimateSettingDisksFactoryProtocol,
+                     placeDiskFactory: PlaceDiskFactoryProtocol,
                      validMovesFactory: ValidMovesFactoryProtocol) {
+        let state = State()
+
+        let setDisk = setDiskFactory.make(
+            updateDisk: state.updateDisk,
+            actionCreator: actionCreator
+        )
+
+        let animateSettingDisks = animateSettingDisksFactory.make(
+            setDisk: setDisk,
+            store: store
+        )
+
         let flippedDiskCoordinates = flippedDiskCoordinatesFactory.make(store: store)
+
+        let placeDisk = placeDiskFactory.make(
+            flippedDiskCoordinates: flippedDiskCoordinates,
+            setDisk: setDisk,
+            animateSettingDisks: animateSettingDisks,
+            actionCreator: actionCreator,
+            store: store,
+            mainAsyncScheduler: mainAsyncScheduler
+        )
 
         let validMoves = validMovesFactory.make(
             flippedDiskCoordinates: flippedDiskCoordinates,
             store: store
         )
         self.init(input: Input(),
-                  state: State(),
+                  state: state,
                   extra: Extra(store: store,
                                actionCreator: actionCreator,
                                mainScheduler: mainScheduler,
-                               validMoves: validMoves))
+                               validMoves: validMoves,
+                               setDisk: setDisk,
+                               placeDisk: placeDisk))
     }
 }
 
@@ -43,9 +70,7 @@ extension ReversiManagementStream {
     }
 
     public struct Output: OutputType {
-        let gameLoaded: Observable<Void>
         let newGameBegan: Observable<Void>
-        let handleDiskWithCoordinate: Observable<(Disk, Coordinate)>
         let willTurnDiskOfComputer: Observable<Disk>
         let didTurnDiskOfComputer: Observable<Disk>
         let handerAlert: Observable<Alert>
@@ -56,6 +81,10 @@ extension ReversiManagementStream {
         let countOfLight: ValueObservable<Int>
         let playerDark: ValueObservable<GameData.Player>
         let playerLight: ValueObservable<GameData.Player>
+
+        let updateDisk: Observable<UpdateDisk>
+        let didUpdateDisk: Observable<Bool>
+        let didRefreshAllDisk: Observable<Void>
     }
 
     public struct State: StateType {
@@ -67,6 +96,8 @@ extension ReversiManagementStream {
         let didTurnDiskOfComputer = PublishRelay<Disk>()
         let handleDiskWithCoordinate = PublishRelay<(Disk, Coordinate)>()
         let handerAlert = PublishRelay<Alert>()
+
+        let updateDisk = PublishRelay<UpdateDisk>()
     }
 
     public struct Extra: ExtraType {
@@ -74,6 +105,8 @@ extension ReversiManagementStream {
         let actionCreator: GameActionCreatorProtocol
         let mainScheduler: SchedulerType
         let validMoves: ValidMovesProtocol
+        let setDisk: SetDiskProtocol
+        let placeDisk: PlaceDiskProtocol
     }
 
     public static func bind(from dependency: Dependency<Input, State, Extra>, disposeBag: DisposeBag) -> Output {
@@ -142,10 +175,30 @@ extension ReversiManagementStream {
             .subscribe(onNext: { prepareForReset(extra: extra, state: state) })
             .disposed(by: disposeBag)
 
+        let didRefreshAllDisk = store.loaded
+            .withLatestFrom(extra.store.cells)
+            .flatMap { cells -> Observable<Void> in
+                let updates = cells.flatMap { rows in
+                    rows.map { cell in
+                        extra.setDisk(cell.disk,
+                                      at: cell.coordinate,
+                                      animated: false).asObservable()
+                    }
+                }
+                return Observable.zip(updates).map { _ in }
+            }
+            .share()
+
+        let didUpdateDisk = state.handleDiskWithCoordinate
+            .flatMap { disk, coordinate -> Observable<Bool> in
+                extra.placeDisk(disk, at: coordinate, animated: true)
+                    .asObservable()
+                    .catchError { _ in .empty() }
+            }
+            .share()
+
         return Output(
-            gameLoaded: store.loaded,
             newGameBegan: state.newGameBegan.asObservable(),
-            handleDiskWithCoordinate: state.handleDiskWithCoordinate.asObservable(),
             willTurnDiskOfComputer: state.willTurnDiskOfComputer.asObservable(),
             didTurnDiskOfComputer: state.didTurnDiskOfComputer.asObservable(),
             handerAlert: state.handerAlert.asObservable(),
@@ -154,7 +207,10 @@ extension ReversiManagementStream {
             countOfDark: store.countOfDark,
             countOfLight: store.countOfLight,
             playerDark: store.playerDark,
-            playerLight: store.playerLight
+            playerLight: store.playerLight,
+            updateDisk: state.updateDisk.asObservable(),
+            didUpdateDisk: didUpdateDisk,
+            didRefreshAllDisk: didRefreshAllDisk
         )
     }
 }

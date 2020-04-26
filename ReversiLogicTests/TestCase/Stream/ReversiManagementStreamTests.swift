@@ -2,7 +2,7 @@ import RxTest
 import XCTest
 @testable import ReversiLogic
 
-final class ReversiPlaceDiskStreamTests: XCTestCase {
+final class ReversiManagementStreamTests: XCTestCase {
 
     private var dependency: Dependency!
 
@@ -18,7 +18,7 @@ final class ReversiPlaceDiskStreamTests: XCTestCase {
         let disk = Disk.dark
 
         let didUpdateDisk = Watcher(stream.output.didUpdateDisk)
-        stream.input.handleDiskWithCoordinate((disk, coordinate))
+        dependency.state.handleDiskWithCoordinate.accept((disk, coordinate))
         placeDisk._callAsFunction.onNext(true)
 
         XCTAssertEqual(didUpdateDisk.calledCount, 1)
@@ -41,7 +41,7 @@ final class ReversiPlaceDiskStreamTests: XCTestCase {
         store.$cells.accept([coordinates.map { GameData.Cell(coordinate: $0, disk: disk) }])
 
         let didRefreshAllDisk = Watcher(stream.output.didRefreshAllDisk)
-        stream.input.refreshAllDisk(())
+        store.$loaded.accept(())
         dependency.setDisk._callAsFunction.onNext(true)
         dependency.setDisk._callAsFunction.onNext(true)
 
@@ -50,10 +50,11 @@ final class ReversiPlaceDiskStreamTests: XCTestCase {
     }
 }
 
-extension ReversiPlaceDiskStreamTests {
+extension ReversiManagementStreamTests {
 
     private final class  Dependency {
 
+        let state = ReversiManagementStream.State()
         let store = MockGameStore()
         let actionCreator = MockGameActionCreator()
 
@@ -61,24 +62,22 @@ extension ReversiPlaceDiskStreamTests {
         let setDisk = MockSetDisk()
         let animateSettingDisks = MockAnimateSettingDisks()
         let placeDisk = MockPlaceDisk()
+        let validMoves = MockValidMoves()
 
         let testScheduler = TestScheduler(initialClock: 0)
 
-        let testTarget: ReversiPlaceDiskStream
+        let testTarget: ReversiManagementStream
 
         init() {
-            let placeDiskFactory = MockPlaceDiskFactory(placeDisk: placeDisk)
-            let setDiskFactory = MockSetDiskFactory(setDisk: setDisk)
-            let animateSettingDisksFactory = MockAnimateSettingDisksFactory(animateSettingDisks: animateSettingDisks)
-            let flippedDiskCoordinatesFactory = MockFlippedDiskCoordinatesFactory(flippedDiskCoordinates: flippedDiskCoordinates)
-            self.testTarget = ReversiPlaceDiskStream(
-                actionCreator: actionCreator,
-                store: store,
-                mainAsyncScheduler: testScheduler,
-                flippedDiskCoordinatesFactory: flippedDiskCoordinatesFactory,
-                setDiskFactory: setDiskFactory,
-                animateSettingDisksFactory: animateSettingDisksFactory,
-                placeDiskFactory: placeDiskFactory
+            self.testTarget = ReversiManagementStream(
+                input: .init(),
+                state: state,
+                extra: .init(store: store,
+                             actionCreator: actionCreator,
+                             mainScheduler: testScheduler,
+                             validMoves: validMoves,
+                             setDisk: setDisk,
+                             placeDisk: placeDisk)
             )
         }
     }

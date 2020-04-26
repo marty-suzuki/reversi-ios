@@ -50,21 +50,18 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel>, ReversiViewMo
         let messageDiskSize: CGFloat
         let mainAsyncScheduler: SchedulerType
         let mainScheduler: SchedulerType
-        let placeDiskStream: ReversiPlaceDiskStreamType
         let managementStream: ReversiManagementStreamType
     }
 
     convenience init(messageDiskSize: CGFloat,
                      mainAsyncScheduler: SchedulerType,
                      mainScheduler: SchedulerType,
-                     placeDiskStream: ReversiPlaceDiskStreamType,
                      managementStream: ReversiManagementStreamType) {
         self.init(input: Input(),
                   state: State(),
                   extra: Extra(messageDiskSize: messageDiskSize,
                                mainAsyncScheduler: mainAsyncScheduler,
                                mainScheduler: mainScheduler,
-                               placeDiskStream: placeDiskStream,
                                managementStream: managementStream))
     }
 
@@ -102,34 +99,21 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel>, ReversiViewMo
             })
             .disposed(by: disposeBag)
 
-        do {
-            let input = extra.placeDiskStream.input
-            let output = extra.placeDiskStream.output
+        managementStream.output.didRefreshAllDisk
+            .bind(to: state.updateCount)
+            .disposed(by: disposeBag)
 
-            managementStream.output.gameLoaded
-                .bind(to: input.refreshAllDisk)
-                .disposed(by: disposeBag)
+        managementStream.output.updateDisk
+            .bind(to: state.updateBoard)
+            .disposed(by: disposeBag)
 
-            output.didRefreshAllDisk
-                .bind(to: state.updateCount)
-                .disposed(by: disposeBag)
-
-            output.updateDisk
-                .bind(to: state.updateBoard)
-                .disposed(by: disposeBag)
-
-            output.didUpdateDisk
-                .subscribe(onNext: { _ in
-                    managementStream.input.nextTurn(())
-                    managementStream.input.save(())
-                    state.updateCount.accept(())
-                })
-                .disposed(by: disposeBag)
-
-            managementStream.output.handleDiskWithCoordinate
-                .bind(to: input.handleDiskWithCoordinate)
-                .disposed(by: disposeBag)
-        }
+        managementStream.output.didUpdateDisk
+            .subscribe(onNext: { _ in
+                managementStream.input.nextTurn(())
+                managementStream.input.save(())
+                state.updateCount.accept(())
+            })
+            .disposed(by: disposeBag)
 
         Observable.merge(managementStream.output.willTurnDiskOfComputer.map { ($0, true) },
                          managementStream.output.didTurnDiskOfComputer.map { ($0, false) })

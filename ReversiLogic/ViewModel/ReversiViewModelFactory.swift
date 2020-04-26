@@ -27,27 +27,21 @@ public struct ReversiViewModelFactory: ReversiViewModelFactoryType {
         let placeDiskFactory = PlaceDiskFactory()
         let validMovesFactory = ValidMovesFactory()
 
-        let placeDiskStream = ReversiPlaceDiskStream(
-            actionCreator: actionCreator,
-            store: store,
-            mainAsyncScheduler: mainAsyncScheduler,
-            flippedDiskCoordinatesFactory: flippedDiskCoordinatesFactory,
-            setDiskFactory: setDiskFactory,
-            animateSettingDisksFactory: animateSettingDisksFactory,
-            placeDiskFactory: placeDiskFactory
-        )
         let managementStream = ReversiManagementStream(
             store: store,
             actionCreator: actionCreator,
             mainScheduler: mainScheduler,
+            mainAsyncScheduler: mainAsyncScheduler,
             flippedDiskCoordinatesFactory: flippedDiskCoordinatesFactory,
+            setDiskFactory: setDiskFactory,
+            animateSettingDisksFactory: animateSettingDisksFactory,
+            placeDiskFactory: placeDiskFactory,
             validMovesFactory: validMovesFactory
         )
 
         return ReversiViewModel(messageDiskSize: messageDiskSize,
                                 mainAsyncScheduler: mainAsyncScheduler,
                                 mainScheduler: mainScheduler,
-                                placeDiskStream: placeDiskStream,
                                 managementStream: managementStream)
     }
 }

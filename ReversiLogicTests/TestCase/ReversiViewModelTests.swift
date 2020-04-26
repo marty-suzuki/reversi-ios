@@ -142,13 +142,11 @@ extension ReversiViewModelTests {
 
         let state = ReversiViewModel.State()
         let testScheduler = TestScheduler(initialClock: 0)
-        let placeDiskStream = MockReversiPlaceDiskStream()
         let managementStream = MockReversiManagementStream()
         private(set) lazy var extra = ReversiViewModel.Extra(
             messageDiskSize: messageDiskSize,
             mainAsyncScheduler: testScheduler,
             mainScheduler: testScheduler,
-            placeDiskStream: placeDiskStream,
             managementStream: managementStream
         )
 

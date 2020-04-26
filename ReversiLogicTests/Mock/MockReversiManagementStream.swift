@@ -9,9 +9,7 @@ final class MockReversiManagementStream: ReversiManagementStreamType {
 
     lazy var output = OutputWrapper(_output)
     lazy var _output = ReversiManagementStream.Output(
-        gameLoaded: gameLoaded,
         newGameBegan: newGameBegan,
-        handleDiskWithCoordinate: handleDiskWithCoordinate,
         willTurnDiskOfComputer: willTurnDiskOfComputer,
         didTurnDiskOfComputer: didTurnDiskOfComputer,
         handerAlert: handerAlert,
@@ -20,11 +18,12 @@ final class MockReversiManagementStream: ReversiManagementStreamType {
         countOfDark: countOfDark,
         countOfLight: countOfLight,
         playerDark: playerDark,
-        playerLight: playerLight
+        playerLight: playerLight,
+        updateDisk: updateDisk,
+        didUpdateDisk: didUpdateDisk,
+        didRefreshAllDisk: didRefreshAllDisk
     )
 
-    @MockPublishWrapper
-    var  gameLoaded: Observable<Void>
     @MockPublishWrapper
     var  newGameBegan: Observable<Void>
     @MockPublishWrapper
@@ -48,6 +47,13 @@ final class MockReversiManagementStream: ReversiManagementStreamType {
     var playerDark: ValueObservable<GameData.Player>
     @MockBehaviorWrapeer(value: .manual)
     var playerLight: ValueObservable<GameData.Player>
+
+    @MockPublishWrapper
+    var updateDisk: Observable<UpdateDisk>
+    @MockPublishWrapper
+    var didUpdateDisk: Observable<Bool>
+    @MockPublishWrapper
+    var didRefreshAllDisk: Observable<Void>
 
     init() {
         self.input = InputWrapper(_input)
