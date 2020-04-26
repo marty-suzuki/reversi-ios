@@ -31,7 +31,6 @@ public final class ReversiPlaceDiskStream: UnioStream<ReversiPlaceDiskStream>, R
             flippedDiskCoordinates: flippedDiskCoordinates,
             setDisk: setDisk,
             animateSettingDisks: animateSettingDisks,
-            updateDisk: state.updateDisk,
             actionCreator: actionCreator,
             store: store,
             mainAsyncScheduler: mainAsyncScheduler

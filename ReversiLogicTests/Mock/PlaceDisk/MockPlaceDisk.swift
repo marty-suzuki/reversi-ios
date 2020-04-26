@@ -9,7 +9,6 @@ struct MockPlaceDiskFactory: PlaceDiskFactoryProtocol {
     func make(flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
               setDisk: SetDiskProtocol,
               animateSettingDisks: AnimateSettingDisksProtocol,
-              updateDisk: PublishRelay<UpdateDisk>,
               actionCreator: GameActionCreatorProtocol,
               store: GameStoreProtocol,
               mainAsyncScheduler: SchedulerType) -> PlaceDiskProtocol {

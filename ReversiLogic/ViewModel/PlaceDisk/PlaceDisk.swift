@@ -5,7 +5,6 @@ protocol PlaceDiskFactoryProtocol {
     func make(flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
               setDisk: SetDiskProtocol,
               animateSettingDisks: AnimateSettingDisksProtocol,
-              updateDisk: PublishRelay<UpdateDisk>,
               actionCreator: GameActionCreatorProtocol,
               store: GameStoreProtocol,
               mainAsyncScheduler: SchedulerType) -> PlaceDiskProtocol
@@ -15,14 +14,12 @@ struct PlaceDiskFactory: PlaceDiskFactoryProtocol {
     func make(flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
               setDisk: SetDiskProtocol,
               animateSettingDisks: AnimateSettingDisksProtocol,
-              updateDisk: PublishRelay<UpdateDisk>,
               actionCreator: GameActionCreatorProtocol,
               store: GameStoreProtocol,
               mainAsyncScheduler: SchedulerType) -> PlaceDiskProtocol {
         PlaceDisk(flippedDiskCoordinates: flippedDiskCoordinates,
                   setDisk: setDisk,
                   animateSettingDisks: animateSettingDisks,
-                  updateDisk: updateDisk,
                   actionCreator: actionCreator,
                   store: store,
                   mainAsyncScheduler: mainAsyncScheduler)
@@ -40,7 +37,6 @@ struct PlaceDisk: PlaceDiskProtocol {
     let flippedDiskCoordinates: FlippedDiskCoordinatesProtocol
     let setDisk: SetDiskProtocol
     let animateSettingDisks: AnimateSettingDisksProtocol
-    let updateDisk: PublishRelay<UpdateDisk>
     let actionCreator: GameActionCreatorProtocol
     let store: GameStoreProtocol
     let mainAsyncScheduler: SchedulerType
