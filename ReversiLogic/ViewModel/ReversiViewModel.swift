@@ -42,8 +42,6 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel>, ReversiViewMo
         let playerDarkCount = PublishRelay<String>()
         let playerLightCount = PublishRelay<String>()
         let resetBoard = PublishRelay<Void>()
-        let updateBoard = PublishRelay<UpdateDisk>()
-        let updateCount = PublishRelay<Void>()
     }
 
     public struct Extra: ExtraType {
@@ -92,29 +90,6 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel>, ReversiViewMo
             })
             .disposed(by: disposeBag)
 
-        managementStream.output.newGameBegan
-            .subscribe(onNext: {
-                state.resetBoard.accept(())
-                state.updateCount.accept(())
-            })
-            .disposed(by: disposeBag)
-
-        managementStream.output.didRefreshAllDisk
-            .bind(to: state.updateCount)
-            .disposed(by: disposeBag)
-
-        managementStream.output.updateDisk
-            .bind(to: state.updateBoard)
-            .disposed(by: disposeBag)
-
-        managementStream.output.didUpdateDisk
-            .subscribe(onNext: { _ in
-                managementStream.input.nextTurn(())
-                managementStream.input.save(())
-                state.updateCount.accept(())
-            })
-            .disposed(by: disposeBag)
-
         Observable.merge(managementStream.output.willTurnDiskOfComputer.map { ($0, true) },
                          managementStream.output.didTurnDiskOfComputer.map { ($0, false) })
             .subscribe(onNext: { disk, isAnimating in
@@ -126,33 +101,47 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel>, ReversiViewMo
             .disposed(by: disposeBag)
 
         input.handleReset
-            .subscribe(onNext: {
-                managementStream.input.prepareForReset(())
-            })
+            .bind(to: managementStream.input.prepareForReset)
             .disposed(by: disposeBag)
 
         input.handleSelectedCoordinate
-            .subscribe(onNext: { managementStream.input.handleSelectedCoordinate($0) })
+            .bind(to: managementStream.input.handleSelectedCoordinate)
             .disposed(by: disposeBag)
 
         input.setPlayerWithDiskAndIndex
-            .subscribe(onNext: { managementStream.input.setPlayerForDiskWithIndex(($0, $1)) })
+            .bind(to: managementStream.input.setPlayerForDiskWithIndex)
             .disposed(by: disposeBag)
 
         input.startGame
-            .subscribe(onNext: { managementStream.input.startGame(()) })
+            .bind(to: managementStream.input.startGame)
             .disposed(by: disposeBag)
 
         input.viewDidAppear.take(1)
-            .subscribe(onNext: { managementStream.input.waitForPlayer(()) })
+            .bind(to: managementStream.input.waitForPlayer)
             .disposed(by: disposeBag)
 
-        state.updateCount
-            .subscribe(onNext: {
-                state.playerDarkCount.accept("\(managementStream.output.countOfDark.value)")
-                state.playerLightCount.accept("\(managementStream.output.countOfLight.value)")
-            })
-            .disposed(by: disposeBag)
+        do {
+            let updateCount1 = managementStream.output.newGameBegan
+                .do(onNext: {
+                    state.resetBoard.accept(())
+                })
+
+            let updateCount2 = managementStream.output.didUpdateDisk
+                .map { _ in }
+                .do(onNext: {
+                    managementStream.input.nextTurn(())
+                    managementStream.input.save(())
+                })
+
+            Observable.merge(updateCount1,
+                             updateCount2,
+                             managementStream.output.didRefreshAllDisk)
+                .subscribe(onNext: {
+                    state.playerDarkCount.accept("\(managementStream.output.countOfDark.value)")
+                    state.playerLightCount.accept("\(managementStream.output.countOfLight.value)")
+                })
+                .disposed(by: disposeBag)
+        }
 
         return Output(
             messageDisk: state.messageDisk.asObservable(),
@@ -166,7 +155,7 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel>, ReversiViewMo
             playerDarkSelectedIndex: managementStream.output.playerDark.distinctUntilChanged().map { $0.rawValue },
             playerLightSelectedIndex: managementStream.output.playerLight.distinctUntilChanged().map { $0.rawValue },
             resetBoard: state.resetBoard.asObservable(),
-            updateBoard: state.updateBoard.asObservable()
+            updateBoard: managementStream.output.updateDisk
         )
     }
 }
