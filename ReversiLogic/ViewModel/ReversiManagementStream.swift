@@ -149,7 +149,24 @@ extension ReversiManagementStream {
             .disposed(by: disposeBag)
 
         dependency.inputObservables.prepareForReset
-            .subscribe(onNext: { prepareForReset(extra: extra, state: state) })
+            .map { _ -> Alert in
+                Alert.reset {
+                    let actionCreator = extra.actionCreator
+                    let store = extra.store
+
+                    store.placeDiskCanceller.value?.cancel()
+                    actionCreator.setPlaceDiskCanceller(nil)
+
+                    for side in Disk.allCases {
+                        store.playerCancellers.value[side]?.cancel()
+                        actionCreator.setPlayerCanceller(nil, for: side)
+                    }
+
+                    state.newGame.accept(())
+                    waitForPlayer(extra: extra, state: state)
+                }
+            }
+            .bind(to: state.handerAlert)
             .disposed(by: disposeBag)
 
         let didRefreshAllDisk = store.loaded
@@ -338,25 +355,6 @@ extension ReversiManagementStream {
             actionCreator.setStatus(.turn(turn))
             waitForPlayer(extra: extra, state: state)
         }
-    }
-
-    static func prepareForReset(extra: Extra, state: State) {
-        let actionCreator = extra.actionCreator
-        let store = extra.store
-
-        let alert = Alert.reset {
-            store.placeDiskCanceller.value?.cancel()
-            actionCreator.setPlaceDiskCanceller(nil)
-
-            for side in Disk.allCases {
-                store.playerCancellers.value[side]?.cancel()
-                actionCreator.setPlayerCanceller(nil, for: side)
-            }
-
-            state.newGame.accept(())
-            waitForPlayer(extra: extra, state: state)
-        }
-        state.handerAlert.accept(alert)
     }
 
     @available(*, unavailable)
