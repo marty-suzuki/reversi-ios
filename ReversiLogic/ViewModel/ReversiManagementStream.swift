@@ -139,10 +139,39 @@ extension ReversiManagementStream {
             .bind(to: state.newGame)
             .disposed(by: disposeBag)
 
-        dependency.inputObservables.nextTurn
+        let nextTurn = PublishRelay<Void>()
+        Observable.merge(dependency.inputObservables.nextTurn,
+                         nextTurn.asObservable())
             .subscribe(onNext: {
-                nextTurn(extra: extra, state: state)
-                save(extra: extra)
+                let store = extra.store
+                let actionCreator = extra.actionCreator
+                let validMoves = extra.validMoves
+
+                var turn: Disk
+                switch store.status.value {
+                case let .turn(disk):
+                    turn = disk
+                case .gameOver:
+                    return
+                }
+
+                turn.flip()
+
+                if validMoves(for: turn).isEmpty {
+                    if validMoves(for: turn.flipped).isEmpty {
+                        actionCreator.setStatus(.gameOver)
+                    } else {
+                        actionCreator.setStatus(.turn(turn))
+
+                        let alert = Alert.pass {
+                            nextTurn.accept(())
+                        }
+                        state.handerAlert.accept(alert)
+                    }
+                } else {
+                    actionCreator.setStatus(.turn(turn))
+                    waitForPlayer(extra: extra, state: state)
+                }
             })
             .disposed(by: disposeBag)
 
@@ -221,6 +250,9 @@ extension ReversiManagementStream {
                     .asObservable()
                     .catchError { _ in .empty() }
             }
+            .do(onNext: { _ in
+                save(extra: extra)
+            })
             .share()
 
         return Output(
@@ -320,38 +352,6 @@ extension ReversiManagementStream {
 
         if !store.isDiskPlacing.value, store.status.value == .turn(disk), case .computer = player {
             playTurnOfComputer(extra: extra, state: state)
-        }
-    }
-
-    static func nextTurn(extra: Extra, state: State) {
-        let store = extra.store
-        let actionCreator = extra.actionCreator
-        let validMoves = extra.validMoves
-
-        var turn: Disk
-        switch store.status.value {
-        case let .turn(disk):
-            turn = disk
-        case .gameOver:
-            return
-        }
-
-        turn.flip()
-
-        if validMoves(for: turn).isEmpty {
-            if validMoves(for: turn.flipped).isEmpty {
-                actionCreator.setStatus(.gameOver)
-            } else {
-                actionCreator.setStatus(.turn(turn))
-
-                let alert = Alert.pass {
-                    nextTurn(extra: extra, state: state)
-                }
-                state.handerAlert.accept(alert)
-            }
-        } else {
-            actionCreator.setStatus(.turn(turn))
-            waitForPlayer(extra: extra, state: state)
         }
     }
 
