@@ -105,7 +105,7 @@ final class ReversiViewModelTests: XCTestCase {
         let playerDarkCount = Watcher(viewModel.output.playerDarkCount)
         let playerLightCount = Watcher(viewModel.output.playerLightCount)
 
-        dependency.state.updateCount.accept(())
+        managementStream.$didRefreshAllDisk.accept(())
 
         XCTAssertEqual(playerDarkCount.calledCount, 1)
         XCTAssertEqual(playerDarkCount.parameters, ["\(darkCount)"])

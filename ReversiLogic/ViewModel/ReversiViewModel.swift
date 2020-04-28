@@ -130,7 +130,6 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel>, ReversiViewMo
                 .map { _ in }
                 .do(onNext: {
                     managementStream.input.nextTurn(())
-                    managementStream.input.save(())
                 })
 
             Observable.merge(updateCount1,

@@ -64,7 +64,6 @@ extension ReversiManagementStream {
         let startGame = PublishRelay<Void>()
         let newGame = PublishRelay<Void>()
         let handleSelectedCoordinate = PublishRelay<Coordinate>()
-        let save = PublishRelay<Void>()
         let nextTurn = PublishRelay<Void>()
         let prepareForReset = PublishRelay<Void>()
     }
@@ -140,12 +139,11 @@ extension ReversiManagementStream {
             .bind(to: state.newGame)
             .disposed(by: disposeBag)
 
-        dependency.inputObservables.save
-            .subscribe(onNext: { save(extra: extra) })
-            .disposed(by: disposeBag)
-
         dependency.inputObservables.nextTurn
-            .subscribe(onNext: { nextTurn(extra: extra, state: state) })
+            .subscribe(onNext: {
+                nextTurn(extra: extra, state: state)
+                save(extra: extra)
+            })
             .disposed(by: disposeBag)
 
         dependency.inputObservables.prepareForReset

@@ -13,12 +13,18 @@ final class ReversiManagementStreamTests: XCTestCase {
     func test_handleDiskWithCoordinate() throws {
         let stream = dependency.testTarget
         let placeDisk = dependency.placeDisk
+        let store = dependency.store
 
         let coordinate = Coordinate(x: 0, y: 1)
         let disk = Disk.dark
 
+        store.$isDiskPlacing.accept(false)
+        store.$status.accept(.turn(disk))
+        store.$playerOfCurrentTurn.accept(.manual)
+
         let didUpdateDisk = Watcher(stream.output.didUpdateDisk)
-        dependency.state.handleDiskWithCoordinate.accept((disk, coordinate))
+
+        stream.input.handleSelectedCoordinate(coordinate)
         placeDisk._callAsFunction.onNext(true)
 
         XCTAssertEqual(didUpdateDisk.calledCount, 1)
@@ -54,6 +60,7 @@ extension ReversiManagementStreamTests {
 
     private final class  Dependency {
 
+        let input = ReversiManagementStream.Input()
         let state = ReversiManagementStream.State()
         let store = MockGameStore()
         let actionCreator = MockGameActionCreator()
@@ -70,7 +77,7 @@ extension ReversiManagementStreamTests {
 
         init() {
             self.testTarget = ReversiManagementStream(
-                input: .init(),
+                input: input,
                 state: state,
                 extra: .init(store: store,
                              actionCreator: actionCreator,
