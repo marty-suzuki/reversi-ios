@@ -26,22 +26,46 @@ public struct ReversiViewModelFactory: ReversiViewModelFactoryType {
         let animateSettingDisksFactory = AnimateSettingDisksFactory()
         let placeDiskFactory = PlaceDiskFactory()
         let validMovesFactory = ValidMovesFactory()
+        let setDisk = setDiskFactory.make(actionCreator: actionCreator)
 
-        let managementStream = ReversiManagementStream(
-            store: store,
-            actionCreator: actionCreator,
-            mainScheduler: mainScheduler,
-            mainAsyncScheduler: mainAsyncScheduler,
-            flippedDiskCoordinatesFactory: flippedDiskCoordinatesFactory,
-            setDiskFactory: setDiskFactory,
-            animateSettingDisksFactory: animateSettingDisksFactory,
-            placeDiskFactory: placeDiskFactory,
-            validMovesFactory: validMovesFactory
+        let animateSettingDisks = animateSettingDisksFactory.make(
+            setDisk: setDisk,
+            store: store
         )
 
-        return ReversiViewModel(messageDiskSize: messageDiskSize,
-                                mainAsyncScheduler: mainAsyncScheduler,
-                                mainScheduler: mainScheduler,
-                                managementStream: managementStream)
+        let flippedDiskCoordinates = flippedDiskCoordinatesFactory.make(store: store)
+
+        let placeDisk = placeDiskFactory.make(
+            flippedDiskCoordinates: flippedDiskCoordinates,
+            setDisk: setDisk,
+            animateSettingDisks: animateSettingDisks,
+            actionCreator: actionCreator,
+            store: store,
+            mainAsyncScheduler: mainAsyncScheduler
+        )
+
+        let validMoves = validMovesFactory.make(
+            flippedDiskCoordinates: flippedDiskCoordinates,
+            store: store
+        )
+
+        let managementStream = ReversiManagementStream(
+            input: .init(),
+            state: .init(),
+            extra: .init(store: store,
+                         actionCreator: actionCreator,
+                         mainScheduler: mainScheduler,
+                         validMoves: validMoves,
+                         setDisk: setDisk,
+                         placeDisk: placeDisk))
+
+        return ReversiViewModel(
+            input: .init(),
+            state: .init(),
+            extra: .init(messageDiskSize: messageDiskSize,
+                         mainAsyncScheduler: mainAsyncScheduler,
+                         mainScheduler: mainScheduler,
+                         managementStream: managementStream)
+        )
     }
 }

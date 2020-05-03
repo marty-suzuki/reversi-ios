@@ -74,6 +74,7 @@
 		EDBDD2BD245313A400BB545A /* Watcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBDD2BC245313A400BB545A /* Watcher.swift */; };
 		EDBDD2BF245325B700BB545A /* UpdateDiskExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBDD2BE245325B700BB545A /* UpdateDiskExtension.swift */; };
 		EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A552448B3E9009E69F7 /* Coordinate.swift */; };
+		EDCE4499245EE8630067B130 /* PublishRelayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCE4498245EE8630067B130 /* PublishRelayExtension.swift */; };
 		EDDDC5732455EE63001F73C2 /* SetDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC5722455EE63001F73C2 /* SetDisk.swift */; };
 		EDDDC5782455F6BA001F73C2 /* AnimateSettingDisks.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC5772455F6BA001F73C2 /* AnimateSettingDisks.swift */; };
 		EDDDC57A2455F98F001F73C2 /* MockAnimateSettingDisks.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC5792455F98F001F73C2 /* MockAnimateSettingDisks.swift */; };
@@ -191,6 +192,7 @@
 		EDBDD2BC245313A400BB545A /* Watcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Watcher.swift; sourceTree = "<group>"; };
 		EDBDD2BE245325B700BB545A /* UpdateDiskExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateDiskExtension.swift; sourceTree = "<group>"; };
 		EDCC2A552448B3E9009E69F7 /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
+		EDCE4498245EE8630067B130 /* PublishRelayExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishRelayExtension.swift; sourceTree = "<group>"; };
 		EDDDC5722455EE63001F73C2 /* SetDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDisk.swift; sourceTree = "<group>"; };
 		EDDDC5772455F6BA001F73C2 /* AnimateSettingDisks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimateSettingDisks.swift; sourceTree = "<group>"; };
 		EDDDC5792455F98F001F73C2 /* MockAnimateSettingDisks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAnimateSettingDisks.swift; sourceTree = "<group>"; };
@@ -445,6 +447,7 @@
 				ED8CC36124475F0100CD2CAB /* CollectionExtension.swift */,
 				ED6736E92450CE4000521D10 /* DiskAtCoordinate.swift */,
 				ED20D52F244AD70A00F7BA46 /* UIAlertControllerExtension.swift */,
+				EDCE4498245EE8630067B130 /* PublishRelayExtension.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -754,6 +757,7 @@
 				EDBC5A9B244F5EFC006D3865 /* GameDispatcher.swift in Sources */,
 				ED6EACA42444B1E900BAF620 /* ReversiViewModel.swift in Sources */,
 				EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */,
+				EDCE4499245EE8630067B130 /* PublishRelayExtension.swift in Sources */,
 				EDBDD2BB24530C9400BB545A /* ReversiViewModelFactory.swift in Sources */,
 				ED6EACA62444BDE100BAF620 /* Canceller.swift in Sources */,
 				ED6EAC9524436C3300BAF620 /* Disk.swift in Sources */,

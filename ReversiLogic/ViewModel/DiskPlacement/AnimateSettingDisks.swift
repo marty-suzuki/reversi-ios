@@ -15,8 +15,11 @@ public struct AnimateSettingDisksFactory: AnimateSettingDisksFactoryProtocol {
 }
 
 public protocol AnimateSettingDisksProtocol {
-    func callAsFunction(at coordinates: [Coordinate],
-                        to disk: Disk) -> Single<Bool>
+    func callAsFunction<T: Acceptable>(
+        at coordinates: [Coordinate],
+        to disk: Disk,
+        updateDisk: T
+    ) -> Single<Bool> where T.Element == UpdateDisk
 }
 
 struct AnimateSettingDisks: AnimateSettingDisksProtocol {
@@ -24,8 +27,11 @@ struct AnimateSettingDisks: AnimateSettingDisksProtocol {
     let setDisk: SetDiskProtocol
     let store: GameStoreProtocol
 
-    func callAsFunction(at coordinates: [Coordinate],
-                        to disk: Disk) -> Single<Bool> {
+    func callAsFunction<T: Acceptable>(
+        at coordinates: [Coordinate],
+        to disk: Disk,
+        updateDisk: T
+    ) -> Single<Bool> where T.Element == UpdateDisk {
         guard let coordinate = coordinates.first else {
             return .just(true)
         }
@@ -36,18 +42,23 @@ struct AnimateSettingDisks: AnimateSettingDisksProtocol {
 
         return setDisk(disk,
                        at: coordinate,
-                       animated: true)
+                       animated: true,
+                       updateDisk: updateDisk)
             .flatMap { [animateSettingDisks = self, setDisk] finished in
                 if placeDiskCanceller.isCancelled {
                     return .error(Error.animationCancellerCancelled)
                 }
                 if finished {
-                    return animateSettingDisks(at: Array(coordinates.dropFirst()), to: disk)
+                    return animateSettingDisks(at: Array(coordinates.dropFirst()),
+                                               to: disk,
+                                               updateDisk: updateDisk)
                 } else {
                     let observables = coordinates.map {
                         setDisk(disk,
                                 at: $0,
-                                animated: false).asObservable()
+                                animated: false,
+                                updateDisk: updateDisk)
+                            .asObservable()
                     }
                     return Observable.zip(observables)
                         .map { _ in false }

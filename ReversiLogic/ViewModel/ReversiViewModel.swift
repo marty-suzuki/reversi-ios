@@ -51,18 +51,6 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel>, ReversiViewMo
         let managementStream: ReversiManagementStreamType
     }
 
-    convenience init(messageDiskSize: CGFloat,
-                     mainAsyncScheduler: SchedulerType,
-                     mainScheduler: SchedulerType,
-                     managementStream: ReversiManagementStreamType) {
-        self.init(input: Input(),
-                  state: State(),
-                  extra: Extra(messageDiskSize: messageDiskSize,
-                               mainAsyncScheduler: mainAsyncScheduler,
-                               mainScheduler: mainScheduler,
-                               managementStream: managementStream))
-    }
-
     public static func bind(from dependency: Dependency<Input, State, Extra>, disposeBag: DisposeBag) -> Output {
         let input = dependency.inputObservables
         let extra = dependency.extra

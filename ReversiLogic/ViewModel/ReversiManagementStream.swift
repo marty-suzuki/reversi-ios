@@ -9,55 +9,6 @@ public protocol ReversiManagementStreamType: AnyObject {
 
 public final class ReversiManagementStream: UnioStream<ReversiManagementStream>, ReversiManagementStreamType {
 
-    convenience init(store: GameStoreProtocol,
-                     actionCreator: GameActionCreatorProtocol,
-                     mainScheduler: SchedulerType,
-                     mainAsyncScheduler: SchedulerType,
-                     flippedDiskCoordinatesFactory: FlippedDiskCoordinatesFactoryProtocol,
-                     setDiskFactory: SetDiskFactoryProtocol,
-                     animateSettingDisksFactory: AnimateSettingDisksFactoryProtocol,
-                     placeDiskFactory: PlaceDiskFactoryProtocol,
-                     validMovesFactory: ValidMovesFactoryProtocol) {
-        let state = State()
-
-        let setDisk = setDiskFactory.make(
-            updateDisk: state.updateDisk,
-            actionCreator: actionCreator
-        )
-
-        let animateSettingDisks = animateSettingDisksFactory.make(
-            setDisk: setDisk,
-            store: store
-        )
-
-        let flippedDiskCoordinates = flippedDiskCoordinatesFactory.make(store: store)
-
-        let placeDisk = placeDiskFactory.make(
-            flippedDiskCoordinates: flippedDiskCoordinates,
-            setDisk: setDisk,
-            animateSettingDisks: animateSettingDisks,
-            actionCreator: actionCreator,
-            store: store,
-            mainAsyncScheduler: mainAsyncScheduler
-        )
-
-        let validMoves = validMovesFactory.make(
-            flippedDiskCoordinates: flippedDiskCoordinates,
-            store: store
-        )
-        self.init(input: Input(),
-                  state: state,
-                  extra: Extra(store: store,
-                               actionCreator: actionCreator,
-                               mainScheduler: mainScheduler,
-                               validMoves: validMoves,
-                               setDisk: setDisk,
-                               placeDisk: placeDisk))
-    }
-}
-
-extension ReversiManagementStream {
-
     public struct Input: InputType {
         let waitForPlayer = PublishRelay<Void>()
         let setPlayerForDiskWithIndex = PublishRelay<(Disk, Int)>()
@@ -239,7 +190,9 @@ extension ReversiManagementStream {
                     rows.map { cell in
                         extra.setDisk(cell.disk,
                                       at: cell.coordinate,
-                                      animated: false).asObservable()
+                                      animated: false,
+                                      updateDisk: state.updateDisk)
+                            .asObservable()
                     }
                 }
                 return Observable.zip(updates).map { _ in }
@@ -385,7 +338,10 @@ extension ReversiManagementStream {
 
         let didUpdateDisk = handleDiskWithCoordinate
             .flatMap { disk, coordinate -> Observable<Bool> in
-                extra.placeDisk(disk, at: coordinate, animated: true)
+                extra.placeDisk(disk,
+                                at: coordinate,
+                                animated: true,
+                                updateDisk: state.updateDisk)
                     .asObservable()
                     .catchError { _ in .empty() }
             }

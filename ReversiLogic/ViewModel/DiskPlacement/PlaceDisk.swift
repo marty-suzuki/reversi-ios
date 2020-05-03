@@ -1,7 +1,7 @@
 import RxRelay
 import RxSwift
 
-protocol PlaceDiskFactoryProtocol {
+public protocol PlaceDiskFactoryProtocol {
     func make(flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
               setDisk: SetDiskProtocol,
               animateSettingDisks: AnimateSettingDisksProtocol,
@@ -10,13 +10,13 @@ protocol PlaceDiskFactoryProtocol {
               mainAsyncScheduler: SchedulerType) -> PlaceDiskProtocol
 }
 
-struct PlaceDiskFactory: PlaceDiskFactoryProtocol {
-    func make(flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
-              setDisk: SetDiskProtocol,
-              animateSettingDisks: AnimateSettingDisksProtocol,
-              actionCreator: GameActionCreatorProtocol,
-              store: GameStoreProtocol,
-              mainAsyncScheduler: SchedulerType) -> PlaceDiskProtocol {
+public struct PlaceDiskFactory: PlaceDiskFactoryProtocol {
+    public func make(flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
+                     setDisk: SetDiskProtocol,
+                     animateSettingDisks: AnimateSettingDisksProtocol,
+                     actionCreator: GameActionCreatorProtocol,
+                     store: GameStoreProtocol,
+                     mainAsyncScheduler: SchedulerType) -> PlaceDiskProtocol {
         PlaceDisk(flippedDiskCoordinates: flippedDiskCoordinates,
                   setDisk: setDisk,
                   animateSettingDisks: animateSettingDisks,
@@ -26,10 +26,13 @@ struct PlaceDiskFactory: PlaceDiskFactoryProtocol {
     }
 }
 
-protocol PlaceDiskProtocol {
-    func callAsFunction(_ disk: Disk,
-                        at coordinate: Coordinate,
-                        animated isAnimated: Bool) -> Single<Bool>
+public protocol PlaceDiskProtocol {
+    func callAsFunction<T: Acceptable>(
+        _ disk: Disk,
+        at coordinate: Coordinate,
+        animated isAnimated: Bool,
+        updateDisk: T
+    ) -> Single<Bool> where T.Element == UpdateDisk
 }
 
 struct PlaceDisk: PlaceDiskProtocol {
@@ -46,9 +49,12 @@ struct PlaceDisk: PlaceDiskProtocol {
     ///     whether or not the animations actually finished before the completion handler was called.
     ///     If `animated` is `false`,  this closure is performed at the beginning of the next run loop cycle. This parameter may be `nil`.
     /// - Throws: `DiskPlacementError` if the `disk` cannot be placed at (`x`, `y`).
-    func callAsFunction(_ disk: Disk,
-                        at coordinate: Coordinate,
-                        animated isAnimated: Bool) -> Single<Bool> {
+    func callAsFunction<T: Acceptable>(
+        _ disk: Disk,
+        at coordinate: Coordinate,
+        animated isAnimated: Bool,
+        updateDisk: T
+    ) -> Single<Bool> where T.Element == UpdateDisk {
 
         let diskCoordinates = flippedDiskCoordinates(by: disk, at: coordinate)
         if diskCoordinates.isEmpty {
@@ -60,7 +66,9 @@ struct PlaceDisk: PlaceDiskProtocol {
                 actionCreator.setPlaceDiskCanceller(nil)
             }
             actionCreator.setPlaceDiskCanceller(Canceller(cleanUp))
-            return animateSettingDisks(at: [coordinate] + diskCoordinates, to: disk)
+            return animateSettingDisks(at: [coordinate] + diskCoordinates,
+                                       to: disk,
+                                       updateDisk: updateDisk)
                 .flatMap { [store] finished in
                     guard  let canceller = store.placeDiskCanceller.value else {
                         return .error(Error.animationCancellerReleased)
@@ -80,7 +88,8 @@ struct PlaceDisk: PlaceDiskProtocol {
             let observables = coordinates.map {
                 setDisk(disk,
                         at: $0,
-                        animated: false).asObservable()
+                        animated: false,
+                        updateDisk: updateDisk).asObservable()
             }
             return Observable.just(())
                 .observeOn(mainAsyncScheduler)

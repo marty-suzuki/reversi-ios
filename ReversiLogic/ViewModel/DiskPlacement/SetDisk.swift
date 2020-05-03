@@ -2,31 +2,34 @@ import RxRelay
 import RxSwift
 
 public protocol SetDiskFactoryProtocol {
-    func make(updateDisk: PublishRelay<UpdateDisk>,
-              actionCreator: GameActionCreatorProtocol) -> SetDiskProtocol
+    func make(actionCreator: GameActionCreatorProtocol) -> SetDiskProtocol
 }
 
 public struct SetDiskFactory: SetDiskFactoryProtocol {
-    public func make(updateDisk: PublishRelay<UpdateDisk>,
-              actionCreator: GameActionCreatorProtocol) -> SetDiskProtocol {
-        SetDisk(updateDisk: updateDisk, actionCreator: actionCreator)
+    public func make(actionCreator: GameActionCreatorProtocol) -> SetDiskProtocol {
+        SetDisk(actionCreator: actionCreator)
     }
 }
 
 public protocol SetDiskProtocol {
-    func callAsFunction(_ disk: Disk?,
-                        at coordinate: Coordinate,
-                        animated: Bool) -> Single<Bool>
+    func callAsFunction<T: Acceptable>(
+        _ disk: Disk?,
+        at coordinate: Coordinate,
+        animated: Bool,
+        updateDisk: T
+    ) -> Single<Bool> where T.Element == UpdateDisk
 }
 
 struct SetDisk: SetDiskProtocol {
 
-    let updateDisk: PublishRelay<UpdateDisk>
     let actionCreator: GameActionCreatorProtocol
 
-    func callAsFunction(_ disk: Disk?,
-                        at coordinate: Coordinate,
-                        animated: Bool) -> Single<Bool> {
+    func callAsFunction<T: Acceptable>(
+        _ disk: Disk?,
+        at coordinate: Coordinate,
+        animated: Bool,
+        updateDisk: T
+    ) -> Single<Bool> where T.Element == UpdateDisk {
         Single<Bool>.create { [actionCreator, updateDisk] observer in
             actionCreator.setDisk(disk, at: coordinate)
             let update = UpdateDisk(disk: disk, coordinate: coordinate, animated: animated) {
