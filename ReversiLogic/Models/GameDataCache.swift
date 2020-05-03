@@ -11,7 +11,7 @@ final class GameDataCache: GameDataCacheProtocol {
     private let _saveGame: GameDataIO.SaveGame
 
     init(loadGame: @escaping GameDataIO.LoadGame,
-        saveGame: @escaping GameDataIO.SaveGame) {
+         saveGame: @escaping GameDataIO.SaveGame) {
         self._loadGame = loadGame
         self._saveGame = saveGame
     }

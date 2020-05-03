@@ -25,15 +25,15 @@ final class MockReversiManagementStream: ReversiManagementStreamType {
     )
 
     @MockPublishWrapper
-    var  newGameBegan: Observable<Void>
+    var newGameBegan: Observable<Void>
     @MockPublishWrapper
-    var  handleDiskWithCoordinate: Observable<(Disk, Coordinate)>
+    var handleDiskWithCoordinate: Observable<(Disk, Coordinate)>
     @MockPublishWrapper
-    var  willTurnDiskOfComputer: Observable<Disk>
+    var willTurnDiskOfComputer: Observable<Disk>
     @MockPublishWrapper
-    var  didTurnDiskOfComputer: Observable<Disk>
+    var didTurnDiskOfComputer: Observable<Disk>
     @MockPublishWrapper
-    var  handerAlert: Observable<Alert>
+    var handerAlert: Observable<Alert>
 
     @MockBehaviorWrapeer(value: .turn(.dark))
     var status: ValueObservable<GameData.Status>
