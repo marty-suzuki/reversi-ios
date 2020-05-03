@@ -143,7 +143,7 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel>, ReversiViewMo
             messageDisk: state.messageDisk.asObservable(),
             messageDiskSizeConstant: state.messageDiskSizeConstant.asObservable(),
             messageText: state.messageText.asObservable(),
-            showAlert: managementStream.output.handerAlert.asObservable(),
+            showAlert: managementStream.output.handleAlert,
             isPlayerDarkAnimating: state.isPlayerDarkAnimating.asObservable(),
             isPlayerLightAnimating: state.isPlayerLightAnimating.asObservable(),
             playerDarkCount: state.playerDarkCount.asObservable(),

@@ -68,34 +68,27 @@ extension ReversiManagementStream {
     }
 
     public struct Output: OutputType {
-        let newGameBegan: Observable<Void>
-        let willTurnDiskOfComputer: Observable<Disk>
-        let didTurnDiskOfComputer: Observable<Disk>
-        let handerAlert: Observable<Alert>
-
         let status: ValueObservable<GameData.Status>
         let sideWithMoreDisks: ValueObservable<Disk?>
         let countOfDark: ValueObservable<Int>
         let countOfLight: ValueObservable<Int>
         let playerDark: ValueObservable<GameData.Player>
         let playerLight: ValueObservable<GameData.Player>
-
+        let newGameBegan: Observable<Void>
+        let willTurnDiskOfComputer: Observable<Disk>
+        let didTurnDiskOfComputer: Observable<Disk>
+        let handleAlert: Observable<Alert>
         let updateDisk: Observable<UpdateDisk>
         let didUpdateDisk: Observable<Bool>
         let didRefreshAllDisk: Observable<Void>
     }
 
     public struct State: StateType {
-        let newGame = PublishRelay<Void>()
-        let playTurnOfComputer = PublishRelay<Void>()
-
+        let reset = PublishRelay<Void>()
         let newGameBegan = PublishRelay<Void>()
         let willTurnDiskOfComputer = PublishRelay<Disk>()
         let didTurnDiskOfComputer = PublishRelay<Disk>()
-        let handerAlert = PublishRelay<Alert>()
-
         let updateDisk = PublishRelay<UpdateDisk>()
-
         let save = PublishRelay<Void>()
         let waitForPlayer = PublishRelay<Void>()
         let nextTurn = PublishRelay<Void>()
@@ -110,6 +103,12 @@ extension ReversiManagementStream {
         let placeDisk: PlaceDiskProtocol
     }
 
+    private enum NextTurnResult {
+        case gameOver
+        case validMoves(GameData.Status)
+        case noValidMoves(GameData.Status)
+    }
+
     public static func bind(from dependency: Dependency<Input, State, Extra>, disposeBag: DisposeBag) -> Output {
 
         let state = dependency.state
@@ -117,7 +116,7 @@ extension ReversiManagementStream {
         let store = extra.store
         let actionCreator = extra.actionCreator
 
-        Observable.merge(state.newGame.asObservable(),
+        Observable.merge(state.reset.asObservable(),
                          store.faildToLoad)
             .subscribe(onNext: {
                 actionCreator.reset()
@@ -130,139 +129,54 @@ extension ReversiManagementStream {
             .subscribe(onNext: { actionCreator.load() })
             .disposed(by: disposeBag)
 
-        Observable.merge(dependency.inputObservables.waitForPlayer,
-                         state.waitForPlayer.asObservable())
-            .withLatestFrom(store.status)
-            .withLatestFrom(store.playerDark) { ($0, $1) }
-            .withLatestFrom(store.playerLight) { ($0.0, $0.1, $1) }
-            .flatMap { status, playerDark, playerLight -> Observable<Void> in
-                let player: GameData.Player
-                switch status {
-                case .gameOver:
-                    return .empty()
-                case .turn(.dark):
-                    player = playerDark
-                case .turn(.light):
-                    player = playerLight
-                }
-
-                switch player {
-                case .manual:
-                    return .empty()
-                case .computer:
-                    return .just(())
-                }
-            }
-            .bind(to: state.playTurnOfComputer)
-            .disposed(by: disposeBag)
-
-        dependency.inputObservables.setPlayerForDiskWithIndex
-            .do(onNext: { disk, index in
-                let actionCreator = extra.actionCreator
-                let store = extra.store
-                switch disk {
-                case .dark:
-                    actionCreator.setPlayerOfDark(GameData.Player(rawValue: index) ?? .manual)
-                case .light:
-                    actionCreator.setPlayerOfLight(GameData.Player(rawValue: index) ?? .manual)
-                }
-
-                state.save.accept(())
-
-                if let canceller = store.playerCancellers.value[disk] {
-                    canceller.cancel()
-                }
-            })
-            .withLatestFrom(store.isDiskPlacing) { ($0.0, $1) }
-            .flatMap { disk, isDiskPlacing -> Observable<Disk> in
-                if isDiskPlacing {
-                    return .empty()
-                } else {
-                    return .just(disk)
-                }
-            }
-            .withLatestFrom(store.playerDark) { ($0, $1) }
-            .withLatestFrom(store.playerLight) { ($0.0, $0.1, $1) }
-            .flatMap { disk, playerDark, playerLight -> Observable<Disk> in
-                let player: GameData.Player
-                switch disk {
-                case .dark:
-                    player = playerDark
-                case .light:
-                    player = playerLight
-                }
-                guard case .computer = player else {
-                    return .empty()
-                }
-                return .just(disk)
-            }
-            .withLatestFrom(store.status) { ($0, $1) }
-            .flatMap { disk, status -> Observable<Void> in
-                guard case .turn(disk) = status else {
-                    return .empty()
-                }
-                return .just(())
-            }
-            .bind(to: state.playTurnOfComputer)
-            .disposed(by: disposeBag)
-
         dependency.inputObservables.newGame
-            .bind(to: state.newGame)
+            .bind(to: state.reset)
             .disposed(by: disposeBag)
 
-        state.nextTurn
-            .subscribe(onNext: {
-                let store = extra.store
-                let actionCreator = extra.actionCreator
+        let nextTurnResult = state.nextTurn
+            .withLatestFrom(extra.store.status)
+            .flatMap { status -> Observable<NextTurnResult> in
                 let validMoves = extra.validMoves
-
                 var turn: Disk
                 switch store.status.value {
                 case let .turn(disk):
                     turn = disk
                 case .gameOver:
-                    return
+                    return .empty()
                 }
 
                 turn.flip()
 
                 if validMoves(for: turn).isEmpty {
                     if validMoves(for: turn.flipped).isEmpty {
-                        actionCreator.setStatus(.gameOver)
+                        return .just(.gameOver)
                     } else {
-                        actionCreator.setStatus(.turn(turn))
-
-                        let alert = Alert.pass {
-                            state.nextTurn.accept(())
-                        }
-                        state.handerAlert.accept(alert)
+                        return .just(.noValidMoves(.turn(turn)))
                     }
                 } else {
-                    actionCreator.setStatus(.turn(turn))
-                    state.waitForPlayer.accept(())
-                }
-            })
-            .disposed(by: disposeBag)
-
-        dependency.inputObservables.prepareForReset
-            .map { _ -> Alert in
-                Alert.reset {
-                    let actionCreator = extra.actionCreator
-                    let store = extra.store
-
-                    store.placeDiskCanceller.value?.cancel()
-                    actionCreator.setPlaceDiskCanceller(nil)
-
-                    for side in Disk.allCases {
-                        store.playerCancellers.value[side]?.cancel()
-                        actionCreator.setPlayerCanceller(nil, for: side)
-                    }
-
-                    state.newGame.accept(())
-                    state.waitForPlayer.accept(())
+                    return .just(.validMoves(.turn(turn)))
                 }
             }
-            .bind(to: state.handerAlert)
+            .do(onNext: { result in
+                let actionCreator = extra.actionCreator
+                switch result {
+                case .gameOver:
+                    actionCreator.setStatus(.gameOver)
+                case let .validMoves(status),
+                     let .noValidMoves(status):
+                    actionCreator.setStatus(status)
+                }
+            })
+            .share()
+
+        nextTurnResult
+            .flatMap { result -> Observable<Void> in
+                guard case .validMoves = result else {
+                    return .empty()
+                }
+                return .just(())
+            }
+            .bind(to: state.waitForPlayer)
             .disposed(by: disposeBag)
 
         state.save
@@ -281,6 +195,42 @@ extension ReversiManagementStream {
                                    playerLight: store.playerLight.value)
             })
             .disposed(by: disposeBag)
+
+        let handleAlert: Observable<Alert> = {
+            let o1 = nextTurnResult
+                .flatMap { result -> Observable<Alert> in
+                    guard case .noValidMoves = result else {
+                        return .empty()
+                    }
+                    let alert = Alert.pass {
+                        state.nextTurn.accept(())
+                    }
+                    return .just(alert)
+                }
+                .share()
+
+            let o2 = dependency.inputObservables.prepareForReset
+                .map { _ -> Alert in
+                    Alert.reset {
+                        let actionCreator = extra.actionCreator
+                        let store = extra.store
+
+                        store.placeDiskCanceller.value?.cancel()
+                        actionCreator.setPlaceDiskCanceller(nil)
+
+                        for side in Disk.allCases {
+                            store.playerCancellers.value[side]?.cancel()
+                            actionCreator.setPlayerCanceller(nil, for: side)
+                        }
+
+                        state.reset.accept(())
+                        state.waitForPlayer.accept(())
+                    }
+                }
+                .share()
+
+            return Observable.merge(o1, o2)
+        }()
 
         let didRefreshAllDisk = store.loaded
             .withLatestFrom(extra.store.cells)
@@ -310,7 +260,84 @@ extension ReversiManagementStream {
                     return .just((turn, coordinate))
                 }
 
-            let o2 = state.playTurnOfComputer
+            let playTurnOfComputer1 = Observable.merge(
+                    dependency.inputObservables.waitForPlayer,
+                    state.waitForPlayer.asObservable()
+                )
+                .withLatestFrom(store.status)
+                .withLatestFrom(store.playerDark) { ($0, $1) }
+                .withLatestFrom(store.playerLight) { ($0.0, $0.1, $1) }
+                .flatMap { status, playerDark, playerLight -> Observable<Void> in
+                    let player: GameData.Player
+                    switch status {
+                    case .gameOver:
+                        return .empty()
+                    case .turn(.dark):
+                        player = playerDark
+                    case .turn(.light):
+                        player = playerLight
+                    }
+
+                    switch player {
+                    case .manual:
+                        return .empty()
+                    case .computer:
+                        return .just(())
+                    }
+                }
+
+            let playTurnOfComputer2 = dependency.inputObservables.setPlayerForDiskWithIndex
+                .do(onNext: { disk, index in
+                    let actionCreator = extra.actionCreator
+                    let store = extra.store
+                    switch disk {
+                    case .dark:
+                        actionCreator.setPlayerOfDark(GameData.Player(rawValue: index) ?? .manual)
+                    case .light:
+                        actionCreator.setPlayerOfLight(GameData.Player(rawValue: index) ?? .manual)
+                    }
+
+                    state.save.accept(())
+
+                    if let canceller = store.playerCancellers.value[disk] {
+                        canceller.cancel()
+                    }
+                })
+                .withLatestFrom(store.isDiskPlacing) { ($0.0, $1) }
+                .flatMap { disk, isDiskPlacing -> Observable<Disk> in
+                    if isDiskPlacing {
+                        return .empty()
+                    } else {
+                        return .just(disk)
+                    }
+                }
+                .withLatestFrom(store.playerDark) { ($0, $1) }
+                .withLatestFrom(store.playerLight) { ($0.0, $0.1, $1) }
+                .flatMap { disk, playerDark, playerLight -> Observable<Disk> in
+                    let player: GameData.Player
+                    switch disk {
+                    case .dark:
+                        player = playerDark
+                    case .light:
+                        player = playerLight
+                    }
+                    guard case .computer = player else {
+                        return .empty()
+                    }
+                    return .just(disk)
+                }
+                .withLatestFrom(store.status) { ($0, $1) }
+                .flatMap { disk, status -> Observable<Void> in
+                    guard case .turn(disk) = status else {
+                        return .empty()
+                    }
+                    return .just(())
+                }
+
+            let o2 = Observable.merge(
+                    playTurnOfComputer1,
+                    playTurnOfComputer2
+                )
                 .map { _ -> (Disk, Coordinate) in
                     let validMoves = extra.validMoves
                     guard
@@ -369,16 +396,16 @@ extension ReversiManagementStream {
             .share()
 
         return Output(
-            newGameBegan: state.newGameBegan.asObservable(),
-            willTurnDiskOfComputer: state.willTurnDiskOfComputer.asObservable(),
-            didTurnDiskOfComputer: state.didTurnDiskOfComputer.asObservable(),
-            handerAlert: state.handerAlert.asObservable(),
             status: store.status,
             sideWithMoreDisks: store.sideWithMoreDisks,
             countOfDark: store.countOfDark,
             countOfLight: store.countOfLight,
             playerDark: store.playerDark,
             playerLight: store.playerLight,
+            newGameBegan: state.newGameBegan.asObservable(),
+            willTurnDiskOfComputer: state.willTurnDiskOfComputer.asObservable(),
+            didTurnDiskOfComputer: state.didTurnDiskOfComputer.asObservable(),
+            handleAlert: handleAlert,
             updateDisk: state.updateDisk.asObservable(),
             didUpdateDisk: didUpdateDisk,
             didRefreshAllDisk: didRefreshAllDisk
