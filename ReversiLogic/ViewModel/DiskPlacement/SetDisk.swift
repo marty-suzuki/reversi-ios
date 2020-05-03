@@ -1,16 +1,6 @@
 import RxRelay
 import RxSwift
 
-public protocol SetDiskFactoryProtocol {
-    func make(actionCreator: GameActionCreatorProtocol) -> SetDiskProtocol
-}
-
-public struct SetDiskFactory: SetDiskFactoryProtocol {
-    public func make(actionCreator: GameActionCreatorProtocol) -> SetDiskProtocol {
-        SetDisk(actionCreator: actionCreator)
-    }
-}
-
 public protocol SetDiskProtocol {
     func callAsFunction<T: Acceptable>(
         _ disk: Disk?,

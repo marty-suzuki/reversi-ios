@@ -2,16 +2,6 @@ import RxRelay
 import RxSwift
 @testable import ReversiLogic
 
-struct MockValidMovesFactory: ValidMovesFactoryProtocol {
-
-    let validMoves: MockValidMoves
-
-    func make(flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
-              store: GameStoreProtocol) -> ValidMovesProtocol {
-        return validMoves
-    }
-}
-
 struct MockValidMoves: ValidMovesProtocol {
 
     @MockResponse<Disk, [Coordinate]>

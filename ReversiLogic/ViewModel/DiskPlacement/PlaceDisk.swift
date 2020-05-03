@@ -1,31 +1,6 @@
 import RxRelay
 import RxSwift
 
-public protocol PlaceDiskFactoryProtocol {
-    func make(flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
-              setDisk: SetDiskProtocol,
-              animateSettingDisks: AnimateSettingDisksProtocol,
-              actionCreator: GameActionCreatorProtocol,
-              store: GameStoreProtocol,
-              mainAsyncScheduler: SchedulerType) -> PlaceDiskProtocol
-}
-
-public struct PlaceDiskFactory: PlaceDiskFactoryProtocol {
-    public func make(flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
-                     setDisk: SetDiskProtocol,
-                     animateSettingDisks: AnimateSettingDisksProtocol,
-                     actionCreator: GameActionCreatorProtocol,
-                     store: GameStoreProtocol,
-                     mainAsyncScheduler: SchedulerType) -> PlaceDiskProtocol {
-        PlaceDisk(flippedDiskCoordinates: flippedDiskCoordinates,
-                  setDisk: setDisk,
-                  animateSettingDisks: animateSettingDisks,
-                  actionCreator: actionCreator,
-                  store: store,
-                  mainAsyncScheduler: mainAsyncScheduler)
-    }
-}
-
 public protocol PlaceDiskProtocol {
     func callAsFunction<T: Acceptable>(
         _ disk: Disk,

@@ -1,19 +1,6 @@
 import RxRelay
 import RxSwift
 
-public protocol AnimateSettingDisksFactoryProtocol {
-    func make(setDisk: SetDiskProtocol,
-              store: GameStoreProtocol) -> AnimateSettingDisksProtocol
-}
-
-public struct AnimateSettingDisksFactory: AnimateSettingDisksFactoryProtocol {
-    public func make(setDisk: SetDiskProtocol,
-                     store: GameStoreProtocol) -> AnimateSettingDisksProtocol {
-        AnimateSettingDisks(setDisk: setDisk,
-                            store: store)
-    }
-}
-
 public protocol AnimateSettingDisksProtocol {
     func callAsFunction<T: Acceptable>(
         at coordinates: [Coordinate],

@@ -1,13 +1,3 @@
-public protocol FlippedDiskCoordinatesFactoryProtocol {
-    func make(store: GameStoreProtocol) -> FlippedDiskCoordinatesProtocol
-}
-
-public struct FlippedDiskCoordinatesFactory: FlippedDiskCoordinatesFactoryProtocol {
-    public func make(store: GameStoreProtocol) -> FlippedDiskCoordinatesProtocol {
-        FlippedDiskCoordinates(store: store)
-    }
-}
-
 public protocol FlippedDiskCoordinatesProtocol {
     func callAsFunction(by disk: Disk, at coordinate: Coordinate) -> [Coordinate]
 }

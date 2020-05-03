@@ -9,16 +9,16 @@ final class MockReversiManagementStream: ReversiManagementStreamType {
 
     lazy var output = OutputWrapper(_output)
     lazy var _output = ReversiManagementStream.Output(
-        newGameBegan: newGameBegan,
-        willTurnDiskOfComputer: willTurnDiskOfComputer,
-        didTurnDiskOfComputer: didTurnDiskOfComputer,
-        handerAlert: handerAlert,
         status: status,
         sideWithMoreDisks: sideWithMoreDisks,
         countOfDark: countOfDark,
         countOfLight: countOfLight,
         playerDark: playerDark,
         playerLight: playerLight,
+        newGameBegan: newGameBegan,
+        willTurnDiskOfComputer: willTurnDiskOfComputer,
+        didTurnDiskOfComputer: didTurnDiskOfComputer,
+        handleAlert: handerAlert,
         updateDisk: updateDisk,
         didUpdateDisk: didUpdateDisk,
         didRefreshAllDisk: didRefreshAllDisk

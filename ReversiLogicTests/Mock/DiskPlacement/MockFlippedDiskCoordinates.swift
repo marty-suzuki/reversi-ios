@@ -1,14 +1,5 @@
 @testable import ReversiLogic
 
-public struct MockFlippedDiskCoordinatesFactory: FlippedDiskCoordinatesFactoryProtocol {
-
-    let flippedDiskCoordinates: MockFlippedDiskCoordinates
-
-    public func make(store: GameStoreProtocol) -> FlippedDiskCoordinatesProtocol {
-        flippedDiskCoordinates
-    }
-}
-
 final class MockFlippedDiskCoordinates: FlippedDiskCoordinatesProtocol {
 
     @MockResponse<Parameters, [Coordinate]>

@@ -1,17 +1,3 @@
-
-public protocol ValidMovesFactoryProtocol {
-    func make(flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
-              store: GameStoreProtocol) -> ValidMovesProtocol
-}
-
-public struct ValidMovesFactory: ValidMovesFactoryProtocol {
-    public func make(flippedDiskCoordinates: FlippedDiskCoordinatesProtocol,
-                     store: GameStoreProtocol) -> ValidMovesProtocol {
-        ValidMoves(flippedDiskCoordinates: flippedDiskCoordinates,
-                   store: store)
-    }
-}
-
 public protocol ValidMovesProtocol {
     func callAsFunction(for disk: Disk) -> [Coordinate]
 }
