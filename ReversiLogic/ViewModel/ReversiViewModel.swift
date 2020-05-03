@@ -128,9 +128,6 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel>, ReversiViewMo
 
             let updateCount2 = managementStream.output.didUpdateDisk
                 .map { _ in }
-                .do(onNext: {
-                    managementStream.input.nextTurn(())
-                })
 
             Observable.merge(updateCount1,
                              updateCount2,

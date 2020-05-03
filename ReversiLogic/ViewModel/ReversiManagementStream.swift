@@ -64,7 +64,6 @@ extension ReversiManagementStream {
         let startGame = PublishRelay<Void>()
         let newGame = PublishRelay<Void>()
         let handleSelectedCoordinate = PublishRelay<Coordinate>()
-        let nextTurn = PublishRelay<Void>()
         let prepareForReset = PublishRelay<Void>()
     }
 
@@ -99,6 +98,7 @@ extension ReversiManagementStream {
 
         let save = PublishRelay<Void>()
         let waitForPlayer = PublishRelay<Void>()
+        let nextTurn = PublishRelay<Void>()
     }
 
     public struct Extra: ExtraType {
@@ -157,16 +157,60 @@ extension ReversiManagementStream {
             .disposed(by: disposeBag)
 
         dependency.inputObservables.setPlayerForDiskWithIndex
-            .subscribe(onNext: { setPlayer(for: $0, with: $1, extra: extra, state: state) })
+            .do(onNext: { disk, index in
+                let actionCreator = extra.actionCreator
+                let store = extra.store
+                switch disk {
+                case .dark:
+                    actionCreator.setPlayerOfDark(GameData.Player(rawValue: index) ?? .manual)
+                case .light:
+                    actionCreator.setPlayerOfLight(GameData.Player(rawValue: index) ?? .manual)
+                }
+
+                state.save.accept(())
+
+                if let canceller = store.playerCancellers.value[disk] {
+                    canceller.cancel()
+                }
+            })
+            .withLatestFrom(store.isDiskPlacing) { ($0.0, $1) }
+            .flatMap { disk, isDiskPlacing -> Observable<Disk> in
+                if isDiskPlacing {
+                    return .empty()
+                } else {
+                    return .just(disk)
+                }
+            }
+            .withLatestFrom(store.playerDark) { ($0, $1) }
+            .withLatestFrom(store.playerLight) { ($0.0, $0.1, $1) }
+            .flatMap { disk, playerDark, playerLight -> Observable<Disk> in
+                let player: GameData.Player
+                switch disk {
+                case .dark:
+                    player = playerDark
+                case .light:
+                    player = playerLight
+                }
+                guard case .computer = player else {
+                    return .empty()
+                }
+                return .just(disk)
+            }
+            .withLatestFrom(store.status) { ($0, $1) }
+            .flatMap { disk, status -> Observable<Void> in
+                guard case .turn(disk) = status else {
+                    return .empty()
+                }
+                return .just(())
+            }
+            .bind(to: state.playTurnOfComputer)
             .disposed(by: disposeBag)
 
         dependency.inputObservables.newGame
             .bind(to: state.newGame)
             .disposed(by: disposeBag)
 
-        let nextTurn = PublishRelay<Void>()
-        Observable.merge(dependency.inputObservables.nextTurn,
-                         nextTurn.asObservable())
+        state.nextTurn
             .subscribe(onNext: {
                 let store = extra.store
                 let actionCreator = extra.actionCreator
@@ -189,7 +233,7 @@ extension ReversiManagementStream {
                         actionCreator.setStatus(.turn(turn))
 
                         let alert = Alert.pass {
-                            nextTurn.accept(())
+                            state.nextTurn.accept(())
                         }
                         state.handerAlert.accept(alert)
                     }
@@ -223,6 +267,14 @@ extension ReversiManagementStream {
 
         state.save
             .subscribe(onNext: {
+                #if DEBUG
+                print("""
+                status: \(store.status.value)
+                dark: \(store.playerDark.value)
+                light: \(store.playerLight.value)
+
+                """)
+                #endif
                 actionCreator.save(cells: store.cells.value,
                                    status: store.status.value,
                                    playerDark: store.playerDark.value,
@@ -311,6 +363,7 @@ extension ReversiManagementStream {
                     .catchError { _ in .empty() }
             }
             .do(onNext: { _ in
+                state.nextTurn.accept(())
                 state.save.accept(())
             })
             .share()
@@ -330,38 +383,6 @@ extension ReversiManagementStream {
             didUpdateDisk: didUpdateDisk,
             didRefreshAllDisk: didRefreshAllDisk
         )
-    }
-}
-
-extension ReversiManagementStream {
-
-    static func setPlayer(for disk: Disk, with index: Int, extra: Extra, state: State) {
-        let actionCreator = extra.actionCreator
-        let store = extra.store
-        switch disk {
-        case .dark:
-            actionCreator.setPlayerOfDark(GameData.Player(rawValue: index) ?? .manual)
-        case .light:
-            actionCreator.setPlayerOfLight(GameData.Player(rawValue: index) ?? .manual)
-        }
-
-        state.save.accept(())
-
-        if let canceller = store.playerCancellers.value[disk] {
-            canceller.cancel()
-        }
-
-        let player: GameData.Player
-        switch disk {
-        case .dark:
-            player = store.playerDark.value
-        case .light:
-            player = store.playerLight.value
-        }
-
-        if !store.isDiskPlacing.value, store.status.value == .turn(disk), case .computer = player {
-            state.playTurnOfComputer.accept(())
-        }
     }
 
     @available(*, unavailable)
