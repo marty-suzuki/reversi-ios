@@ -88,7 +88,7 @@ extension ReversiManagementStream {
 
     public struct State: StateType {
         let newGame = PublishRelay<Void>()
-        let readyComputerDisk = PublishRelay<(Disk, Coordinate, Canceller)>()
+        let playTurnOfComputer = PublishRelay<Void>()
 
         let newGameBegan = PublishRelay<Void>()
         let willTurnDiskOfComputer = PublishRelay<Disk>()
@@ -224,13 +224,39 @@ extension ReversiManagementStream {
                     return .just((turn, coordinate))
                 }
 
-            let o2 = state.readyComputerDisk
+            let o2 = state.playTurnOfComputer
+                .map { _ -> (Disk, Coordinate) in
+                    let validMoves = extra.validMoves
+                    guard
+                        case let .turn(disk) = store.status.value,
+                        let coordinate = validMoves(for: disk).randomElement()
+                    else {
+                        preconditionFailure()
+                    }
+                    return (disk, coordinate)
+                }
+                .do(onNext: { disk, _ in
+                    state.willTurnDiskOfComputer.accept(disk)
+                })
+                .map { disk, coordinate -> (Disk, Coordinate, Canceller) in
+                    let cleanUp: () -> Void = {
+                        state.didTurnDiskOfComputer.accept(disk)
+                        actionCreator.setPlayerCanceller(nil, for: disk)
+                    }
+                    return (disk, coordinate, Canceller(cleanUp))
+                }
+                .do(onNext: { disk, _, canceller in
+                    actionCreator.setPlayerCanceller(canceller, for: disk)
+                })
                 .flatMap { disk, coordinate, canceller -> Maybe<(Disk, Coordinate)> in
                     weak var canceller = canceller
                     return Maybe.just(())
                         .delay(.seconds(2), scheduler: extra.mainScheduler)
                         .flatMap { _ -> Maybe<(Disk, Coordinate)> in
-                            if let canceller = canceller, canceller.isCancelled {
+                            guard
+                                let canceller = canceller,
+                                !canceller.isCancelled
+                            else {
                                 return .empty()
                             }
                             return .just((disk, coordinate))
@@ -283,29 +309,6 @@ extension ReversiManagementStream {
                                  playerLight: store.playerLight.value)
     }
 
-    static func playTurnOfComputer(extra: Extra, state: State) {
-        let store = extra.store
-        let actionCreator = extra.actionCreator
-        let validMoves = extra.validMoves
-        guard
-            case let .turn(disk) = store.status.value,
-            let coordinate = validMoves(for: disk).randomElement()
-        else {
-            preconditionFailure()
-        }
-
-        state.willTurnDiskOfComputer.accept(disk)
-
-        let cleanUp: () -> Void = {
-            state.didTurnDiskOfComputer.accept(disk)
-            actionCreator.setPlayerCanceller(nil, for: disk)
-        }
-        let canceller = Canceller(cleanUp)
-        actionCreator.setPlayerCanceller(canceller, for: disk)
-
-        state.readyComputerDisk.accept((disk, coordinate, canceller))
-    }
-
     static func waitForPlayer(extra: Extra, state: State) {
         let store = extra.store
         let player: GameData.Player
@@ -322,7 +325,7 @@ extension ReversiManagementStream {
         case .manual:
             break
         case .computer:
-            playTurnOfComputer(extra: extra, state: state)
+            state.playTurnOfComputer.accept(())
         }
     }
 
@@ -351,7 +354,7 @@ extension ReversiManagementStream {
         }
 
         if !store.isDiskPlacing.value, store.status.value == .turn(disk), case .computer = player {
-            playTurnOfComputer(extra: extra, state: state)
+            state.playTurnOfComputer.accept(())
         }
     }
 
