@@ -98,6 +98,7 @@ extension ReversiManagementStream {
         let updateDisk = PublishRelay<UpdateDisk>()
 
         let save = PublishRelay<Void>()
+        let waitForPlayer = PublishRelay<Void>()
     }
 
     public struct Extra: ExtraType {
@@ -129,8 +130,30 @@ extension ReversiManagementStream {
             .subscribe(onNext: { actionCreator.load() })
             .disposed(by: disposeBag)
 
-        dependency.inputObservables.waitForPlayer
-            .subscribe(onNext: { waitForPlayer(extra: extra, state: state) })
+        Observable.merge(dependency.inputObservables.waitForPlayer,
+                         state.waitForPlayer.asObservable())
+            .withLatestFrom(store.status)
+            .withLatestFrom(store.playerDark) { ($0, $1) }
+            .withLatestFrom(store.playerLight) { ($0.0, $0.1, $1) }
+            .flatMap { status, playerDark, playerLight -> Observable<Void> in
+                let player: GameData.Player
+                switch status {
+                case .gameOver:
+                    return .empty()
+                case .turn(.dark):
+                    player = playerDark
+                case .turn(.light):
+                    player = playerLight
+                }
+
+                switch player {
+                case .manual:
+                    return .empty()
+                case .computer:
+                    return .just(())
+                }
+            }
+            .bind(to: state.playTurnOfComputer)
             .disposed(by: disposeBag)
 
         dependency.inputObservables.setPlayerForDiskWithIndex
@@ -172,7 +195,7 @@ extension ReversiManagementStream {
                     }
                 } else {
                     actionCreator.setStatus(.turn(turn))
-                    waitForPlayer(extra: extra, state: state)
+                    state.waitForPlayer.accept(())
                 }
             })
             .disposed(by: disposeBag)
@@ -192,7 +215,7 @@ extension ReversiManagementStream {
                     }
 
                     state.newGame.accept(())
-                    waitForPlayer(extra: extra, state: state)
+                    state.waitForPlayer.accept(())
                 }
             }
             .bind(to: state.handerAlert)
@@ -311,26 +334,6 @@ extension ReversiManagementStream {
 }
 
 extension ReversiManagementStream {
-
-    static func waitForPlayer(extra: Extra, state: State) {
-        let store = extra.store
-        let player: GameData.Player
-        switch store.status.value {
-        case .gameOver:
-            return
-        case .turn(.dark):
-            player = store.playerDark.value
-        case .turn(.light):
-            player = store.playerLight.value
-        }
-
-        switch player {
-        case .manual:
-            break
-        case .computer:
-            state.playTurnOfComputer.accept(())
-        }
-    }
 
     static func setPlayer(for disk: Disk, with index: Int, extra: Extra, state: State) {
         let actionCreator = extra.actionCreator
