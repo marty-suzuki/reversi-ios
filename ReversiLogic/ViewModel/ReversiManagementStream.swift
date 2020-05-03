@@ -96,6 +96,8 @@ extension ReversiManagementStream {
         let handerAlert = PublishRelay<Alert>()
 
         let updateDisk = PublishRelay<UpdateDisk>()
+
+        let save = PublishRelay<Void>()
     }
 
     public struct Extra: ExtraType {
@@ -119,7 +121,7 @@ extension ReversiManagementStream {
             .subscribe(onNext: {
                 actionCreator.reset()
                 state.newGameBegan.accept(())
-                save(extra: extra)
+                state.save.accept(())
             })
             .disposed(by: disposeBag)
 
@@ -194,6 +196,15 @@ extension ReversiManagementStream {
                 }
             }
             .bind(to: state.handerAlert)
+            .disposed(by: disposeBag)
+
+        state.save
+            .subscribe(onNext: {
+                actionCreator.save(cells: store.cells.value,
+                                   status: store.status.value,
+                                   playerDark: store.playerDark.value,
+                                   playerLight: store.playerLight.value)
+            })
             .disposed(by: disposeBag)
 
         let didRefreshAllDisk = store.loaded
@@ -277,7 +288,7 @@ extension ReversiManagementStream {
                     .catchError { _ in .empty() }
             }
             .do(onNext: { _ in
-                save(extra: extra)
+                state.save.accept(())
             })
             .share()
 
@@ -300,14 +311,6 @@ extension ReversiManagementStream {
 }
 
 extension ReversiManagementStream {
-
-    static func save(extra: Extra) {
-        let store = extra.store
-        extra.actionCreator.save(cells: store.cells.value,
-                                 status: store.status.value,
-                                 playerDark: store.playerDark.value,
-                                 playerLight: store.playerLight.value)
-    }
 
     static func waitForPlayer(extra: Extra, state: State) {
         let store = extra.store
@@ -339,7 +342,7 @@ extension ReversiManagementStream {
             actionCreator.setPlayerOfLight(GameData.Player(rawValue: index) ?? .manual)
         }
 
-        save(extra: extra)
+        state.save.accept(())
 
         if let canceller = store.playerCancellers.value[disk] {
             canceller.cancel()
