@@ -23,8 +23,7 @@ class ViewController: UIViewController {
     @IBOutlet private var playerLightActivityIndicator: UIActivityIndicatorView!
 
     private let disposeBag = DisposeBag()
-
-    private let viewModelFactory = ReversiViewModelFactory()
+    @Lazy() private var viewModelFactory: ReversiViewModelFactoryType
     private lazy var viewModel = viewModelFactory.make(
         messageDiskSize: messageDiskSizeConstraint.constant,
         mainAsyncScheduler: MainScheduler.asyncInstance,
@@ -131,5 +130,14 @@ class ViewController: UIViewController {
 extension ViewController: BoardViewDelegate {
     func boardView(_ boardView: BoardView, didSelectCellAtX x: Int, y: Int) {
         viewModel.input.handleSelectedCoordinate(.init(x: x, y: y))
+    }
+}
+
+extension ViewController {
+    static func make(factory: ReversiViewModelFactoryType) -> ViewController {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let vc: ViewController = storyboard.instantiateInitialViewController()!
+        vc.viewModelFactory = factory
+        return vc
     }
 }
