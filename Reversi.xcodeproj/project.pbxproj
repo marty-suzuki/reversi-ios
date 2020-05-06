@@ -77,6 +77,7 @@
 		EDCE4499245EE8630067B130 /* PublishRelayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCE4498245EE8630067B130 /* PublishRelayExtension.swift */; };
 		EDCE449D245EF64C0067B130 /* Lazy.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCE449C245EF64C0067B130 /* Lazy.swift */; };
 		EDCE44C2246327A40067B130 /* SetDiskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCE44C1246327A40067B130 /* SetDiskTests.swift */; };
+		EDCE44C424632C3F0067B130 /* FlippedDiskCoordinatesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCE44C324632C3F0067B130 /* FlippedDiskCoordinatesTests.swift */; };
 		EDDDC5732455EE63001F73C2 /* SetDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC5722455EE63001F73C2 /* SetDisk.swift */; };
 		EDDDC5782455F6BA001F73C2 /* AnimateSettingDisks.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC5772455F6BA001F73C2 /* AnimateSettingDisks.swift */; };
 		EDDDC57A2455F98F001F73C2 /* MockAnimateSettingDisks.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDDC5792455F98F001F73C2 /* MockAnimateSettingDisks.swift */; };
@@ -197,6 +198,7 @@
 		EDCE4498245EE8630067B130 /* PublishRelayExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishRelayExtension.swift; sourceTree = "<group>"; };
 		EDCE449C245EF64C0067B130 /* Lazy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lazy.swift; sourceTree = "<group>"; };
 		EDCE44C1246327A40067B130 /* SetDiskTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDiskTests.swift; sourceTree = "<group>"; };
+		EDCE44C324632C3F0067B130 /* FlippedDiskCoordinatesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlippedDiskCoordinatesTests.swift; sourceTree = "<group>"; };
 		EDDDC5722455EE63001F73C2 /* SetDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetDisk.swift; sourceTree = "<group>"; };
 		EDDDC5772455F6BA001F73C2 /* AnimateSettingDisks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimateSettingDisks.swift; sourceTree = "<group>"; };
 		EDDDC5792455F98F001F73C2 /* MockAnimateSettingDisks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAnimateSettingDisks.swift; sourceTree = "<group>"; };
@@ -490,6 +492,7 @@
 		EDCE44C02463271E0067B130 /* DiskPlacement */ = {
 			isa = PBXGroup;
 			children = (
+				EDCE44C324632C3F0067B130 /* FlippedDiskCoordinatesTests.swift */,
 				EDCE44C1246327A40067B130 /* SetDiskTests.swift */,
 			);
 			path = DiskPlacement;
@@ -811,6 +814,7 @@
 				ED6EACA82444CD7E00BAF620 /* ReversiViewModelTests.swift in Sources */,
 				EDDDC57E2455FF64001F73C2 /* MockSetDisk.swift in Sources */,
 				EDE3249A245601E900C00F72 /* MockPlaceDisk.swift in Sources */,
+				EDCE44C424632C3F0067B130 /* FlippedDiskCoordinatesTests.swift in Sources */,
 				ED9AEF7C244C39F8004A068C /* MockBehaviorWrapper.swift in Sources */,
 				ED6D32AD24508C0500D0932F /* MockPublishResponse.swift in Sources */,
 				ED6D32A9245088D700D0932F /* MockGameStore.swift in Sources */,
