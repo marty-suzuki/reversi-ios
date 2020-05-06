@@ -11,8 +11,10 @@ final class ReversiViewModelTests: XCTestCase {
     override func setUp() {
         self.dependency = Dependency(messageDiskSize: 0)
     }
+}
 
-    func test_viewDidAppear_waitForPlayerが2回呼ばれることはない() {
+extension ReversiViewModelTests {
+    func test_input_viewDidAppear_waitForPlayerが2回呼ばれることはない() {
         let viewModel = dependency.testTarget
         let managementStream = dependency.managementStream
 
@@ -24,8 +26,10 @@ final class ReversiViewModelTests: XCTestCase {
         viewModel.input.viewDidAppear(())
         XCTAssertEqual(watcher.calledCount, 1)
     }
+}
 
-    func test_status_gameOverじゃない場合() {
+extension ReversiViewModelTests {
+    func test_output_messageXXX_statusがgameOverじゃない場合() {
         let expectedSize = CGFloat(arc4random() % 100)
         self.dependency = Dependency(messageDiskSize: expectedSize)
         let managementStream = dependency.managementStream
@@ -48,7 +52,7 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(mwssageText.parameters, ["'s turn"])
     }
 
-    func test_status_gameOverで勝者がいる場合() {
+    func test_output_messageXXX_statusがgameOverで勝者がいる場合() {
         let expectedDisk = Disk.dark
         let expectedSize = CGFloat(arc4random() % 100)
         self.dependency = Dependency(messageDiskSize: expectedSize)
@@ -57,7 +61,7 @@ final class ReversiViewModelTests: XCTestCase {
 
         let messageDiskSizeConstant = Watcher(viewModel.output.messageDiskSizeConstant)
         let messageDisk = Watcher(viewModel.output.messageDisk)
-        let mwssageText = Watcher(viewModel.output.messageText)
+        let messageText = Watcher(viewModel.output.messageText)
 
         managementStream.$sideWithMoreDisks.accept(expectedDisk)
         managementStream.$status.accept(.gameOver)
@@ -68,11 +72,11 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(messageDisk.calledCount, 1)
         XCTAssertEqual(messageDisk.parameters, [expectedDisk])
 
-        XCTAssertEqual(mwssageText.calledCount, 1)
-        XCTAssertEqual(mwssageText.parameters, [" won"])
+        XCTAssertEqual(messageText.calledCount, 1)
+        XCTAssertEqual(messageText.parameters, [" won"])
     }
 
-    func test_status_gameOverで勝者がいない場合() {
+    func test_output_messageXXX_statusがgameOverで勝者がいない場合() {
         let managementStream = dependency.managementStream
         let viewModel = dependency.testTarget
         self.dependency = Dependency(messageDiskSize: 0)
@@ -92,8 +96,10 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(mwssageText.calledCount, 1)
         XCTAssertEqual(mwssageText.parameters, ["Tied"])
     }
+}
 
-    func test_updateCount() {
+extension ReversiViewModelTests {
+    func test_output_playerXXXCount_didRefreshAllDiskが発火する() {
         let darkCount = Int(arc4random() % 100)
         let lightCount = Int(arc4random() % 100)
         let managementStream = dependency.managementStream
@@ -114,7 +120,55 @@ final class ReversiViewModelTests: XCTestCase {
         XCTAssertEqual(playerLightCount.parameters, ["\(lightCount)"])
     }
 
-    func test_isPlayerDarkAnimating_and_isPlayerLightAnimating() {
+    func test_output_playerXXXCount_didUpdateDiskが発火する() {
+        let darkCount = Int(arc4random() % 100)
+        let lightCount = Int(arc4random() % 100)
+        let managementStream = dependency.managementStream
+        let viewModel = dependency.testTarget
+
+        managementStream.$countOfDark.accept(darkCount)
+        managementStream.$countOfLight.accept(lightCount)
+
+        let playerDarkCount = Watcher(viewModel.output.playerDarkCount)
+        let playerLightCount = Watcher(viewModel.output.playerLightCount)
+
+        managementStream.$didUpdateDisk.accept(true)
+
+        XCTAssertEqual(playerDarkCount.calledCount, 1)
+        XCTAssertEqual(playerDarkCount.parameters, ["\(darkCount)"])
+
+        XCTAssertEqual(playerLightCount.calledCount, 1)
+        XCTAssertEqual(playerLightCount.parameters, ["\(lightCount)"])
+    }
+
+    func test_output_playerXXXCount_and_resetBoard_didUpdateDiskが発火する() {
+        let darkCount = Int(arc4random() % 100)
+        let lightCount = Int(arc4random() % 100)
+        let managementStream = dependency.managementStream
+        let viewModel = dependency.testTarget
+
+        managementStream.$countOfDark.accept(darkCount)
+        managementStream.$countOfLight.accept(lightCount)
+
+        let playerDarkCount = Watcher(viewModel.output.playerDarkCount)
+        let playerLightCount = Watcher(viewModel.output.playerLightCount)
+        let resetBoard = Watcher(viewModel.output.resetBoard)
+
+        managementStream.$newGameBegan.accept(())
+
+        XCTAssertEqual(playerDarkCount.calledCount, 1)
+        XCTAssertEqual(playerDarkCount.parameters, ["\(darkCount)"])
+
+        XCTAssertEqual(playerLightCount.calledCount, 1)
+        XCTAssertEqual(playerLightCount.parameters, ["\(lightCount)"])
+
+        XCTAssertEqual(resetBoard.calledCount, 1)
+        XCTAssertEqual(resetBoard.parameters.count, 1)
+    }
+}
+
+extension ReversiViewModelTests {
+    func test_output_isPlayerXXXAnimating() {
         let managementStream = dependency.managementStream
         let viewModel = dependency.testTarget
 
@@ -137,7 +191,47 @@ final class ReversiViewModelTests: XCTestCase {
 }
 
 extension ReversiViewModelTests {
+    func test_output_playerXXXSelectedIndex_同じ値では複数回発火しない() {
+        let managementStream = dependency.managementStream
+        let viewModel = dependency.testTarget
 
+        do {
+            let playerDarkSelectedIndex = Watcher(viewModel.output.playerDarkSelectedIndex.skip(1))
+
+            managementStream.$playerDark.accept(.computer)
+            managementStream.$playerDark.accept(.computer)
+            managementStream.$playerDark.accept(.computer)
+            managementStream.$playerDark.accept(.manual)
+            managementStream.$playerDark.accept(.manual)
+
+            let expected = [
+                GameData.Player.computer.rawValue,
+                GameData.Player.manual.rawValue
+            ]
+            XCTAssertEqual(playerDarkSelectedIndex.calledCount, 2)
+            XCTAssertEqual(playerDarkSelectedIndex.parameters, expected)
+        }
+
+        do {
+            let playerLightSelectedIndex = Watcher(viewModel.output.playerLightSelectedIndex.skip(1))
+
+            managementStream.$playerLight.accept(.computer)
+            managementStream.$playerLight.accept(.computer)
+            managementStream.$playerLight.accept(.computer)
+            managementStream.$playerLight.accept(.manual)
+            managementStream.$playerLight.accept(.manual)
+
+            let expected = [
+                GameData.Player.computer.rawValue,
+                GameData.Player.manual.rawValue
+            ]
+            XCTAssertEqual(playerLightSelectedIndex.calledCount, 2)
+            XCTAssertEqual(playerLightSelectedIndex.parameters, expected)
+        }
+    }
+}
+
+extension ReversiViewModelTests {
     fileprivate final class Dependency {
 
         let state = ReversiViewModel.State()
