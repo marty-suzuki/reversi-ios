@@ -25,6 +25,7 @@
 		ED20D557244B826600F7BA46 /* PublishWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D556244B826600F7BA46 /* PublishWrapper.swift */; };
 		ED20D56D244C2D6F00F7BA46 /* BehaviorWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D56B244C2D6F00F7BA46 /* BehaviorWrapper.swift */; };
 		ED20D56E244C2D6F00F7BA46 /* ValueObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED20D56C244C2D6F00F7BA46 /* ValueObservable.swift */; };
+		ED349E3824669BCA0014BCDC /* AnimateSettingDisksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED349E3724669BCA0014BCDC /* AnimateSettingDisksTests.swift */; };
 		ED3D8EE7244DF95F00DBF850 /* RxCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EE4244DF95F00DBF850 /* RxCocoa.framework */; };
 		ED3D8EE8244DF95F00DBF850 /* RxCocoa.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EE4244DF95F00DBF850 /* RxCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		ED3D8EE9244DF95F00DBF850 /* RxRelay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EE5244DF95F00DBF850 /* RxRelay.framework */; };
@@ -155,6 +156,7 @@
 		ED20D556244B826600F7BA46 /* PublishWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublishWrapper.swift; sourceTree = "<group>"; };
 		ED20D56B244C2D6F00F7BA46 /* BehaviorWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BehaviorWrapper.swift; sourceTree = "<group>"; };
 		ED20D56C244C2D6F00F7BA46 /* ValueObservable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueObservable.swift; sourceTree = "<group>"; };
+		ED349E3724669BCA0014BCDC /* AnimateSettingDisksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimateSettingDisksTests.swift; sourceTree = "<group>"; };
 		ED3D8EE4244DF95F00DBF850 /* RxCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxCocoa.framework; path = Carthage/Build/iOS/RxCocoa.framework; sourceTree = "<group>"; };
 		ED3D8EE5244DF95F00DBF850 /* RxRelay.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxRelay.framework; path = Carthage/Build/iOS/RxRelay.framework; sourceTree = "<group>"; };
 		ED3D8EE6244DF95F00DBF850 /* RxSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxSwift.framework; path = Carthage/Build/iOS/RxSwift.framework; sourceTree = "<group>"; };
@@ -492,6 +494,7 @@
 		EDCE44C02463271E0067B130 /* DiskPlacement */ = {
 			isa = PBXGroup;
 			children = (
+				ED349E3724669BCA0014BCDC /* AnimateSettingDisksTests.swift */,
 				EDCE44C324632C3F0067B130 /* FlippedDiskCoordinatesTests.swift */,
 				EDCE44C1246327A40067B130 /* SetDiskTests.swift */,
 			);
@@ -806,6 +809,7 @@
 				ED20D533244ADCAE00F7BA46 /* MockGameDataCache.swift in Sources */,
 				EDCE44C2246327A40067B130 /* SetDiskTests.swift in Sources */,
 				ED9AEF7E244C4223004A068C /* CountableProperty.swift in Sources */,
+				ED349E3824669BCA0014BCDC /* AnimateSettingDisksTests.swift in Sources */,
 				EDBDD2BD245313A400BB545A /* Watcher.swift in Sources */,
 				ED6EAC9F24436EE800BAF620 /* GameDataIOTests.swift in Sources */,
 				ED6D32B42450A38700D0932F /* GameActionCreatorTests.swift in Sources */,
