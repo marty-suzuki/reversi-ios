@@ -1,12 +1,14 @@
+import RxSwift
+
 public protocol FlippedDiskCoordinatesProtocol {
-    func callAsFunction(by disk: Disk, at coordinate: Coordinate) -> [Coordinate]
+    func callAsFunction(by disk: Disk, at coordinate: Coordinate) -> Single<[Coordinate]>
 }
 
 struct FlippedDiskCoordinates: FlippedDiskCoordinatesProtocol {
 
     let store: GameStoreProtocol
 
-    func callAsFunction(by disk: Disk, at coordinate: Coordinate) -> [Coordinate] {
+    func callAsFunction(by disk: Disk, at coordinate: Coordinate) -> Single<[Coordinate]> {
         let directions = [
             (x: -1, y: -1),
             (x:  0, y: -1),
@@ -19,7 +21,7 @@ struct FlippedDiskCoordinates: FlippedDiskCoordinatesProtocol {
         ]
 
         guard store.cells.value[coordinate] == nil else {
-            return []
+            return .just([])
         }
 
         var diskCoordinates: [Coordinate] = []
@@ -46,6 +48,6 @@ struct FlippedDiskCoordinates: FlippedDiskCoordinatesProtocol {
             }
         }
 
-        return diskCoordinates
+        return .just(diskCoordinates)
     }
 }

@@ -17,7 +17,6 @@ final class PlaceDiskTests: XCTestCase {
         let scheduler = dependency.testScheduler
 
         let flippedCoordinate = Coordinate(x: 0, y: 1)
-        flippedDiskCoordinates.callAsFunctionResponse = [flippedCoordinate]
         let disk = Disk.dark
         let coordiate = Coordinate(x: 0, y: 0)
         let finshed = placeDisk(disk,
@@ -26,6 +25,7 @@ final class PlaceDiskTests: XCTestCase {
                                 updateDisk: dependency.updateDisk)
             .asObservable()
         let result = Watcher(finshed)
+        flippedDiskCoordinates._callAsFunction.onNext([flippedCoordinate])
         scheduler.start()
         setDisk._callAsFunction.onNext(true)
         setDisk._callAsFunction.onNext(true)
@@ -49,7 +49,6 @@ final class PlaceDiskTests: XCTestCase {
         let store = dependency.store
 
         let flippedCoordinate = Coordinate(x: 0, y: 1)
-        flippedDiskCoordinates.callAsFunctionResponse = [flippedCoordinate]
         store.$placeDiskCanceller.accept(nil)
 
         let disk = Disk.dark
@@ -59,6 +58,9 @@ final class PlaceDiskTests: XCTestCase {
                                 animated: true,
                                 updateDisk: dependency.updateDisk)
             .asObservable()
+
+        let result = Watcher(finshed)
+        flippedDiskCoordinates._callAsFunction.onNext([flippedCoordinate])
 
         XCTAssertEqual(actionCreator.$_setPlaceDiskCanceller.calledCount, 1)
         let placeDiskCanceller = try XCTUnwrap(actionCreator.$_setPlaceDiskCanceller.parameters.first)
@@ -70,7 +72,6 @@ final class PlaceDiskTests: XCTestCase {
         ]
         XCTAssertEqual(animateSettingDisks.$_callAsFunction.parameters, expextedAnimateSettingDisks)
 
-        let result = Watcher(finshed)
         animateSettingDisks._callAsFunction.onNext(true)
 
         XCTAssertEqual(result.calledCount, 1)
@@ -86,7 +87,6 @@ final class PlaceDiskTests: XCTestCase {
         let store = dependency.store
 
         let flippedCoordinate = Coordinate(x: 0, y: 1)
-        flippedDiskCoordinates.callAsFunctionResponse = [flippedCoordinate]
         let canceller = Canceller({})
         canceller.cancel()
         store.$placeDiskCanceller.accept(canceller)
@@ -99,6 +99,9 @@ final class PlaceDiskTests: XCTestCase {
                                 updateDisk: dependency.updateDisk)
             .asObservable()
 
+        let result = Watcher(finshed)
+        flippedDiskCoordinates._callAsFunction.onNext([flippedCoordinate])
+
         XCTAssertEqual(actionCreator.$_setPlaceDiskCanceller.calledCount, 1)
         let placeDiskCanceller = try XCTUnwrap(actionCreator.$_setPlaceDiskCanceller.parameters.first)
         XCTAssertNotNil(placeDiskCanceller)
@@ -109,7 +112,6 @@ final class PlaceDiskTests: XCTestCase {
         ]
         XCTAssertEqual(animateSettingDisks.$_callAsFunction.parameters, expextedAnimateSettingDisks)
 
-        let result = Watcher(finshed)
         animateSettingDisks._callAsFunction.onNext(true)
 
         XCTAssertEqual(result.calledCount, 1)
@@ -125,7 +127,6 @@ final class PlaceDiskTests: XCTestCase {
         let store = dependency.store
 
         let flippedCoordinate = Coordinate(x: 0, y: 1)
-        flippedDiskCoordinates.callAsFunctionResponse = [flippedCoordinate]
         let canceller = Canceller({})
         store.$placeDiskCanceller.accept(canceller)
 
@@ -137,6 +138,9 @@ final class PlaceDiskTests: XCTestCase {
                                 animated: true,
                                 updateDisk: dependency.updateDisk)
             .asObservable()
+
+        let result = Watcher(finshed)
+        flippedDiskCoordinates._callAsFunction.onNext([flippedCoordinate])
 
         do {
             XCTAssertEqual(actionCreator.$_setPlaceDiskCanceller.calledCount, 1)
@@ -150,7 +154,6 @@ final class PlaceDiskTests: XCTestCase {
         ]
         XCTAssertEqual(animateSettingDisks.$_callAsFunction.parameters, expextedAnimateSettingDisks)
 
-        let result = Watcher(finshed)
         animateSettingDisks._callAsFunction.onNext(expectedFinished)
 
         XCTAssertEqual(result.calledCount, 1)
@@ -167,7 +170,6 @@ final class PlaceDiskTests: XCTestCase {
         let placeDisk = dependency.testTarget
         let flippedDiskCoordinates = dependency.flippedDiskCoordinates
 
-        flippedDiskCoordinates.callAsFunctionResponse = []
         let disk = Disk.dark
         let coordiate = Coordinate(x: 0, y: 0)
         let finshed = placeDisk(disk,
@@ -176,6 +178,7 @@ final class PlaceDiskTests: XCTestCase {
                                 updateDisk: dependency.updateDisk)
             .asObservable()
         let result = Watcher(finshed)
+        flippedDiskCoordinates._callAsFunction.onNext([])
 
         XCTAssertEqual(result.calledCount, 1)
         let error = try XCTUnwrap(result.errors.first as? PlaceDisk.Error)

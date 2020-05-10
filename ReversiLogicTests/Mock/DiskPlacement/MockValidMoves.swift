@@ -4,10 +4,10 @@ import RxSwift
 
 struct MockValidMoves: ValidMovesProtocol {
 
-    @MockResponse<Disk, [Coordinate]>
-    var _callAsFunction: [Coordinate] = []
+    @MockPublishResponse<Disk, [Coordinate]>
+    var _callAsFunction: AnyObserver<[Coordinate]>
 
-    func callAsFunction(for disk: Disk) -> [Coordinate] {
-        return __callAsFunction.respond(disk)
+    func callAsFunction(for disk: Disk) -> Single<[Coordinate]> {
+        return __callAsFunction.respond(disk).take(1).asSingle()
     }
 }

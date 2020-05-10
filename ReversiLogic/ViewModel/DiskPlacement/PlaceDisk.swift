@@ -30,48 +30,73 @@ struct PlaceDisk: PlaceDiskProtocol {
         animated isAnimated: Bool,
         updateDisk: T
     ) -> Single<Bool> where T.Element == UpdateDisk {
-
-        let diskCoordinates = flippedDiskCoordinates(by: disk, at: coordinate)
-        if diskCoordinates.isEmpty {
-            return .error(Error.diskPlacement(disk: disk, coordinate: coordinate))
-        }
-
-        if isAnimated {
-            let cleanUp: () -> Void = { [actionCreator] in
-                actionCreator.setPlaceDiskCanceller(nil)
-            }
-            actionCreator.setPlaceDiskCanceller(Canceller(cleanUp))
-            return animateSettingDisks(at: [coordinate] + diskCoordinates,
-                                       to: disk,
-                                       updateDisk: updateDisk)
-                .flatMap { [store] finished in
-                    guard  let canceller = store.placeDiskCanceller.value else {
-                        return .error(Error.animationCancellerReleased)
-                    }
-
-                    if canceller.isCancelled {
-                        return .error(Error.animationCancellerCancelled)
-                    }
-
-                    return .just(finished)
+        let coordinatesAndIsAnimated = flippedDiskCoordinates(by: disk, at: coordinate)
+            .flatMap { coordinates -> Single<([Coordinate], Bool)> in
+                if coordinates.isEmpty {
+                    return .error(Error.diskPlacement(disk: disk, coordinate: coordinate))
                 }
-                .do(onSuccess: { _ in
-                    cleanUp()
-                })
-        } else {
-            let coordinates = [coordinate] + diskCoordinates
-            let observables = coordinates.map {
-                setDisk(disk,
-                        at: $0,
-                        animated: false,
-                        updateDisk: updateDisk).asObservable()
+                return .just((coordinates, isAnimated))
             }
-            return Observable.just(())
-                .observeOn(mainAsyncScheduler)
-                .flatMap { Observable.zip(observables) }
-                .map { _ in true }
-                .asSingle()
-        }
+            .asObservable()
+            .share()
+
+        let animated = coordinatesAndIsAnimated
+            .flatMap { [actionCreator] coordinates, isAnimated -> Observable<([Coordinate], Canceller)> in
+                guard isAnimated else {
+                    return .empty()
+                }
+                let cleanUp: () -> Void = {
+                    actionCreator.setPlaceDiskCanceller(nil)
+                }
+                return .just((coordinates, Canceller(cleanUp)))
+            }
+            .do(onNext: { [actionCreator] _, canceller in
+                actionCreator.setPlaceDiskCanceller(canceller)
+            })
+            .flatMap { [store, animateSettingDisks] coordinates, canceller -> Observable<Bool> in
+                weak var canceller = canceller
+                return animateSettingDisks(at: [coordinate] + coordinates,
+                                           to: disk,
+                                           updateDisk: updateDisk)
+                    .asObservable()
+                    .withLatestFrom(store.placeDiskCanceller) { ($0, $1) }
+                    .flatMap { finished, placeDiskCanceller -> Observable<Bool> in
+                        guard let canceller = placeDiskCanceller else {
+                            return .error(Error.animationCancellerReleased)
+                        }
+
+                        if canceller.isCancelled {
+                            return .error(Error.animationCancellerCancelled)
+                        }
+
+                        return .just(finished)
+                    }
+                    .do(onNext: { _ in
+                        canceller?.cancel()
+                    })
+            }
+
+        let nonAnimated = coordinatesAndIsAnimated
+            .flatMap { [setDisk, mainAsyncScheduler] coordinates, isAnimated -> Observable<Bool> in
+                if isAnimated {
+                    return .empty()
+                }
+
+                let coordinates = [coordinate] + coordinates
+                let observables = coordinates.map {
+                    setDisk(disk,
+                            at: $0,
+                            animated: false,
+                            updateDisk: updateDisk).asObservable()
+                }
+                return Observable.just(())
+                    .observeOn(mainAsyncScheduler)
+                    .flatMap { Observable.zip(observables) }
+                    .map { _ in true }
+            }
+
+        return Observable.merge(animated, nonAnimated)
+            .asSingle()
     }
 
     enum Error: Swift.Error, Equatable {

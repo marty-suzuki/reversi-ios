@@ -11,8 +11,8 @@ final class FlippedDiskCoordinatesTests: XCTestCase {
     func test_callAsFunction_coordinateに対応したcellがない() {
         let coordinate = Coordinate(x: 0, y: 0)
         let disk = Disk.dark
-        let coordinates = dependency.testTarget(by: disk, at: coordinate)
-        XCTAssertTrue(coordinates.isEmpty)
+        let coordinates = Watcher(dependency.testTarget(by: disk, at: coordinate).asObservable())
+        XCTAssertEqual(coordinates.parameters, [[]])
     }
 
     func test_callAsFunction_反転できるcellが存在する() {
@@ -32,8 +32,8 @@ final class FlippedDiskCoordinatesTests: XCTestCase {
             }
 
         store.$cells.accept(cells)
-        let coordinates = dependency.testTarget(by: .light, at: .init(x: 0, y: 1))
-        XCTAssertEqual(coordinates, [.init(x: 1, y: 1)])
+        let coordinates = Watcher(dependency.testTarget(by: .light, at: .init(x: 0, y: 1)).asObservable())
+        XCTAssertEqual(coordinates.parameters, [[.init(x: 1, y: 1)]])
     }
 }
 

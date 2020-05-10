@@ -1,5 +1,7 @@
+import RxSwift
+
 public protocol ValidMovesProtocol {
-    func callAsFunction(for disk: Disk) -> [Coordinate]
+    func callAsFunction(for disk: Disk) -> Single<[Coordinate]>
 }
 
 struct ValidMoves: ValidMovesProtocol {
@@ -7,20 +9,26 @@ struct ValidMoves: ValidMovesProtocol {
     let flippedDiskCoordinates: FlippedDiskCoordinatesProtocol
     let store: GameStoreProtocol
 
-    func canPlace(disk: Disk, at coordinate: Coordinate) -> Bool {
-        return !flippedDiskCoordinates(by: disk, at: coordinate)
-            .isEmpty
-    }
-
-    func callAsFunction(for disk: Disk) -> [Coordinate] {
-        store.cells.value.reduce([Coordinate]()) { result, rows in
-            rows.reduce(result) { result, cell in
-                if canPlace(disk: disk, at: cell.coordinate) {
-                    return result + [cell.coordinate]
-                } else {
-                    return result
+    func callAsFunction(for disk: Disk) -> Single<[Coordinate]> {
+        store.cells
+            .flatMap { [flippedDiskCoordinates] cells -> Observable<[Coordinate]> in
+                let coordinates = cells.flatMap { rows in
+                    rows.map { cell in
+                        flippedDiskCoordinates(by: disk, at: cell.coordinate)
+                            .map { coordinates -> Coordinate? in
+                                if coordinates.isEmpty {
+                                    return nil
+                                } else {
+                                    return cell.coordinate
+                                }
+                            }
+                            .asObservable()
+                    }
                 }
+                return Observable.zip(coordinates)
+                    .map { $0.compactMap { $0 } }
             }
-        }
+            .take(1)
+            .asSingle()
     }
 }

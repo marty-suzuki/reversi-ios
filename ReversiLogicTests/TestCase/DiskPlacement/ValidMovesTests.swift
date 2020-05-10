@@ -20,17 +20,20 @@ final class ValidMovesTests: XCTestCase {
             Coordinate(x: 2, y: 0)
         ]
         store.$cells.accept([coordinates.map { GameData.Cell(coordinate: $0, disk: disk) }])
-        flippedDiskCoordinates.callAsFunctionResponse = coordinates
 
-        let result = validMoves(for: disk)
-        XCTAssertEqual(result, coordinates)
+        let result = Watcher(validMoves(for: disk).asObservable())
+        flippedDiskCoordinates._callAsFunction.onNext(coordinates)
+        flippedDiskCoordinates._callAsFunction.onNext(coordinates)
+        flippedDiskCoordinates._callAsFunction.onNext(coordinates)
 
-        XCTAssertEqual(flippedDiskCoordinates.$callAsFunctionResponse.calledCount, 3)
+        XCTAssertEqual(result.parameters, [coordinates])
+
+        XCTAssertEqual(flippedDiskCoordinates.$_callAsFunction.calledCount, 3)
 
         let expected = coordinates.map { coordinate in
             MockFlippedDiskCoordinates.Parameters(disk: disk, coordinate: coordinate)
         }
-        XCTAssertEqual(flippedDiskCoordinates.$callAsFunctionResponse.parameters, expected)
+        XCTAssertEqual(flippedDiskCoordinates.$_callAsFunction.parameters, expected)
     }
 }
 

@@ -219,7 +219,7 @@ extension ReversiManagementStream {
             .withLatestFrom(store.status)
             .flatMap { status -> Observable<NextTurnResult> in
                 var turn: Disk
-                switch store.status.value {
+                switch status {
                 case let .turn(disk):
                     turn = disk
                 case .gameOver:
@@ -228,15 +228,22 @@ extension ReversiManagementStream {
 
                 turn.flip()
 
-                if validMoves(for: turn).isEmpty {
-                    if validMoves(for: turn.flipped).isEmpty {
-                        return .just(.gameOver)
-                    } else {
-                        return .just(.noValidMoves(.turn(turn)))
+                return validMoves(for: turn)
+                    .flatMap { coordinates -> Single<NextTurnResult> in
+                        if coordinates.isEmpty {
+                            return validMoves(for: turn.flipped)
+                                .flatMap { coordinates -> Single<NextTurnResult> in
+                                    if coordinates.isEmpty {
+                                        return .just(.gameOver)
+                                    } else {
+                                        return .just(.noValidMoves(.turn(turn)))
+                                    }
+                                }
+                        } else {
+                            return .just(.validMoves(.turn(turn)))
+                        }
                     }
-                } else {
-                    return .just(.validMoves(.turn(turn)))
-                }
+                    .asObservable()
             }
             .do(onNext: { result in
                 switch result {
@@ -343,14 +350,19 @@ extension ReversiManagementStream {
                 playTurnOfComputerTrigger1,
                 playTurnOfComputerTrigger2
             )
-            .map { _ -> (Disk, Coordinate) in
-                guard
-                    case let .turn(disk) = store.status.value,
-                    let coordinate = validMoves(for: disk).randomElement()
-                else {
+            .withLatestFrom(store.status)
+            .flatMap { status -> Observable<(Disk, Coordinate)> in
+                guard case let .turn(disk) = status else {
                     preconditionFailure()
                 }
-                return (disk, coordinate)
+                return validMoves(for: disk)
+                    .map { coordinates -> (Disk, Coordinate) in
+                        guard let coordinate = coordinates.randomElement() else {
+                            preconditionFailure()
+                        }
+                        return (disk, coordinate)
+                    }
+                    .asObservable()
             }
             .do(onNext: { disk, _ in
                 state.willTurnDiskOfComputer.accept(disk)
