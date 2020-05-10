@@ -92,6 +92,7 @@
 		EDE324A12456142200C00F72 /* MockValidMoves.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE324A02456142200C00F72 /* MockValidMoves.swift */; };
 		EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */; };
 		EDFD2A0324685DAD006BDC8D /* NextTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */; };
+		EDFD2A0524686176006BDC8D /* PlayerTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -217,6 +218,7 @@
 		EDE324A02456142200C00F72 /* MockValidMoves.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockValidMoves.swift; sourceTree = "<group>"; };
 		EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPublishWrapper.swift; sourceTree = "<group>"; };
 		EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextTurnManagement.swift; sourceTree = "<group>"; };
+		EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTurnManagement.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -545,6 +547,7 @@
 			isa = PBXGroup;
 			children = (
 				EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */,
+				EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */,
 				EDAAB292245216B500B72937 /* ReversiManagementStream.swift */,
 			);
 			path = GameManagement;
@@ -806,6 +809,7 @@
 				ED20D557244B826600F7BA46 /* PublishWrapper.swift in Sources */,
 				ED20D530244AD70A00F7BA46 /* UIAlertControllerExtension.swift in Sources */,
 				ED6736EA2450CE4000521D10 /* DiskAtCoordinate.swift in Sources */,
+				EDFD2A0524686176006BDC8D /* PlayerTurnManagement.swift in Sources */,
 				ED6EAC9B24436D9400BAF620 /* GameDataIO.swift in Sources */,
 				EDFD2A0324685DAD006BDC8D /* NextTurnManagement.swift in Sources */,
 				ED20D52E244AD61E00F7BA46 /* Alert.swift in Sources */,

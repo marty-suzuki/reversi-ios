@@ -53,6 +53,7 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
         let setDisk: SetDiskProtocol
         let placeDisk: PlaceDiskProtocol
         let nextTurnManagement: NextTurnManagementProtocol
+        let playerTurnManagement: PlayerTurnManagementProtocol
     }
 
     public static func bind(from dependency: Dependency<Input, State, Extra>, disposeBag: DisposeBag) -> Output {
@@ -62,6 +63,7 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
         let store = extra.store
         let actionCreator = extra.actionCreator
         let nextTurnManagement = extra.nextTurnManagement
+        let playerTurnManagement = extra.playerTurnManagement
 
         Observable.merge(state.reset.asObservable(),
                          store.faildToLoad)
@@ -129,7 +131,17 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
             }
             .share()
 
-        let didUpdateDisk = placeDiskTrigger(dependency: dependency)
+        let didUpdateDisk = playerTurnManagement(
+                waitForPlayer: Observable.merge(
+                    input.waitForPlayer,
+                    state.waitForPlayer.asObservable()
+                ),
+                setPlayerForDiskWithIndex: input.setPlayerForDiskWithIndex,
+                handleSelectedCoordinate: input.handleSelectedCoordinate,
+                save: state.save,
+                willTurnDiskOfComputer: state.willTurnDiskOfComputer,
+                didTurnDiskOfComputer: state.didTurnDiskOfComputer
+            )
             .flatMap { disk, coordinate -> Observable<Bool> in
                 extra.placeDisk(disk,
                                 at: coordinate,
@@ -203,160 +215,5 @@ extension ReversiManagementStream {
             }
 
         return Observable.merge(noValidMovesAlert, resetAlert)
-    }
-
-    private static func placeDiskTrigger(dependency:  Dependency<Input, State, Extra>) -> Observable<(Disk, Coordinate)> {
-        let input = dependency.inputObservables
-        let extra = dependency.extra
-        let state = dependency.state
-        let store = extra.store
-        let actionCreator = extra.actionCreator
-        let validMoves = extra.validMoves
-        let mainScheduler = extra.mainScheduler
-
-        let playTurnOfComputerTrigger1: Observable<Void> = Observable.merge(
-                input.waitForPlayer,
-                state.waitForPlayer.asObservable()
-            )
-            .withLatestFrom(store.status)
-            .withLatestFrom(store.playerDark) { ($0, $1) }
-            .withLatestFrom(store.playerLight) { ($0.0, $0.1, $1) }
-            .flatMap { status, playerDark, playerLight -> Observable<Void> in
-                let player: GameData.Player
-                switch status {
-                case .gameOver:
-                    return .empty()
-                case .turn(.dark):
-                    player = playerDark
-                case .turn(.light):
-                    player = playerLight
-                }
-
-                switch player {
-                case .manual:
-                    return .empty()
-                case .computer:
-                    return .just(())
-                }
-            }
-
-        let playTurnOfComputerTrigger2: Observable<Void> = {
-            let sideEffectBeforeIsDiskPlacingCheck: (Disk, Int) -> Void = { disk, index in
-                switch disk {
-                case .dark:
-                    actionCreator.setPlayerOfDark(GameData.Player(rawValue: index) ?? .manual)
-                case .light:
-                    actionCreator.setPlayerOfLight(GameData.Player(rawValue: index) ?? .manual)
-                }
-
-                state.save.accept(())
-
-                if let canceller = store.playerCancellers.value[disk] {
-                    canceller.cancel()
-                }
-            }
-
-            let passIsDiskPlacingCheck: Observable<Disk> = input.setPlayerForDiskWithIndex
-                .do(onNext: sideEffectBeforeIsDiskPlacingCheck)
-                .withLatestFrom(store.isDiskPlacing) { ($0.0, $1) }
-                .flatMap { disk, isDiskPlacing -> Observable<Disk> in
-                    if isDiskPlacing {
-                        return .empty()
-                    } else {
-                        return .just(disk)
-                    }
-                }
-
-            let passComputerCheck: Observable<Disk> = passIsDiskPlacingCheck
-                .withLatestFrom(store.playerDark) { ($0, $1) }
-                .withLatestFrom(store.playerLight) { ($0.0, $0.1, $1) }
-                .flatMap { disk, playerDark, playerLight -> Observable<Disk> in
-                    let player: GameData.Player
-                    switch disk {
-                    case .dark:
-                        player = playerDark
-                    case .light:
-                        player = playerLight
-                    }
-                    guard case .computer = player else {
-                        return .empty()
-                    }
-                    return .just(disk)
-                }
-
-            return passComputerCheck
-                .withLatestFrom(store.status) { ($0, $1) }
-                .flatMap { disk, status -> Observable<Void> in
-                    guard case .turn(disk) = status else {
-                        return .empty()
-                    }
-                    return .just(())
-                }
-        }()
-
-        let computerPlaceDiskTrigger: Observable<(Disk, Coordinate)> = Observable.merge(
-                playTurnOfComputerTrigger1,
-                playTurnOfComputerTrigger2
-            )
-            .withLatestFrom(store.status)
-            .flatMap { status -> Observable<(Disk, Coordinate)> in
-                guard case let .turn(disk) = status else {
-                    preconditionFailure()
-                }
-                return validMoves(for: disk)
-                    .map { coordinates -> (Disk, Coordinate) in
-                        guard let coordinate = coordinates.randomElement() else {
-                            preconditionFailure()
-                        }
-                        return (disk, coordinate)
-                    }
-                    .asObservable()
-            }
-            .do(onNext: { disk, _ in
-                state.willTurnDiskOfComputer.accept(disk)
-            })
-            .map { disk, coordinate -> (Disk, Coordinate, Canceller) in
-                let cleanUp: () -> Void = {
-                    state.didTurnDiskOfComputer.accept(disk)
-                    actionCreator.setPlayerCanceller(nil, for: disk)
-                }
-                return (disk, coordinate, Canceller(cleanUp))
-            }
-            .do(onNext: { disk, _, canceller in
-                actionCreator.setPlayerCanceller(canceller, for: disk)
-            })
-            .flatMap { disk, coordinate, canceller -> Maybe<(Disk, Coordinate)> in
-                weak var canceller = canceller
-                return Maybe.just(())
-                    .delay(.seconds(2), scheduler: mainScheduler)
-                    .flatMap { _ -> Maybe<(Disk, Coordinate)> in
-                        guard
-                            let canceller = canceller,
-                            !canceller.isCancelled
-                        else {
-                            return .empty()
-                        }
-                        return .just((disk, coordinate))
-                    }
-                    .do(onNext: { _ in
-                        canceller?.cancel()
-                    })
-            }
-            .asObservable()
-
-        let manualPlaceDiskTrigger: Observable<(Disk, Coordinate)> = input
-            .handleSelectedCoordinate
-            .flatMap { coordinate -> Observable<(Disk, Coordinate)> in
-                guard
-                    !store.isDiskPlacing.value,
-                    case let .turn(turn) = store.status.value,
-                    case .manual = store.playerOfCurrentTurn.value
-                else {
-                    return .empty()
-                }
-                return .just((turn, coordinate))
-            }
-
-        return Observable.merge(computerPlaceDiskTrigger, manualPlaceDiskTrigger)
     }
 }
