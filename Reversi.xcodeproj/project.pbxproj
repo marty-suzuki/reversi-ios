@@ -95,6 +95,9 @@
 		EDFD2A0524686176006BDC8D /* PlayerTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */; };
 		EDFD2A07246868C5006BDC8D /* AlertManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A06246868C5006BDC8D /* AlertManagement.swift */; };
 		EDFD2A0924686CFB006BDC8D /* MainScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0824686CFB006BDC8D /* MainScheduler.swift */; };
+		EDFD2A0C24686EA0006BDC8D /* MockAlertManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0B24686EA0006BDC8D /* MockAlertManagement.swift */; };
+		EDFD2A0E24686F5A006BDC8D /* MockNextTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0D24686F5A006BDC8D /* MockNextTurnManagement.swift */; };
+		EDFD2A1024686FA6006BDC8D /* MockPlayerTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0F24686FA6006BDC8D /* MockPlayerTurnManagement.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -223,6 +226,9 @@
 		EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTurnManagement.swift; sourceTree = "<group>"; };
 		EDFD2A06246868C5006BDC8D /* AlertManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManagement.swift; sourceTree = "<group>"; };
 		EDFD2A0824686CFB006BDC8D /* MainScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainScheduler.swift; sourceTree = "<group>"; };
+		EDFD2A0B24686EA0006BDC8D /* MockAlertManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAlertManagement.swift; sourceTree = "<group>"; };
+		EDFD2A0D24686F5A006BDC8D /* MockNextTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockNextTurnManagement.swift; sourceTree = "<group>"; };
+		EDFD2A0F24686FA6006BDC8D /* MockPlayerTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPlayerTurnManagement.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -340,6 +346,7 @@
 			isa = PBXGroup;
 			children = (
 				EDDDC5742455F100001F73C2 /* DiskPlacement */,
+				EDFD2A0A24686E8B006BDC8D /* GameManagement */,
 				ED6D32AA245089D400D0932F /* MockGameActionCreator.swift */,
 				ED20D532244ADCAE00F7BA46 /* MockGameDataCache.swift */,
 				ED6D32A8245088D700D0932F /* MockGameStore.swift */,
@@ -555,6 +562,16 @@
 				EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */,
 				EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */,
 				EDAAB292245216B500B72937 /* ReversiManagementStream.swift */,
+			);
+			path = GameManagement;
+			sourceTree = "<group>";
+		};
+		EDFD2A0A24686E8B006BDC8D /* GameManagement */ = {
+			isa = PBXGroup;
+			children = (
+				EDFD2A0B24686EA0006BDC8D /* MockAlertManagement.swift */,
+				EDFD2A0D24686F5A006BDC8D /* MockNextTurnManagement.swift */,
+				EDFD2A0F24686FA6006BDC8D /* MockPlayerTurnManagement.swift */,
 			);
 			path = GameManagement;
 			sourceTree = "<group>";
@@ -837,6 +854,7 @@
 				EDBDD2BF245325B700BB545A /* UpdateDiskExtension.swift in Sources */,
 				EDE324A12456142200C00F72 /* MockValidMoves.swift in Sources */,
 				ED4E71452448DA6D00518585 /* GameDataCacheTests.swift in Sources */,
+				EDFD2A0C24686EA0006BDC8D /* MockAlertManagement.swift in Sources */,
 				ED20D533244ADCAE00F7BA46 /* MockGameDataCache.swift in Sources */,
 				EDCE44C2246327A40067B130 /* SetDiskTests.swift in Sources */,
 				ED9AEF7E244C4223004A068C /* CountableProperty.swift in Sources */,
@@ -849,6 +867,8 @@
 				ED6EACA82444CD7E00BAF620 /* ReversiViewModelTests.swift in Sources */,
 				ED9C7D3124680F1D00089488 /* ValidMovesTests.swift in Sources */,
 				EDDDC57E2455FF64001F73C2 /* MockSetDisk.swift in Sources */,
+				EDFD2A1024686FA6006BDC8D /* MockPlayerTurnManagement.swift in Sources */,
+				EDFD2A0E24686F5A006BDC8D /* MockNextTurnManagement.swift in Sources */,
 				EDE3249A245601E900C00F72 /* MockPlaceDisk.swift in Sources */,
 				EDCE44C424632C3F0067B130 /* FlippedDiskCoordinatesTests.swift in Sources */,
 				ED9AEF7C244C39F8004A068C /* MockBehaviorWrapper.swift in Sources */,

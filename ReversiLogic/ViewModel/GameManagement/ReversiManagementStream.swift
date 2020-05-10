@@ -123,9 +123,8 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
             )
             .share()
 
-
         let didRefreshAllDisk: Observable<Void> = store.loaded
-            .withLatestFrom(extra.store.cells)
+            .withLatestFrom(store.cells)
             .flatMap { cells -> Observable<Void> in
                 let updates = cells.flatMap { rows in
                     rows.map { cell in
