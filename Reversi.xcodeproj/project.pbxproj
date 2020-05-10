@@ -94,6 +94,7 @@
 		EDFD2A0324685DAD006BDC8D /* NextTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */; };
 		EDFD2A0524686176006BDC8D /* PlayerTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */; };
 		EDFD2A07246868C5006BDC8D /* AlertManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A06246868C5006BDC8D /* AlertManagement.swift */; };
+		EDFD2A0924686CFB006BDC8D /* MainScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0824686CFB006BDC8D /* MainScheduler.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -221,6 +222,7 @@
 		EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextTurnManagement.swift; sourceTree = "<group>"; };
 		EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTurnManagement.swift; sourceTree = "<group>"; };
 		EDFD2A06246868C5006BDC8D /* AlertManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManagement.swift; sourceTree = "<group>"; };
+		EDFD2A0824686CFB006BDC8D /* MainScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainScheduler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -487,6 +489,7 @@
 				ED20D56B244C2D6F00F7BA46 /* BehaviorWrapper.swift */,
 				ED6EACA52444BDE100BAF620 /* Canceller.swift */,
 				EDCE449C245EF64C0067B130 /* Lazy.swift */,
+				EDFD2A0824686CFB006BDC8D /* MainScheduler.swift */,
 				ED20D556244B826600F7BA46 /* PublishWrapper.swift */,
 				ED20D56C244C2D6F00F7BA46 /* ValueObservable.swift */,
 			);
@@ -808,6 +811,7 @@
 				EDBC5A9D244F5F09006D3865 /* GameActionCreator.swift in Sources */,
 				EDDDC5782455F6BA001F73C2 /* AnimateSettingDisks.swift in Sources */,
 				ED20D56D244C2D6F00F7BA46 /* BehaviorWrapper.swift in Sources */,
+				EDFD2A0924686CFB006BDC8D /* MainScheduler.swift in Sources */,
 				EDDDC57C2455FB23001F73C2 /* PlaceDisk.swift in Sources */,
 				ED20D56E244C2D6F00F7BA46 /* ValueObservable.swift in Sources */,
 				ED20D557244B826600F7BA46 /* PublishWrapper.swift in Sources */,

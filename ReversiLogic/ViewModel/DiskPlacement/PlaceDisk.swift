@@ -104,7 +104,4 @@ struct PlaceDisk: PlaceDiskProtocol {
         case animationCancellerReleased
         case animationCancellerCancelled
     }
-
-    @available(*, unavailable)
-    private enum MainScheduler {}
 }

@@ -182,8 +182,3 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
         )
     }
 }
-
-extension ReversiManagementStream {
-    @available(*, unavailable)
-    private enum MainScheduler {}
-}

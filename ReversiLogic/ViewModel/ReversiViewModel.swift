@@ -143,9 +143,3 @@ public final class ReversiViewModel: UnioStream<ReversiViewModel>, ReversiViewMo
         )
     }
 }
-
-extension ReversiViewModel {
-
-    @available(*, unavailable)
-    private enum MainScheduler {}
-}
