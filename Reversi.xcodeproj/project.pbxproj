@@ -434,7 +434,7 @@
 			isa = PBXGroup;
 			children = (
 				EDDDC5712455EE44001F73C2 /* DiskPlacement */,
-				EDAAB292245216B500B72937 /* ReversiManagementStream.swift */,
+				EDFD2A0124685D12006BDC8D /* GameManagement */,
 				ED6EACA32444B1E900BAF620 /* ReversiViewModel.swift */,
 				EDBDD2BA24530C9400BB545A /* ReversiViewModelFactory.swift */,
 			);
@@ -537,6 +537,14 @@
 				EDE3249E245613C800C00F72 /* ReversiManagementStreamTests.swift */,
 			);
 			path = Stream;
+			sourceTree = "<group>";
+		};
+		EDFD2A0124685D12006BDC8D /* GameManagement */ = {
+			isa = PBXGroup;
+			children = (
+				EDAAB292245216B500B72937 /* ReversiManagementStream.swift */,
+			);
+			path = GameManagement;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
