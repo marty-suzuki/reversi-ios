@@ -62,6 +62,7 @@
 		ED8CC36424478D5B00CD2CAB /* GameDataCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED8CC36324478D5B00CD2CAB /* GameDataCache.swift */; };
 		ED9AEF7C244C39F8004A068C /* MockBehaviorWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9AEF7B244C39F8004A068C /* MockBehaviorWrapper.swift */; };
 		ED9AEF7E244C4223004A068C /* CountableProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9AEF7D244C4223004A068C /* CountableProperty.swift */; };
+		ED9C7D2F24672D5600089488 /* PlaceDiskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9C7D2E24672D5600089488 /* PlaceDiskTests.swift */; };
 		EDAAB28D2452006000B72937 /* UpdateDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDAAB28C2452006000B72937 /* UpdateDisk.swift */; };
 		EDAAB28F2452043200B72937 /* FlippedDiskCoordinates.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDAAB28E2452043200B72937 /* FlippedDiskCoordinates.swift */; };
 		EDAAB293245216B500B72937 /* ReversiManagementStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDAAB292245216B500B72937 /* ReversiManagementStream.swift */; };
@@ -186,6 +187,7 @@
 		ED8CC36324478D5B00CD2CAB /* GameDataCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDataCache.swift; sourceTree = "<group>"; };
 		ED9AEF7B244C39F8004A068C /* MockBehaviorWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockBehaviorWrapper.swift; sourceTree = "<group>"; };
 		ED9AEF7D244C4223004A068C /* CountableProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountableProperty.swift; sourceTree = "<group>"; };
+		ED9C7D2E24672D5600089488 /* PlaceDiskTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceDiskTests.swift; sourceTree = "<group>"; };
 		EDAAB28C2452006000B72937 /* UpdateDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateDisk.swift; sourceTree = "<group>"; };
 		EDAAB28E2452043200B72937 /* FlippedDiskCoordinates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlippedDiskCoordinates.swift; sourceTree = "<group>"; };
 		EDAAB292245216B500B72937 /* ReversiManagementStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiManagementStream.swift; sourceTree = "<group>"; };
@@ -496,6 +498,7 @@
 			children = (
 				ED349E3724669BCA0014BCDC /* AnimateSettingDisksTests.swift */,
 				EDCE44C324632C3F0067B130 /* FlippedDiskCoordinatesTests.swift */,
+				ED9C7D2E24672D5600089488 /* PlaceDiskTests.swift */,
 				EDCE44C1246327A40067B130 /* SetDiskTests.swift */,
 			);
 			path = DiskPlacement;
@@ -801,6 +804,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ED6D32AB245089D400D0932F /* MockGameActionCreator.swift in Sources */,
+				ED9C7D2F24672D5600089488 /* PlaceDiskTests.swift in Sources */,
 				ED6EACAB2444D3C200BAF620 /* MockResponse.swift in Sources */,
 				ED1BEDBB2452F0700066E68E /* MockFlippedDiskCoordinates.swift in Sources */,
 				EDBDD2BF245325B700BB545A /* UpdateDiskExtension.swift in Sources */,
