@@ -52,6 +52,7 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
         let validMoves: ValidMovesProtocol
         let setDisk: SetDiskProtocol
         let placeDisk: PlaceDiskProtocol
+        let nextTurnManagement: NextTurnManagementProtocol
     }
 
     public static func bind(from dependency: Dependency<Input, State, Extra>, disposeBag: DisposeBag) -> Output {
@@ -60,6 +61,7 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
         let extra = dependency.extra
         let store = extra.store
         let actionCreator = extra.actionCreator
+        let nextTurnManagement = extra.nextTurnManagement
 
         Observable.merge(state.reset.asObservable(),
                          store.faildToLoad)
@@ -95,7 +97,8 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
             })
             .disposed(by: disposeBag)
 
-        let nextTurnResult = nextTurnResultTrigger(dependency: dependency)
+        let nextTurnResult = nextTurnManagement(nextTurn: state.nextTurn.asObservable())
+            .share()
 
         nextTurnResult
             .flatMap { result -> Observable<Void> in
@@ -163,14 +166,8 @@ extension ReversiManagementStream {
     @available(*, unavailable)
     private enum MainScheduler {}
 
-    private enum NextTurnResult {
-        case gameOver
-        case validMoves(GameData.Status)
-        case noValidMoves(GameData.Status)
-    }
-
     private static func handleAlertTrigger(dependency: Dependency<Input, State, Extra>,
-                                           nextTurnResult: Observable<NextTurnResult>) -> Observable<Alert> {
+                                           nextTurnResult: Observable<NextTurn.Response>) -> Observable<Alert> {
         let input = dependency.inputObservables
         let state = dependency.state
         let extra = dependency.extra
@@ -206,55 +203,6 @@ extension ReversiManagementStream {
             }
 
         return Observable.merge(noValidMovesAlert, resetAlert)
-    }
-
-    private static func nextTurnResultTrigger(dependency:  Dependency<Input, State, Extra>) -> Observable<NextTurnResult> {
-        let state = dependency.state
-        let extra = dependency.extra
-        let store = extra.store
-        let actionCreator = extra.actionCreator
-        let validMoves = extra.validMoves
-
-        return state.nextTurn
-            .withLatestFrom(store.status)
-            .flatMap { status -> Observable<NextTurnResult> in
-                var turn: Disk
-                switch status {
-                case let .turn(disk):
-                    turn = disk
-                case .gameOver:
-                    return .empty()
-                }
-
-                turn.flip()
-
-                return validMoves(for: turn)
-                    .flatMap { coordinates -> Single<NextTurnResult> in
-                        if coordinates.isEmpty {
-                            return validMoves(for: turn.flipped)
-                                .flatMap { coordinates -> Single<NextTurnResult> in
-                                    if coordinates.isEmpty {
-                                        return .just(.gameOver)
-                                    } else {
-                                        return .just(.noValidMoves(.turn(turn)))
-                                    }
-                                }
-                        } else {
-                            return .just(.validMoves(.turn(turn)))
-                        }
-                    }
-                    .asObservable()
-            }
-            .do(onNext: { result in
-                switch result {
-                case .gameOver:
-                    actionCreator.setStatus(.gameOver)
-                case let .validMoves(status),
-                     let .noValidMoves(status):
-                    actionCreator.setStatus(status)
-                }
-            })
-            .share()
     }
 
     private static func placeDiskTrigger(dependency:  Dependency<Input, State, Extra>) -> Observable<(Disk, Coordinate)> {
