@@ -54,6 +54,7 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
         let placeDisk: PlaceDiskProtocol
         let nextTurnManagement: NextTurnManagementProtocol
         let playerTurnManagement: PlayerTurnManagementProtocol
+        let alertManagement: AlertManagementProtocol
     }
 
     public static func bind(from dependency: Dependency<Input, State, Extra>, disposeBag: DisposeBag) -> Output {
@@ -64,6 +65,7 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
         let actionCreator = extra.actionCreator
         let nextTurnManagement = extra.nextTurnManagement
         let playerTurnManagement = extra.playerTurnManagement
+        let alertManagement = extra.alertManagement
 
         Observable.merge(state.reset.asObservable(),
                          store.faildToLoad)
@@ -99,10 +101,10 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
             })
             .disposed(by: disposeBag)
 
-        let nextTurnResult = nextTurnManagement(nextTurn: state.nextTurn.asObservable())
+        let nextTurnResponse = nextTurnManagement(nextTurn: state.nextTurn.asObservable())
             .share()
 
-        nextTurnResult
+        nextTurnResponse
             .flatMap { result -> Observable<Void> in
                 guard case .validMoves = result else {
                     return .empty()
@@ -112,8 +114,15 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
             .bind(to: state.waitForPlayer)
             .disposed(by: disposeBag)
 
-        let handleAlert = handleAlertTrigger(dependency: dependency,
-                                             nextTurnResult: nextTurnResult)
+        let handleAlert = alertManagement(
+                nextTurnResponse: nextTurnResponse,
+                prepareForReset: input.prepareForReset,
+                nextTurn: state.nextTurn,
+                reset: state.reset,
+                waitForPlayer: state.waitForPlayer
+            )
+            .share()
+
 
         let didRefreshAllDisk: Observable<Void> = store.loaded
             .withLatestFrom(extra.store.cells)
@@ -177,43 +186,4 @@ public final class ReversiManagementStream: UnioStream<ReversiManagementStream>,
 extension ReversiManagementStream {
     @available(*, unavailable)
     private enum MainScheduler {}
-
-    private static func handleAlertTrigger(dependency: Dependency<Input, State, Extra>,
-                                           nextTurnResult: Observable<NextTurn.Response>) -> Observable<Alert> {
-        let input = dependency.inputObservables
-        let state = dependency.state
-        let extra = dependency.extra
-        let actionCreator = extra.actionCreator
-        let store = extra.store
-
-        let noValidMovesAlert: Observable<Alert> = nextTurnResult
-            .flatMap { result -> Observable<Alert> in
-                guard case .noValidMoves = result else {
-                    return .empty()
-                }
-                let alert = Alert.pass {
-                    state.nextTurn.accept(())
-                }
-                return .just(alert)
-            }
-
-        let resetAlert: Observable<Alert> = input
-            .prepareForReset
-            .map { _ -> Alert in
-                Alert.reset {
-                    store.placeDiskCanceller.value?.cancel()
-                    actionCreator.setPlaceDiskCanceller(nil)
-
-                    for side in Disk.allCases {
-                        store.playerCancellers.value[side]?.cancel()
-                        actionCreator.setPlayerCanceller(nil, for: side)
-                    }
-
-                    state.reset.accept(())
-                    state.waitForPlayer.accept(())
-                }
-            }
-
-        return Observable.merge(noValidMovesAlert, resetAlert)
-    }
 }

@@ -57,6 +57,11 @@ public struct ReversiViewModelFactory: ReversiViewModelFactoryType {
             mainScheduler: mainScheduler
         )
 
+        let alertManagement = AlertManagement(
+            store: store,
+            actionCreator: actionCreator
+        )
+
         let managementStream = ReversiManagementStream(
             input: .init(),
             state: .init(),
@@ -67,7 +72,8 @@ public struct ReversiViewModelFactory: ReversiViewModelFactoryType {
                          setDisk: setDisk,
                          placeDisk: placeDisk,
                          nextTurnManagement: nextTurnManagement,
-                         playerTurnManagement: playerTurnManagement)
+                         playerTurnManagement: playerTurnManagement,
+                         alertManagement: alertManagement)
         )
 
         return ReversiViewModel(

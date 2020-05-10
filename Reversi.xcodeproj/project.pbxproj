@@ -93,6 +93,7 @@
 		EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */; };
 		EDFD2A0324685DAD006BDC8D /* NextTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */; };
 		EDFD2A0524686176006BDC8D /* PlayerTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */; };
+		EDFD2A07246868C5006BDC8D /* AlertManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A06246868C5006BDC8D /* AlertManagement.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -219,6 +220,7 @@
 		EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPublishWrapper.swift; sourceTree = "<group>"; };
 		EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextTurnManagement.swift; sourceTree = "<group>"; };
 		EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTurnManagement.swift; sourceTree = "<group>"; };
+		EDFD2A06246868C5006BDC8D /* AlertManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManagement.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -546,6 +548,7 @@
 		EDFD2A0124685D12006BDC8D /* GameManagement */ = {
 			isa = PBXGroup;
 			children = (
+				EDFD2A06246868C5006BDC8D /* AlertManagement.swift */,
 				EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */,
 				EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */,
 				EDAAB292245216B500B72937 /* ReversiManagementStream.swift */,
@@ -793,6 +796,7 @@
 				EDDDC5732455EE63001F73C2 /* SetDisk.swift in Sources */,
 				ED6EACA12443838900BAF620 /* GameData.swift in Sources */,
 				ED8CC36424478D5B00CD2CAB /* GameDataCache.swift in Sources */,
+				EDFD2A07246868C5006BDC8D /* AlertManagement.swift in Sources */,
 				EDE3249C2456094300C00F72 /* ValidMoves.swift in Sources */,
 				EDBC5A9B244F5EFC006D3865 /* GameDispatcher.swift in Sources */,
 				ED6EACA42444B1E900BAF620 /* ReversiViewModel.swift in Sources */,
