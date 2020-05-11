@@ -19,6 +19,9 @@ final class ReversiManagementStreamTests: XCTestCase {
         let disk = Disk.dark
         let finished = true
 
+        let nextTurn = Watcher(dependency.state.nextTurn)
+        let save = Watcher(dependency.state.save)
+
         let didUpdateDisk = Watcher(stream.output.didUpdateDisk)
         playerTurnManagement._callAsFunction.onNext((disk, coordinate))
         placeDisk._callAsFunction.onNext(finished)
@@ -30,9 +33,15 @@ final class ReversiManagementStreamTests: XCTestCase {
         XCTAssertEqual(callAsFunction.parameters, [.init(disk: disk,
                                                          coordinate: coordinate,
                                                          animated: true)])
+
+        XCTAssertEqual(nextTurn.calledCount, 1)
+        XCTAssertFalse(nextTurn.parameters.isEmpty)
+
+        XCTAssertEqual(save.calledCount, 1)
+        XCTAssertFalse(save.parameters.isEmpty)
     }
 
-    func test_refreshAllDisk() throws {
+    func test_output_refreshAllDisk() throws {
         let stream = dependency.testTarget
         let store = dependency.store
 
@@ -49,6 +58,23 @@ final class ReversiManagementStreamTests: XCTestCase {
 
         XCTAssertEqual(didRefreshAllDisk.calledCount, 1)
         XCTAssertFalse(didRefreshAllDisk.parameters.isEmpty)
+    }
+
+    func test_state_waitForPlayer_nextTurnResponse() {
+        let nextTurnManagement = dependency.nextTurnManagement
+        let waitForPlayer = Watcher(dependency.state.waitForPlayer)
+
+        nextTurnManagement._callAsFunction.onNext(.gameOver)
+        XCTAssertEqual(waitForPlayer.calledCount, 0)
+        XCTAssertTrue(waitForPlayer.parameters.isEmpty)
+
+        nextTurnManagement._callAsFunction.onNext(.noValidMoves(.gameOver))
+        XCTAssertEqual(waitForPlayer.calledCount, 0)
+        XCTAssertTrue(waitForPlayer.parameters.isEmpty)
+
+        nextTurnManagement._callAsFunction.onNext(.validMoves(.gameOver))
+        XCTAssertEqual(waitForPlayer.calledCount, 1)
+        XCTAssertFalse(waitForPlayer.parameters.isEmpty)
     }
 }
 
