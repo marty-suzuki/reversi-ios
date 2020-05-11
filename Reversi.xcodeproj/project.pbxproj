@@ -61,7 +61,6 @@
 		ED8CC36224475F0100CD2CAB /* CollectionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED8CC36124475F0100CD2CAB /* CollectionExtension.swift */; };
 		ED8CC36424478D5B00CD2CAB /* GameDataCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED8CC36324478D5B00CD2CAB /* GameDataCache.swift */; };
 		ED9AEF7C244C39F8004A068C /* MockBehaviorWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9AEF7B244C39F8004A068C /* MockBehaviorWrapper.swift */; };
-		ED9AEF7E244C4223004A068C /* CountableProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9AEF7D244C4223004A068C /* CountableProperty.swift */; };
 		ED9C7D2F24672D5600089488 /* PlaceDiskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9C7D2E24672D5600089488 /* PlaceDiskTests.swift */; };
 		ED9C7D3124680F1D00089488 /* ValidMovesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9C7D3024680F1D00089488 /* ValidMovesTests.swift */; };
 		EDAAB28D2452006000B72937 /* UpdateDisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDAAB28C2452006000B72937 /* UpdateDisk.swift */; };
@@ -223,7 +222,6 @@
 		ED8CC36124475F0100CD2CAB /* CollectionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionExtension.swift; sourceTree = "<group>"; };
 		ED8CC36324478D5B00CD2CAB /* GameDataCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDataCache.swift; sourceTree = "<group>"; };
 		ED9AEF7B244C39F8004A068C /* MockBehaviorWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockBehaviorWrapper.swift; sourceTree = "<group>"; };
-		ED9AEF7D244C4223004A068C /* CountableProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountableProperty.swift; sourceTree = "<group>"; };
 		ED9C7D2E24672D5600089488 /* PlaceDiskTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceDiskTests.swift; sourceTree = "<group>"; };
 		ED9C7D3024680F1D00089488 /* ValidMovesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidMovesTests.swift; sourceTree = "<group>"; };
 		EDAAB28C2452006000B72937 /* UpdateDisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateDisk.swift; sourceTree = "<group>"; };
@@ -506,7 +504,6 @@
 		ED6EACA92444D36400BAF620 /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				ED9AEF7D244C4223004A068C /* CountableProperty.swift */,
 				ED9AEF7B244C39F8004A068C /* MockBehaviorWrapper.swift */,
 				EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */,
 				ED6D32AC24508C0500D0932F /* MockPublishResponse.swift */,
@@ -960,7 +957,6 @@
 				EDFD2A0C24686EA0006BDC8D /* MockAlertManagement.swift in Sources */,
 				ED20D533244ADCAE00F7BA46 /* MockGameDataCache.swift in Sources */,
 				EDCE44C2246327A40067B130 /* SetDiskTests.swift in Sources */,
-				ED9AEF7E244C4223004A068C /* CountableProperty.swift in Sources */,
 				ED349E3824669BCA0014BCDC /* AnimateSettingDisksTests.swift in Sources */,
 				ED6EAC9F24436EE800BAF620 /* GameDataIOTests.swift in Sources */,
 				ED6D32B42450A38700D0932F /* GameActionCreatorTests.swift in Sources */,
