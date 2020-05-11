@@ -1,5 +1,6 @@
 import RxRelay
 import RxTest
+import TestModule
 import XCTest
 @testable import ReversiLogic
 

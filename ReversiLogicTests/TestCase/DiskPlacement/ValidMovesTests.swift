@@ -1,3 +1,4 @@
+import TestModule
 import XCTest
 @testable import ReversiLogic
 

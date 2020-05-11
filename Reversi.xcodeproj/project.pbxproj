@@ -74,7 +74,6 @@
 		EDBC5A9B244F5EFC006D3865 /* GameDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBC5A9A244F5EFC006D3865 /* GameDispatcher.swift */; };
 		EDBC5A9D244F5F09006D3865 /* GameActionCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBC5A9C244F5F09006D3865 /* GameActionCreator.swift */; };
 		EDBDD2BB24530C9400BB545A /* ReversiViewModelFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBDD2BA24530C9400BB545A /* ReversiViewModelFactory.swift */; };
-		EDBDD2BD245313A400BB545A /* Watcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBDD2BC245313A400BB545A /* Watcher.swift */; };
 		EDBDD2BF245325B700BB545A /* UpdateDiskExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBDD2BE245325B700BB545A /* UpdateDiskExtension.swift */; };
 		EDCC2A562448B3E9009E69F7 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCC2A552448B3E9009E69F7 /* Coordinate.swift */; };
 		EDCE4499245EE8630067B130 /* PublishRelayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCE4498245EE8630067B130 /* PublishRelayExtension.swift */; };
@@ -91,6 +90,15 @@
 		EDE3249F245613C800C00F72 /* ReversiManagementStreamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE3249E245613C800C00F72 /* ReversiManagementStreamTests.swift */; };
 		EDE324A12456142200C00F72 /* MockValidMoves.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE324A02456142200C00F72 /* MockValidMoves.swift */; };
 		EDF5B88F2469BC9E009508A7 /* AlertManagementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF5B88E2469BC9E009508A7 /* AlertManagementTests.swift */; };
+		EDF5B8AE2469C3F9009508A7 /* TestModule.h in Headers */ = {isa = PBXBuildFile; fileRef = EDF5B8AC2469C3F9009508A7 /* TestModule.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EDF5B8B12469C3F9009508A7 /* TestModule.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDF5B8AA2469C3F9009508A7 /* TestModule.framework */; };
+		EDF5B8B22469C3F9009508A7 /* TestModule.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = EDF5B8AA2469C3F9009508A7 /* TestModule.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		EDF5B8B62469C400009508A7 /* Watcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBDD2BC245313A400BB545A /* Watcher.swift */; };
+		EDF5B8B72469C419009508A7 /* RxRelay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EE5244DF95F00DBF850 /* RxRelay.framework */; };
+		EDF5B8B82469C419009508A7 /* RxRelay.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EE5244DF95F00DBF850 /* RxRelay.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		EDF5B8B92469C419009508A7 /* RxSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EE6244DF95F00DBF850 /* RxSwift.framework */; };
+		EDF5B8BA2469C419009508A7 /* RxSwift.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EE6244DF95F00DBF850 /* RxSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		EDF5B8BC2469C42F009508A7 /* TestModule.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDF5B8AA2469C3F9009508A7 /* TestModule.framework */; };
 		EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */; };
 		EDFD2A0324685DAD006BDC8D /* NextTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */; };
 		EDFD2A0524686176006BDC8D /* PlayerTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */; };
@@ -123,6 +131,13 @@
 			remoteGlobalIDString = ED6EAC6A24436B2B00BAF620;
 			remoteInfo = ReversiLogic;
 		};
+		EDF5B8AF2469C3F9009508A7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D642BDA823A9FE4500396732 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EDF5B8A92469C3F9009508A7;
+			remoteInfo = TestModule;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -132,11 +147,24 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				EDF5B8B22469C3F9009508A7 /* TestModule.framework in Embed Frameworks */,
 				EDBC5A95244F488F006D3865 /* Unio.framework in Embed Frameworks */,
 				ED3D8EEC244DF95F00DBF850 /* RxSwift.framework in Embed Frameworks */,
 				ED3D8EE8244DF95F00DBF850 /* RxCocoa.framework in Embed Frameworks */,
 				ED6EAC8124436B2C00BAF620 /* ReversiLogic.framework in Embed Frameworks */,
 				ED3D8EEA244DF95F00DBF850 /* RxRelay.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EDF5B8BB2469C419009508A7 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				EDF5B8BA2469C419009508A7 /* RxSwift.framework in Embed Frameworks */,
+				EDF5B8B82469C419009508A7 /* RxRelay.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -223,6 +251,9 @@
 		EDE3249E245613C800C00F72 /* ReversiManagementStreamTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReversiManagementStreamTests.swift; sourceTree = "<group>"; };
 		EDE324A02456142200C00F72 /* MockValidMoves.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockValidMoves.swift; sourceTree = "<group>"; };
 		EDF5B88E2469BC9E009508A7 /* AlertManagementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManagementTests.swift; sourceTree = "<group>"; };
+		EDF5B8AA2469C3F9009508A7 /* TestModule.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TestModule.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EDF5B8AC2469C3F9009508A7 /* TestModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestModule.h; sourceTree = "<group>"; };
+		EDF5B8AD2469C3F9009508A7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPublishWrapper.swift; sourceTree = "<group>"; };
 		EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextTurnManagement.swift; sourceTree = "<group>"; };
 		EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTurnManagement.swift; sourceTree = "<group>"; };
@@ -238,6 +269,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EDF5B8B12469C3F9009508A7 /* TestModule.framework in Frameworks */,
 				EDBC5A94244F488F006D3865 /* Unio.framework in Frameworks */,
 				ED3D8EEB244DF95F00DBF850 /* RxSwift.framework in Frameworks */,
 				ED3D8EE7244DF95F00DBF850 /* RxCocoa.framework in Frameworks */,
@@ -267,11 +299,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EDF5B8BC2469C42F009508A7 /* TestModule.framework in Frameworks */,
 				EDBC5A96244F48BE006D3865 /* Unio.framework in Frameworks */,
 				ED3D8EF4244DF9B000DBF850 /* RxTest.framework in Frameworks */,
 				ED3D8EF0244DF9B000DBF850 /* RxRelay.framework in Frameworks */,
 				ED3D8EF1244DF9B000DBF850 /* RxSwift.framework in Frameworks */,
 				ED3D8EF2244DF9B000DBF850 /* RxCocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EDF5B8A72469C3F9009508A7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EDF5B8B92469C419009508A7 /* RxSwift.framework in Frameworks */,
+				EDF5B8B72469C419009508A7 /* RxRelay.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -295,6 +337,7 @@
 				D642BDC923A9FE4700396732 /* ReversiTests */,
 				ED6EAC6C24436B2B00BAF620 /* ReversiLogic */,
 				ED6EAC7924436B2C00BAF620 /* ReversiLogicTests */,
+				EDF5B8AB2469C3F9009508A7 /* TestModule */,
 				D642BDB123A9FE4500396732 /* Products */,
 				ED20D541244B7ECC00F7BA46 /* Frameworks */,
 			);
@@ -307,6 +350,7 @@
 				D642BDC623A9FE4700396732 /* ReversiTests.xctest */,
 				ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */,
 				ED6EAC7324436B2C00BAF620 /* ReversiLogicTests.xctest */,
+				EDF5B8AA2469C3F9009508A7 /* TestModule.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -467,7 +511,6 @@
 				EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */,
 				ED6D32AC24508C0500D0932F /* MockPublishResponse.swift */,
 				ED6EACAA2444D3C200BAF620 /* MockResponse.swift */,
-				EDBDD2BC245313A400BB545A /* Watcher.swift */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -566,6 +609,16 @@
 			path = GameManagement;
 			sourceTree = "<group>";
 		};
+		EDF5B8AB2469C3F9009508A7 /* TestModule */ = {
+			isa = PBXGroup;
+			children = (
+				EDBDD2BC245313A400BB545A /* Watcher.swift */,
+				EDF5B8AC2469C3F9009508A7 /* TestModule.h */,
+				EDF5B8AD2469C3F9009508A7 /* Info.plist */,
+			);
+			path = TestModule;
+			sourceTree = "<group>";
+		};
 		EDFD2A0124685D12006BDC8D /* GameManagement */ = {
 			isa = PBXGroup;
 			children = (
@@ -598,6 +651,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EDF5B8A52469C3F9009508A7 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EDF5B8AE2469C3F9009508A7 /* TestModule.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
@@ -614,6 +675,7 @@
 			);
 			dependencies = (
 				ED6EAC7F24436B2C00BAF620 /* PBXTargetDependency */,
+				EDF5B8B02469C3F9009508A7 /* PBXTargetDependency */,
 			);
 			name = Reversi;
 			packageProductDependencies = (
@@ -681,6 +743,25 @@
 			productReference = ED6EAC7324436B2C00BAF620 /* ReversiLogicTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		EDF5B8A92469C3F9009508A7 /* TestModule */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EDF5B8B52469C3F9009508A7 /* Build configuration list for PBXNativeTarget "TestModule" */;
+			buildPhases = (
+				EDF5B8A52469C3F9009508A7 /* Headers */,
+				EDF5B8A62469C3F9009508A7 /* Sources */,
+				EDF5B8A72469C3F9009508A7 /* Frameworks */,
+				EDF5B8A82469C3F9009508A7 /* Resources */,
+				EDF5B8BB2469C419009508A7 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TestModule;
+			productName = TestModule;
+			productReference = EDF5B8AA2469C3F9009508A7 /* TestModule.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -705,6 +786,9 @@
 						CreatedOnToolsVersion = 11.3.1;
 						LastSwiftMigration = 1130;
 					};
+					EDF5B8A92469C3F9009508A7 = {
+						CreatedOnToolsVersion = 11.4;
+					};
 				};
 			};
 			buildConfigurationList = D642BDAB23A9FE4500396732 /* Build configuration list for PBXProject "Reversi" */;
@@ -726,6 +810,7 @@
 				D642BDC523A9FE4700396732 /* ReversiTests */,
 				ED6EAC6A24436B2B00BAF620 /* ReversiLogic */,
 				ED6EAC7224436B2C00BAF620 /* ReversiLogicTests */,
+				EDF5B8A92469C3F9009508A7 /* TestModule */,
 			);
 		};
 /* End PBXProject section */
@@ -756,6 +841,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		ED6EAC7124436B2C00BAF620 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EDF5B8A82469C3F9009508A7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -870,7 +962,6 @@
 				EDCE44C2246327A40067B130 /* SetDiskTests.swift in Sources */,
 				ED9AEF7E244C4223004A068C /* CountableProperty.swift in Sources */,
 				ED349E3824669BCA0014BCDC /* AnimateSettingDisksTests.swift in Sources */,
-				EDBDD2BD245313A400BB545A /* Watcher.swift in Sources */,
 				ED6EAC9F24436EE800BAF620 /* GameDataIOTests.swift in Sources */,
 				ED6D32B42450A38700D0932F /* GameActionCreatorTests.swift in Sources */,
 				ED6D32B22450A12500D0932F /* GameStoreTests.swift in Sources */,
@@ -893,6 +984,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EDF5B8A62469C3F9009508A7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EDF5B8B62469C400009508A7 /* Watcher.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -910,6 +1009,11 @@
 			isa = PBXTargetDependency;
 			target = ED6EAC6A24436B2B00BAF620 /* ReversiLogic */;
 			targetProxy = ED6EAC7E24436B2C00BAF620 /* PBXContainerItemProxy */;
+		};
+		EDF5B8B02469C3F9009508A7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EDF5B8A92469C3F9009508A7 /* TestModule */;
+			targetProxy = EDF5B8AF2469C3F9009508A7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1240,6 +1344,68 @@
 			};
 			name = Release;
 		};
+		EDF5B8B32469C3F9009508A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
+				INFOPLIST_FILE = TestModule/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "jp.marty-suzuki.TestModule";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		EDF5B8B42469C3F9009508A7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
+				INFOPLIST_FILE = TestModule/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "jp.marty-suzuki.TestModule";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1284,6 +1450,15 @@
 			buildConfigurations = (
 				ED6EAC8524436B2C00BAF620 /* Debug */,
 				ED6EAC8624436B2C00BAF620 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EDF5B8B52469C3F9009508A7 /* Build configuration list for PBXNativeTarget "TestModule" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EDF5B8B32469C3F9009508A7 /* Debug */,
+				EDF5B8B42469C3F9009508A7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
