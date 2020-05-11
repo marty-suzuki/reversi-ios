@@ -90,6 +90,7 @@
 		EDE3249C2456094300C00F72 /* ValidMoves.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE3249B2456094300C00F72 /* ValidMoves.swift */; };
 		EDE3249F245613C800C00F72 /* ReversiManagementStreamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE3249E245613C800C00F72 /* ReversiManagementStreamTests.swift */; };
 		EDE324A12456142200C00F72 /* MockValidMoves.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE324A02456142200C00F72 /* MockValidMoves.swift */; };
+		EDF5B88F2469BC9E009508A7 /* AlertManagementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF5B88E2469BC9E009508A7 /* AlertManagementTests.swift */; };
 		EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */; };
 		EDFD2A0324685DAD006BDC8D /* NextTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */; };
 		EDFD2A0524686176006BDC8D /* PlayerTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */; };
@@ -221,6 +222,7 @@
 		EDE3249B2456094300C00F72 /* ValidMoves.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidMoves.swift; sourceTree = "<group>"; };
 		EDE3249E245613C800C00F72 /* ReversiManagementStreamTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReversiManagementStreamTests.swift; sourceTree = "<group>"; };
 		EDE324A02456142200C00F72 /* MockValidMoves.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockValidMoves.swift; sourceTree = "<group>"; };
+		EDF5B88E2469BC9E009508A7 /* AlertManagementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManagementTests.swift; sourceTree = "<group>"; };
 		EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPublishWrapper.swift; sourceTree = "<group>"; };
 		EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextTurnManagement.swift; sourceTree = "<group>"; };
 		EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTurnManagement.swift; sourceTree = "<group>"; };
@@ -371,6 +373,7 @@
 			isa = PBXGroup;
 			children = (
 				EDCE44C02463271E0067B130 /* DiskPlacement */,
+				EDF5B88D2469BC79009508A7 /* GameManagement */,
 				ED6D32B02450A11600D0932F /* Flux */,
 				ED6D32AF2450A10600D0932F /* Model */,
 				EDE3249D245613C800C00F72 /* Stream */,
@@ -553,6 +556,14 @@
 				EDE3249E245613C800C00F72 /* ReversiManagementStreamTests.swift */,
 			);
 			path = Stream;
+			sourceTree = "<group>";
+		};
+		EDF5B88D2469BC79009508A7 /* GameManagement */ = {
+			isa = PBXGroup;
+			children = (
+				EDF5B88E2469BC9E009508A7 /* AlertManagementTests.swift */,
+			);
+			path = GameManagement;
 			sourceTree = "<group>";
 		};
 		EDFD2A0124685D12006BDC8D /* GameManagement */ = {
@@ -876,6 +887,7 @@
 				ED6D32A9245088D700D0932F /* MockGameStore.swift in Sources */,
 				ED1BEDB62452EBAA0066E68E /* MockReversiManagementStream.swift in Sources */,
 				EDE3249F245613C800C00F72 /* ReversiManagementStreamTests.swift in Sources */,
+				EDF5B88F2469BC9E009508A7 /* AlertManagementTests.swift in Sources */,
 				EDDDC57A2455F98F001F73C2 /* MockAnimateSettingDisks.swift in Sources */,
 				EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */,
 			);
