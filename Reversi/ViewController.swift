@@ -4,23 +4,23 @@ import RxSwift
 import UIKit
 
 class ViewController: UIViewController {
-    @IBOutlet private var boardView: BoardView! {
+    @IBOutlet private(set) var boardView: BoardView! {
         didSet { boardView.delegate = self }
     }
     
-    @IBOutlet private var resetButton: UIButton!
-    @IBOutlet private var messageDiskView: DiskView!
-    @IBOutlet private var messageLabel: UILabel!
-    @IBOutlet private var messageDiskSizeConstraint: NSLayoutConstraint!
+    @IBOutlet private(set) var resetButton: UIButton!
+    @IBOutlet private(set) var messageDiskView: DiskView!
+    @IBOutlet private(set) var messageLabel: UILabel!
+    @IBOutlet private(set) var messageDiskSizeConstraint: NSLayoutConstraint!
     
-    @IBOutlet private var playerDarkControl: UISegmentedControl!
-    @IBOutlet private var playerLightControl: UISegmentedControl!
+    @IBOutlet private(set) var playerDarkControl: UISegmentedControl!
+    @IBOutlet private(set) var playerLightControl: UISegmentedControl!
 
-    @IBOutlet private var playerDarkCountLabel: UILabel!
-    @IBOutlet private var playerLightCountLabel: UILabel!
+    @IBOutlet private(set) var playerDarkCountLabel: UILabel!
+    @IBOutlet private(set) var playerLightCountLabel: UILabel!
 
-    @IBOutlet private var playerDarkActivityIndicator: UIActivityIndicatorView!
-    @IBOutlet private var playerLightActivityIndicator: UIActivityIndicatorView!
+    @IBOutlet private(set) var playerDarkActivityIndicator: UIActivityIndicatorView!
+    @IBOutlet private(set) var playerLightActivityIndicator: UIActivityIndicatorView!
 
     private let disposeBag = DisposeBag()
     @Lazy() private var viewModelFactory: ReversiViewModelFactoryType

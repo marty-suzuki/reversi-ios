@@ -2,6 +2,12 @@ public struct Alert: Equatable {
     public let title: String
     public let message: String
     public let actions: [Action]
+
+    public init(title: String, message: String, actions: [Alert.Action]) {
+        self.title = title
+        self.message = message
+        self.actions = actions
+    }
 }
 
 extension Alert {
@@ -10,6 +16,12 @@ extension Alert {
         public let title: String
         public let style: Style
         public let handler: () -> Void
+
+        public init(title: String, style: Alert.Action.Style, handler: @escaping () -> Void) {
+            self.title = title
+            self.style = style
+            self.handler = handler
+        }
     }
 }
 

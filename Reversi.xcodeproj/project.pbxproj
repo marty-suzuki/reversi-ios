@@ -14,7 +14,7 @@
 		D642BDBB23A9FE4500396732 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D642BDB923A9FE4500396732 /* Main.storyboard */; };
 		D642BDBD23A9FE4700396732 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D642BDBC23A9FE4700396732 /* Assets.xcassets */; };
 		D642BDC023A9FE4700396732 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D642BDBE23A9FE4700396732 /* LaunchScreen.storyboard */; };
-		D642BDCB23A9FE4700396732 /* ReversiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDCA23A9FE4700396732 /* ReversiTests.swift */; };
+		D642BDCB23A9FE4700396732 /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDCA23A9FE4700396732 /* ViewControllerTests.swift */; };
 		D642BDD623AA0B3900396732 /* CellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDD523AA0B3900396732 /* CellView.swift */; };
 		D642BDDC23AA137C00396732 /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D642BDDB23AA137C00396732 /* BoardView.swift */; };
 		ED1BEDB62452EBAA0066E68E /* MockReversiManagementStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED1BEDB52452EBAA0066E68E /* MockReversiManagementStream.swift */; };
@@ -98,6 +98,12 @@
 		EDF5B8B92469C419009508A7 /* RxSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EE6244DF95F00DBF850 /* RxSwift.framework */; };
 		EDF5B8BA2469C419009508A7 /* RxSwift.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EE6244DF95F00DBF850 /* RxSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		EDF5B8BC2469C42F009508A7 /* TestModule.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDF5B8AA2469C3F9009508A7 /* TestModule.framework */; };
+		EDF5B8BF2469C5B3009508A7 /* ReversiViewModeExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF5B8BE2469C5B3009508A7 /* ReversiViewModeExtension.swift */; };
+		EDF5B8C02469CAAB009508A7 /* ReversiLogic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED6EAC6B24436B2B00BAF620 /* ReversiLogic.framework */; };
+		EDF5B8C12469CAAB009508A7 /* TestModule.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDF5B8AA2469C3F9009508A7 /* TestModule.framework */; };
+		EDF5B8C22469CAC6009508A7 /* RxRelay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EE5244DF95F00DBF850 /* RxRelay.framework */; };
+		EDF5B8C32469CAC6009508A7 /* RxSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EE6244DF95F00DBF850 /* RxSwift.framework */; };
+		EDF5B8C42469CAC6009508A7 /* Unio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDBC5A93244F488F006D3865 /* Unio.framework */; };
 		EDF8F036244CBED900C2CF0B /* MockPublishWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */; };
 		EDFD2A0324685DAD006BDC8D /* NextTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */; };
 		EDFD2A0524686176006BDC8D /* PlayerTurnManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */; };
@@ -181,7 +187,7 @@
 		D642BDBF23A9FE4700396732 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D642BDC123A9FE4700396732 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D642BDC623A9FE4700396732 /* ReversiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReversiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D642BDCA23A9FE4700396732 /* ReversiTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiTests.swift; sourceTree = "<group>"; };
+		D642BDCA23A9FE4700396732 /* ViewControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerTests.swift; sourceTree = "<group>"; };
 		D642BDCC23A9FE4700396732 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D642BDD523AA0B3900396732 /* CellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellView.swift; sourceTree = "<group>"; };
 		D642BDDB23AA137C00396732 /* BoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
@@ -252,6 +258,7 @@
 		EDF5B8AA2469C3F9009508A7 /* TestModule.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TestModule.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EDF5B8AC2469C3F9009508A7 /* TestModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestModule.h; sourceTree = "<group>"; };
 		EDF5B8AD2469C3F9009508A7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EDF5B8BE2469C5B3009508A7 /* ReversiViewModeExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReversiViewModeExtension.swift; sourceTree = "<group>"; };
 		EDF8F035244CBED900C2CF0B /* MockPublishWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPublishWrapper.swift; sourceTree = "<group>"; };
 		EDFD2A0224685DAD006BDC8D /* NextTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextTurnManagement.swift; sourceTree = "<group>"; };
 		EDFD2A0424686176006BDC8D /* PlayerTurnManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTurnManagement.swift; sourceTree = "<group>"; };
@@ -280,6 +287,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EDF5B8C22469CAC6009508A7 /* RxRelay.framework in Frameworks */,
+				EDF5B8C32469CAC6009508A7 /* RxSwift.framework in Frameworks */,
+				EDF5B8C42469CAC6009508A7 /* Unio.framework in Frameworks */,
+				EDF5B8C02469CAAB009508A7 /* ReversiLogic.framework in Frameworks */,
+				EDF5B8C12469CAAB009508A7 /* TestModule.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -371,7 +383,7 @@
 		D642BDC923A9FE4700396732 /* ReversiTests */ = {
 			isa = PBXGroup;
 			children = (
-				D642BDCA23A9FE4700396732 /* ReversiTests.swift */,
+				D642BDCA23A9FE4700396732 /* ViewControllerTests.swift */,
 				D642BDCC23A9FE4700396732 /* Info.plist */,
 			);
 			path = ReversiTests;
@@ -519,6 +531,7 @@
 				ED6736E92450CE4000521D10 /* DiskAtCoordinate.swift */,
 				ED20D52F244AD70A00F7BA46 /* UIAlertControllerExtension.swift */,
 				EDCE4498245EE8630067B130 /* PublishRelayExtension.swift */,
+				EDF5B8BE2469C5B3009508A7 /* ReversiViewModeExtension.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -901,7 +914,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D642BDCB23A9FE4700396732 /* ReversiTests.swift in Sources */,
+				D642BDCB23A9FE4700396732 /* ViewControllerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -939,6 +952,7 @@
 				EDFD2A0324685DAD006BDC8D /* NextTurnManagement.swift in Sources */,
 				ED20D52E244AD61E00F7BA46 /* Alert.swift in Sources */,
 				EDCE449D245EF64C0067B130 /* Lazy.swift in Sources */,
+				EDF5B8BF2469C5B3009508A7 /* ReversiViewModeExtension.swift in Sources */,
 				ED8CC36224475F0100CD2CAB /* CollectionExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1195,6 +1209,10 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = ReversiTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1215,6 +1233,10 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = ReversiTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
