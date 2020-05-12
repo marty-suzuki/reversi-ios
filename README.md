@@ -4,6 +4,9 @@
 
 ![アプリのスクリーンショット](img/screenshot.png)
 
+<details>
+  <summary>Fork元の内容はこちら</summary>
+
 ## はじめに
 
 _Fat View Controller_ は iOS アプリ開発におけるアンチパターンとしてよく知られています。 _Fat View Contoller_ を作ると、 UI とロジックが分離されず、モジュール性が低く、テストしづらいコードができあがります。状態管理が複雑になり、修正時の影響範囲が見通しづらく、メンテナンス性が低下します。
@@ -435,6 +438,8 @@ class ViewController: UIViewController
 | リポジトリ | 作者 | アーキテクチャパターン | フレームワーク | UI | 備考 |
 |:--|:--|:--|:--|:--|:--|
 | [refactoring-challenge/reversi-ios](https://github.com/refactoring-challenge/reversi-ios) | [@koher](https://github.com/koher) | Fat View Controller | - | UIKit | 本リポジトリ |
+
+</details>
 
 ## License
 
