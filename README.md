@@ -4,11 +4,28 @@
 
 ![アプリのスクリーンショット](img/screenshot.png)
 
+## 構成
+
+Flux + MVVM (Unio + RxSwift)
+
 ## クラス図
 
 ![uml class diagram](http://www.plantuml.com/plantuml/proxy?src=https://gist.githubusercontent.com/marty-suzuki/bab791caa5d7de410728ec07bba2c288/raw/6746bc26aaacb956cadb4a6b7ff773621e79f8d5/reversi-ios.pu)
 
 https://gist.github.com/marty-suzuki/bab791caa5d7de410728ec07bba2c288
+
+## Installation
+
+```
+carthage update --platform ios --no-use-binaries
+```
+
+## Requirements
+
+- Xcode 11.4
+- [Carthage](https://github.com/Carthage/Carthage) 0.34.0
+- [RxSwift](https://github.com/ReactiveX/RxSwift) 5.0 or greater
+- [Unio](https://github.com/cats-oss/Unio) 0.9.0 or greater
 
 <details>
   <summary>Fork元の内容はこちら</summary>
