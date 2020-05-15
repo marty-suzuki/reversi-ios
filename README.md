@@ -8,6 +8,11 @@
 
 Flux + MVVM (Unio + RxSwift)
 
+## テスト
+
+- [ViewControllerのユニットテスト](https://github.com/marty-suzuki/reversi-ios/tree/master/ReversiTests)
+- [ReversiLogicのユニットテスト](https://github.com/marty-suzuki/reversi-ios/tree/master/ReversiLogicTests)
+
 ## クラス図
 
 ![uml class diagram](http://www.plantuml.com/plantuml/proxy?src=https://gist.githubusercontent.com/marty-suzuki/bab791caa5d7de410728ec07bba2c288/raw/6746bc26aaacb956cadb4a6b7ff773621e79f8d5/reversi-ios.pu)
