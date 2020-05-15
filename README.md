@@ -8,6 +8,16 @@
 
 Flux + MVVM (Unio + RxSwift)
 
+## リファクタ過程
+
+- [Closureを利用したMVVM](https://github.com/marty-suzuki/reversi-ios/tree/mvvm-with-closure)
+- [RxSwiftとUnioを利用したFlux + MVVM](https://github.com/marty-suzuki/reversi-ios/tree/flux-and-mvvm-with-rxswift-and-unio)
+
+## テスト
+
+- [ViewControllerのユニットテスト](https://github.com/marty-suzuki/reversi-ios/tree/flux-and-mvvm-with-rxswift-and-unio/ReversiTests)
+- [ReversiLogicのユニットテスト](https://github.com/marty-suzuki/reversi-ios/tree/flux-and-mvvm-with-rxswift-and-unio/ReversiLogicTests)
+
 ## クラス図
 
 ![uml class diagram](http://www.plantuml.com/plantuml/proxy?src=https://gist.githubusercontent.com/marty-suzuki/bab791caa5d7de410728ec07bba2c288/raw/6746bc26aaacb956cadb4a6b7ff773621e79f8d5/reversi-ios.pu)
@@ -17,7 +27,7 @@ https://gist.github.com/marty-suzuki/bab791caa5d7de410728ec07bba2c288
 ## Installation
 
 ```
-carthage update --platform ios --no-use-binaries
+carthage bootstrap --platform ios --no-use-binaries
 ```
 
 ## Requirements
