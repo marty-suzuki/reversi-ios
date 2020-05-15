@@ -5,7 +5,7 @@ public protocol NextTurnManagementProtocol {
 }
 
 public enum NextTurn {
-    public enum Response {
+    public enum Response: Equatable {
         case gameOver
         case validMoves(GameData.Status)
         case noValidMoves(GameData.Status)

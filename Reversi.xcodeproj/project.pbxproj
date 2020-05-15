@@ -40,6 +40,7 @@
 		ED3D8EF2244DF9B000DBF850 /* RxCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EE4244DF95F00DBF850 /* RxCocoa.framework */; };
 		ED3D8EF4244DF9B000DBF850 /* RxTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED3D8EF3244DF9B000DBF850 /* RxTest.framework */; };
 		ED4E71452448DA6D00518585 /* GameDataCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4E71442448DA6D00518585 /* GameDataCacheTests.swift */; };
+		ED5657A9246ED56000225752 /* NextTurnManagementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED5657A8246ED56000225752 /* NextTurnManagementTests.swift */; };
 		ED6736EA2450CE4000521D10 /* DiskAtCoordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6736E92450CE4000521D10 /* DiskAtCoordinate.swift */; };
 		ED6736EC2450CEBA00521D10 /* DiskAtCoordinateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6736EB2450CEBA00521D10 /* DiskAtCoordinateTests.swift */; };
 		ED6D32A9245088D700D0932F /* MockGameStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6D32A8245088D700D0932F /* MockGameStore.swift */; };
@@ -205,6 +206,7 @@
 		ED3D8EE6244DF95F00DBF850 /* RxSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxSwift.framework; path = Carthage/Build/iOS/RxSwift.framework; sourceTree = "<group>"; };
 		ED3D8EF3244DF9B000DBF850 /* RxTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxTest.framework; path = Carthage/Build/iOS/RxTest.framework; sourceTree = "<group>"; };
 		ED4E71442448DA6D00518585 /* GameDataCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDataCacheTests.swift; sourceTree = "<group>"; };
+		ED5657A8246ED56000225752 /* NextTurnManagementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextTurnManagementTests.swift; sourceTree = "<group>"; };
 		ED6736E92450CE4000521D10 /* DiskAtCoordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskAtCoordinate.swift; sourceTree = "<group>"; };
 		ED6736EB2450CEBA00521D10 /* DiskAtCoordinateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskAtCoordinateTests.swift; sourceTree = "<group>"; };
 		ED6D32A8245088D700D0932F /* MockGameStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockGameStore.swift; sourceTree = "<group>"; };
@@ -615,6 +617,7 @@
 			isa = PBXGroup;
 			children = (
 				EDF5B88E2469BC9E009508A7 /* AlertManagementTests.swift */,
+				ED5657A8246ED56000225752 /* NextTurnManagementTests.swift */,
 			);
 			path = GameManagement;
 			sourceTree = "<group>";
@@ -964,6 +967,7 @@
 				ED6D32AB245089D400D0932F /* MockGameActionCreator.swift in Sources */,
 				ED9C7D2F24672D5600089488 /* PlaceDiskTests.swift in Sources */,
 				ED6EACAB2444D3C200BAF620 /* MockResponse.swift in Sources */,
+				ED5657A9246ED56000225752 /* NextTurnManagementTests.swift in Sources */,
 				ED1BEDBB2452F0700066E68E /* MockFlippedDiskCoordinates.swift in Sources */,
 				EDBDD2BF245325B700BB545A /* UpdateDiskExtension.swift in Sources */,
 				EDE324A12456142200C00F72 /* MockValidMoves.swift in Sources */,
